@@ -1,0 +1,16 @@
+{
+  "name": "automatic-feast-land-4qb0a",
+  "productName": "automatic-feast-land-4qb0a",
+  "description": "My Electron application description",
+  "keywords": [],
+  "main": "./main.js",
+  "version": "1.0.0",
+  "author": "samue",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "43.4.0"
+  }
+}
