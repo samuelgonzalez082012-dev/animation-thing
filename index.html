@@ -112,10 +112,10 @@ button.primary{background-image:linear-gradient(180deg,color-mix(in srgb,var(--a
 .navigatorInfo{font-size:11px;color:var(--muted);margin-top:8px}
 .exportFormats{display:grid;gap:7px}.exportHint{font-size:10px;color:var(--muted);line-height:1.4;margin-top:8px}.exportStatus{font-size:11px;min-height:17px;margin-top:7px;color:var(--muted)}
 #exportPanel{left:765px;top:280px;width:265px;height:315px}
-#layersPanel{left:10px;top:10px;width:220px;height:330px}
+#layersPanel{left:10px;top:10px;width:220px;height:400px}
 #propertiesPanel{left:245px;top:10px;width:240px;height:300px}
 #toolsPanel{left:10px;top:350px;width:235px;height:330px}
-#brushesPanel{left:500px;top:10px;width:245px;height:330px}
+#brushesPanel{left:500px;top:10px;width:245px;height:460px}
 #playbackPanel{right:10px;top:10px;width:220px;height:255px}
 #onionPanel{right:10px;top:280px;width:220px;height:250px}
 #navigatorPanel{right:10px;top:545px;width:220px;height:220px}
@@ -350,6 +350,23 @@ input[type="range"]{accent-color:var(--accent)}
       <div class="panelBody">
         <div id="layerList"></div>
         <div class="propertyLine"><span>Layer opacity</span><input id="layerOpacity" type="range" min="0" max="100" value="100"><span id="layerOpacityText">100%</span></div>
+        <div class="propertyLine"><span>Blend mode</span><select id="layerBlendMode" style="max-width:140px">
+          <option value="normal">Normal</option>
+          <option value="multiply">Multiply</option>
+          <option value="screen">Screen</option>
+          <option value="overlay">Overlay</option>
+          <option value="darken">Darken</option>
+          <option value="lighten">Lighten</option>
+          <option value="color-dodge">Color Dodge</option>
+          <option value="color-burn">Color Burn</option>
+          <option value="difference">Difference</option>
+          <option value="exclusion">Exclusion</option>
+          <option value="hue">Hue</option>
+          <option value="saturation">Saturation</option>
+          <option value="color">Color</option>
+          <option value="luminosity">Luminosity</option>
+        </select></div>
+        <div class="hint">Drag a layer row to reorder it. Blend mode controls how this layer combines with the ones below it.</div>
         <div class="panelButtons"><button class="small" id="addLayer">Add Layer</button><button class="small" id="duplicateLayer">Duplicate</button><button class="small" id="deleteLayer">Delete</button></div>
       </div>
       <div class="panelResizeHandle" data-resize-panel="layersPanel"></div>
@@ -399,6 +416,13 @@ input[type="range"]{accent-color:var(--accent)}
         <div id="brushPresetGrid" class="brushPresetGrid"></div>
         <div class="widgetSectionTitle">Current pen</div>
         <div class="penReadout"><strong id="currentPenName">Basic Round</strong><span id="currentPenDescription">Balanced round brush</span></div>
+        <div class="widgetSectionTitle" style="margin-top:10px">Pressure &amp; tilt (stylus)</div>
+        <label class="checkRow"><input id="pressureEnabled" type="checkbox"> Pressure sensitivity</label>
+        <div class="propertyLine"><span>Size response</span><input id="pressureSizeAmount" type="range" min="0" max="100" value="70"><span id="pressureSizeAmountText">70%</span></div>
+        <div class="propertyLine"><span>Opacity response</span><input id="pressureOpacityAmount" type="range" min="0" max="100" value="40"><span id="pressureOpacityAmountText">40%</span></div>
+        <label class="checkRow"><input id="tiltEnabled" type="checkbox"> Tilt widens strokes</label>
+        <div class="propertyLine"><span>Tilt response</span><input id="tiltAmount" type="range" min="0" max="100" value="50"><span id="tiltAmountText">50%</span></div>
+        <div class="hint">Works with a pen/stylus that reports pressure and tilt. Mouse and touch always draw at full size.</div>
       </div>
       <div class="panelResizeHandle" data-resize-panel="brushesPanel"></div>
     </div>
@@ -425,6 +449,7 @@ input[type="range"]{accent-color:var(--accent)}
         <div class="propertyLine"><span>Opacity</span><input id="onionOpacity" type="range" min="5" max="100" value="25"><span id="onionOpacityText">25%</span></div>
         <div class="propertyLine"><span>Previous frames</span><input id="onionPreviousCount" type="number" min="1" max="3" value="1"></div>
         <div class="propertyLine"><span>Next frames</span><input id="onionNextCount" type="number" min="0" max="2" value="0"></div>
+        <label class="checkRow"><input id="onionColorCodeWidget" type="checkbox"> Color-code (red = past, blue = next)</label>
       </div>
       <div class="panelResizeHandle" data-resize-panel="onionPanel"></div>
     </div>
@@ -2380,6 +2405,266 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
 
   // Wait until the existing app's initialization has completed.
   setTimeout(()=>{focusEveryWidget();wireTimeline();refreshTimeline()},0);
+})();
+
+/* Layer blend modes */
+(function(){
+  "use strict";
+  const BLEND_MODE_MAP={normal:"source-over",multiply:"multiply",screen:"screen",overlay:"overlay",darken:"darken",lighten:"lighten","color-dodge":"color-dodge","color-burn":"color-burn",difference:"difference",exclusion:"exclusion",hue:"hue",saturation:"saturation",color:"color",luminosity:"luminosity"};
+  const blendCanvas=document.createElement("canvas");
+  blendCanvas.width=Math.round(W*DPR);blendCanvas.height=Math.round(H*DPR);
+  const blendCtx=blendCanvas.getContext("2d");
+  blendCtx.setTransform(DPR,0,0,DPR,0,0);
+
+  const baseEnsureFrameLayers=ensureFrameLayers;
+  ensureFrameLayers=function(){
+    baseEnsureFrameLayers();
+    for(const l of layers) if(!l.blendMode || !BLEND_MODE_MAP[l.blendMode]) l.blendMode="normal";
+  };
+  ensureFrameLayers();
+
+  const baseMakeLayer=makeLayer;
+  makeLayer=function(name){const l=baseMakeLayer(name);l.blendMode="normal";return l};
+
+  render=function(){
+    ctx.clearRect(0,0,W,H);
+    if(!projectTransparent){ctx.fillStyle=projectBackground||"#FFFFFF";ctx.fillRect(0,0,W,H)}
+    const f=activeFrame();
+    if(f){
+      for(const l of layers){
+        if(!l.visible) continue;
+        const objs=f.layers[l.id]||[];
+        const mode=BLEND_MODE_MAP[l.blendMode]||"source-over";
+        const op=Math.max(0,Math.min(1,Number(l.opacity==null?1:l.opacity)));
+        if(mode==="source-over"){
+          ctx.save();ctx.globalAlpha=op;
+          for(const o of objs) drawObject(ctx,o);
+          ctx.restore();
+        }else{
+          blendCtx.clearRect(0,0,W,H);
+          for(const o of objs) drawObject(blendCtx,o);
+          ctx.save();
+          ctx.globalAlpha=op;
+          ctx.globalCompositeOperation=mode;
+          ctx.drawImage(blendCanvas,0,0,W,H);
+          ctx.restore();
+        }
+      }
+    }
+    renderSelection();renderOnion();
+  };
+
+  const baseRenderLayersForBlend=renderLayers;
+  renderLayers=function(){
+    baseRenderLayersForBlend();
+    const l=activeLayer();
+    const select=document.getElementById("layerBlendMode");
+    if(select && l){
+      if(document.activeElement!==select) select.value=l.blendMode||"normal";
+      select.onchange=()=>{pushHistory();l.blendMode=select.value;render()};
+    }
+  };
+
+  renderAll();
+})();
+
+/* Pressure & tilt sensitive brush strokes (stylus) */
+(function(){
+  "use strict";
+  let pressureEnabled=false,pressureSizeAmount=.7,pressureOpacityAmount=.4;
+  let tiltEnabled=false,tiltAmount=.5;
+  let strokeCapture=null;
+
+  function normalizePressure(e){
+    if(e.pointerType!=="pen") return 1;
+    if(typeof e.pressure==="number" && e.pressure>0) return Math.max(0,Math.min(1,e.pressure));
+    return .5;
+  }
+  function normalizeTilt(e){
+    if(e.pointerType!=="pen") return 0;
+    const tx=e.tiltX||0,ty=e.tiltY||0;
+    return Math.max(0,Math.min(1,Math.hypot(tx,ty)/90));
+  }
+  function resampleSeriesByArcLength(srcPoints,srcValues,dstPoints){
+    if(!srcPoints.length||!srcValues.length) return dstPoints.map(()=>1);
+    if(srcPoints.length===1) return dstPoints.map(()=>srcValues[0]);
+    const cum=[0];
+    for(let i=1;i<srcPoints.length;i++) cum.push(cum[i-1]+Math.hypot(srcPoints[i].x-srcPoints[i-1].x,srcPoints[i].y-srcPoints[i-1].y));
+    const total=cum[cum.length-1]||1;
+    const cumD=[0];
+    for(let i=1;i<dstPoints.length;i++) cumD.push(cumD[i-1]+Math.hypot(dstPoints[i].x-dstPoints[i-1].x,dstPoints[i].y-dstPoints[i-1].y));
+    const totalD=cumD[cumD.length-1]||1;
+    return dstPoints.map((_,i)=>{
+      const targetLen=totalD>0?(cumD[i]/totalD)*total:0;
+      let j=0;while(j<cum.length-1 && cum[j+1]<targetLen) j++;
+      const segStart=cum[j],segEnd=cum[j+1]!=null?cum[j+1]:cum[j];
+      const t=segEnd>segStart?(targetLen-segStart)/(segEnd-segStart):0;
+      const a=srcValues[j]!=null?srcValues[j]:srcValues[srcValues.length-1];
+      const b=srcValues[j+1]!=null?srcValues[j+1]:a;
+      return a+(b-a)*t;
+    });
+  }
+
+  function drawVariableStroke(c,obj){
+    const pts=obj.points,n=pts.length;
+    const widths=obj.pointWidths;
+    const alphas=obj.pointAlphas||pts.map(()=>(obj.opacity==null?1:obj.opacity));
+    c.save();
+    c.translate(obj.x||0,obj.y||0);c.rotate((obj.rotation||0)*Math.PI/180);c.scale(obj.scaleX||1,obj.scaleY||1);
+    c.globalCompositeOperation=obj.composite||"source-over";
+    c.fillStyle=obj.color||"#111111";
+    for(let i=0;i<n;i++){
+      const w=Math.max(.35,widths[i]||1),r=w/2,a=alphas[i]==null?1:alphas[i];
+      if(i>0){
+        const p0=pts[i-1],p1=pts[i];
+        const w0=Math.max(.35,widths[i-1]||1),r0=w0/2;
+        const dx=p1.x-p0.x,dy=p1.y-p0.y,len=Math.hypot(dx,dy)||1;
+        const nx=-dy/len,ny=dx/len;
+        const a0=alphas[i-1]==null?1:alphas[i-1];
+        c.globalAlpha=Math.max(0,Math.min(1,(a+a0)/2));
+        c.beginPath();
+        c.moveTo(p0.x+nx*r0,p0.y+ny*r0);
+        c.lineTo(p1.x+nx*r,p1.y+ny*r);
+        c.lineTo(p1.x-nx*r,p1.y-ny*r);
+        c.lineTo(p0.x-nx*r0,p0.y-ny*r0);
+        c.closePath();c.fill();
+      }
+      c.globalAlpha=Math.max(0,Math.min(1,a));
+      c.beginPath();c.arc(pts[i].x,pts[i].y,r,0,Math.PI*2);c.fill();
+    }
+    c.restore();
+  }
+
+  const basePressureDrawObject=drawObject;
+  drawObject=function(c,obj){
+    if(obj && obj.type==="stroke" && Array.isArray(obj.pointWidths) && obj.points && obj.pointWidths.length===obj.points.length && obj.points.length>=2){
+      drawVariableStroke(c,obj);return;
+    }
+    basePressureDrawObject(c,obj);
+  };
+
+  function bakeCapture(capture,beforeCount,layerId){
+    if(!pressureEnabled && !tiltEnabled) return;
+    if(!capture||capture.points.length<2) return;
+    const f=activeFrame();if(!f)return;
+    const arr=f.layers[layerId];if(!Array.isArray(arr)||arr.length<=beforeCount) return;
+    const newObjs=arr.slice(beforeCount);
+    for(const obj of newObjs){
+      if(obj.type!=="stroke"||!Array.isArray(obj.points)||obj.points.length<2) continue;
+      const pr=resampleSeriesByArcLength(capture.points,capture.pressures,obj.points);
+      const tl=resampleSeriesByArcLength(capture.points,capture.tilts,obj.points);
+      const baseWidth=obj.width||1,baseOpacity=obj.opacity==null?1:obj.opacity;
+      const sizeAmt=pressureEnabled?pressureSizeAmount:0;
+      const opAmt=pressureEnabled?pressureOpacityAmount:0;
+      const tAmt=tiltEnabled?tiltAmount:0;
+      obj.pointWidths=pr.map((p,i)=>{
+        const sizeFactor=(1-sizeAmt)+sizeAmt*p;
+        const tiltFactor=1+tAmt*(tl[i]||0)*.6;
+        return Math.max(.35,baseWidth*sizeFactor*tiltFactor);
+      });
+      obj.pointAlphas=pr.map(p=>{
+        const opFactor=(1-opAmt)+opAmt*p;
+        return Math.max(.04,baseOpacity*opFactor);
+      });
+    }
+  }
+
+  canvas.addEventListener("pointerdown",e=>{
+    if(playing||tool!=="brush"){strokeCapture=null;return}
+    const f=activeFrame();
+    strokeCapture={
+      layerId:currentLayerId,
+      beforeCount:(f&&Array.isArray(f.layers[currentLayerId]))?f.layers[currentLayerId].length:0,
+      points:[getCanvasPoint(e)],
+      pressures:[normalizePressure(e)],
+      tilts:[normalizeTilt(e)]
+    };
+  });
+  canvas.addEventListener("pointermove",e=>{
+    if(!strokeCapture) return;
+    strokeCapture.points.push(getCanvasPoint(e));
+    strokeCapture.pressures.push(normalizePressure(e));
+    strokeCapture.tilts.push(normalizeTilt(e));
+  });
+  function finishCapture(){
+    if(!strokeCapture) return;
+    const capture=strokeCapture;strokeCapture=null;
+    bakeCapture(capture,capture.beforeCount,capture.layerId);
+  }
+  canvas.addEventListener("pointerup",finishCapture);
+  canvas.addEventListener("pointercancel",()=>{strokeCapture=null});
+
+  document.getElementById("pressureEnabled")?.addEventListener("change",e=>{pressureEnabled=e.target.checked});
+  document.getElementById("pressureSizeAmount")?.addEventListener("input",e=>{pressureSizeAmount=(+e.target.value||0)/100;document.getElementById("pressureSizeAmountText").textContent=Math.round(pressureSizeAmount*100)+"%"});
+  document.getElementById("pressureOpacityAmount")?.addEventListener("input",e=>{pressureOpacityAmount=(+e.target.value||0)/100;document.getElementById("pressureOpacityAmountText").textContent=Math.round(pressureOpacityAmount*100)+"%"});
+  document.getElementById("tiltEnabled")?.addEventListener("change",e=>{tiltEnabled=e.target.checked});
+  document.getElementById("tiltAmount")?.addEventListener("input",e=>{tiltAmount=(+e.target.value||0)/100;document.getElementById("tiltAmountText").textContent=Math.round(tiltAmount*100)+"%"});
+})();
+
+/* Color-coded (light-table style) onion skinning */
+(function(){
+  "use strict";
+  let onionColorCode=false;
+  const ONION_PAST_COLOR="#ff3b30",ONION_FUTURE_COLOR="#2f6fed";
+  const onionScratch=document.createElement("canvas");
+  onionScratch.width=Math.round(W*DPR);onionScratch.height=Math.round(H*DPR);
+  const onionScratchCtx=onionScratch.getContext("2d");
+  onionScratchCtx.setTransform(DPR,0,0,DPR,0,0);
+
+  function drawTintedFrame(frame,tintColor,alpha){
+    onionScratchCtx.clearRect(0,0,W,H);
+    for(const l of layers) if(l.visible) for(const o of (frame.layers[l.id]||[])) drawObject(onionScratchCtx,o);
+    onionScratchCtx.save();
+    onionScratchCtx.globalCompositeOperation="source-in";
+    onionScratchCtx.fillStyle=tintColor;
+    onionScratchCtx.fillRect(0,0,W,H);
+    onionScratchCtx.restore();
+    onionCtx.save();
+    onionCtx.globalAlpha=Math.max(0,Math.min(1,alpha));
+    onionCtx.drawImage(onionScratch,0,0,W,H);
+    onionCtx.restore();
+  }
+
+  const baseRenderOnion=renderOnion;
+  renderOnion=function(){
+    if(!onionColorCode){baseRenderOnion();return}
+    onionCtx.clearRect(0,0,W,H);
+    onionCanvas.style.display=(onion&&!playing)?"block":"none";
+    if(!onion||playing)return;
+    for(let step=1;step<=onionPreviousCount;step++){
+      const idx=currentFrame-step;if(idx<0)break;
+      drawTintedFrame(frames[idx],ONION_PAST_COLOR,onionOpacity/Math.max(1,step));
+    }
+    for(let step=1;step<=onionNextCount;step++){
+      const idx=currentFrame+step;if(idx>=frames.length)break;
+      drawTintedFrame(frames[idx],ONION_FUTURE_COLOR,(onionOpacity*.7)/Math.max(1,step));
+    }
+  };
+
+  document.getElementById("onionColorCodeWidget")?.addEventListener("change",e=>{
+    onionColorCode=e.target.checked;renderOnion();
+  });
+
+  const baseCaptureForOnion=capturePanelLayout;
+  capturePanelLayout=function(){
+    const out=baseCaptureForOnion();
+    if(out.__onion) out.__onion.colorCode=onionColorCode;
+    return out;
+  };
+  const baseLoadForOnion=loadPanelLayout;
+  loadPanelLayout=function(){
+    baseLoadForOnion();
+    try{
+      const raw=localStorage.getItem(WORKSPACE_LAYOUT_KEY);
+      const layout=raw?JSON.parse(raw):null;
+      if(layout && layout.__onion){
+        onionColorCode=!!layout.__onion.colorCode;
+        const w=document.getElementById("onionColorCodeWidget");if(w)w.checked=onionColorCode;
+      }
+    }catch(err){}
+    renderOnion();
+  };
+  loadPanelLayout();
 })();
 </script>
 </body>
