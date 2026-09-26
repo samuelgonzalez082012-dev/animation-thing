@@ -219,6 +219,55 @@ input[type="range"]{accent-color:var(--accent)}
 .schemePreview{grid-column:1/-1;border:1px solid var(--button-outline);padding:10px;background:var(--bg);border-radius:7px}
 .schemePreviewButtons{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
 
+
+/* Timeline Studio overhaul */
+#timelinePanel{left:260px;bottom:10px;width:min(980px,calc(100% - 280px));height:285px;min-height:220px;z-index:40}
+#timelinePanel .panelBody{overflow:hidden;padding:8px}
+.timelineStudioBody{display:grid!important;grid-template-rows:auto auto minmax(84px,1fr) auto auto;gap:7px;height:calc(100% - 34px)!important;zoom:1!important;transform-origin:top left}
+.timelineCommandBar,.timelineInfoBar,.timelineDetailBar,.timelineStatusBar{display:flex;align-items:center;gap:7px;min-width:0}
+.timelineCommandBar{padding:5px 6px;border:1px solid var(--border);border-radius:7px;background:color-mix(in srgb,var(--panel) 95%,var(--bg))}
+.timelineButtonCluster{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.timelineIconButton{min-width:31px;text-align:center}
+.timelinePlayButton{min-width:58px}
+.timelineDivider{width:1px;height:23px;background:var(--border);margin:0 2px}
+.timelineSpacer{flex:1}
+.timelineCompactControl,.timelineCheck{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);white-space:nowrap}
+.timelineCompactControl input[type=number]{width:48px;min-height:25px;padding:3px 5px}
+.timelineCompactControl input[type=range]{width:82px}
+.timelineCheck input{margin:0}
+.timelineInfoBar{justify-content:space-between;padding:2px 4px}
+.timelineInfoBar>div:first-child{display:flex;align-items:baseline;gap:8px;min-width:0}
+#timelineFrameReadout{font-size:13px}
+#timelineFrameLabelReadout{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timelineStats{display:flex;align-items:center;gap:10px;font-size:10px;color:var(--muted);white-space:nowrap}
+.timelineTrackShell{min-height:0;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:7px;overflow:hidden;background:color-mix(in srgb,var(--panel) 97%,var(--bg))}
+.timelineTrackHeader{height:24px;display:flex;align-items:center;justify-content:space-between;padding:0 8px;background:color-mix(in srgb,var(--panel) 90%,var(--bg));border-bottom:1px solid var(--border);font-size:9px;color:var(--muted)}
+.timelineTrackTitle{text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--text)}
+.timelineFrames{display:flex;align-items:stretch;gap:4px;overflow:auto;padding:7px;min-height:84px;scroll-behavior:smooth}
+.timelineFrameCell{width:var(--timeline-cell-width,78px);min-width:var(--timeline-cell-width,78px);height:92px;display:flex;flex-direction:column;gap:3px;padding:4px;border:1px solid var(--border);border-radius:7px;background:var(--panel);cursor:pointer;position:relative;flex:0 0 var(--timeline-cell-width,78px);overflow:hidden}
+.timelineFrameCell:hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--border));background:color-mix(in srgb,var(--accent) 4%,var(--panel))}
+.timelineFrameCell.active{border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
+.timelineFrameCell.playhead::after{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:3px;background:var(--accent);border-radius:7px 7px 0 0}
+.timelineThumbWrap{height:46px;border:1px solid var(--border);border-radius:4px;background:var(--canvas);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.timelineThumbWrap canvas{display:block;width:100%;height:100%;object-fit:contain}
+.timelineFrameTop{display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:9px}
+.timelineFrameNumber{font-weight:700}
+.timelineFrameDuration{padding:1px 4px;border-radius:999px;background:color-mix(in srgb,var(--accent) 10%,transparent);font-size:8px;color:var(--muted)}
+.timelineFrameLabel{font-size:8px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:10px}
+.timelineLayerStrip{display:flex;gap:2px;height:5px;overflow:hidden}
+.timelineLayerDot{flex:1;min-width:3px;border-radius:3px;background:var(--border)}
+.timelineLayerDot.filled{background:var(--accent)}
+.timelineLayerDot.current{box-shadow:inset 0 0 0 1px var(--text)}
+.timelineDetailBar{justify-content:space-between;align-items:center;padding:5px 6px;border:1px solid var(--border);border-radius:7px;background:color-mix(in srgb,var(--panel) 95%,var(--bg));flex-wrap:wrap}
+.timelineDetailGroup{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.timelineDetailTitle{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.timelineToolsGroup{justify-content:flex-end}
+.timelineToolsGroup input{width:42px;min-height:25px}
+.timelineStatusBar{font-size:9px;color:var(--muted);padding:0 4px}
+.timelineStatusDot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block}
+.timelineStatusSpacer{flex:1}
+@media(max-width:1050px){#timelinePanel{width:calc(100% - 30px);left:15px}.timelineStats{display:none}}
+
 </style>
 </head>
 <body>
@@ -232,13 +281,10 @@ input[type="range"]{accent-color:var(--accent)}
       </div>
     </div>
     <div class="homeActions">
-      <button id="backupAllBtn">Export All</button>
-      <button id="restoreAllBtn">Import All</button>
       <button id="customizeBtn">Customize</button>
       <button class="primary" id="newBtn">New Animation</button>
     </div>
   </div>
-  <input type="file" id="restoreAllInput" accept="application/json" style="display:none">
   <div class="homeMain">
     <div class="homeToolbar">
       <input id="homeSearch" class="homeSearch" type="search" placeholder="Search animations..." autocomplete="off">
@@ -367,13 +413,6 @@ input[type="range"]{accent-color:var(--accent)}
         </div>
         <div class="propertyLine"><span>FPS</span><input id="playbackFps" type="number" min="1" max="30" value="8"></div>
         <label class="checkRow"><input id="loopPlayback" type="checkbox" checked> Loop playback</label>
-        <div class="widgetSectionTitle" style="margin-top:9px">Loop Range</div>
-        <div class="propertyLine"><span>Start frame</span><input id="loopStartInput" type="number" min="1" value="" placeholder="1"></div>
-        <div class="propertyLine"><span>End frame</span><input id="loopEndInput" type="number" min="1" value="" placeholder="last"></div>
-        <div class="widgetButtonGrid">
-          <button class="small" id="setLoopRangeBtn">Use Current as End</button>
-          <button class="small" id="clearLoopRangeBtn">Clear Range</button>
-        </div>
         <div class="playbackReadout"><strong id="playbackFrameReadout">Frame 1 / 1</strong><span id="playbackObjectReadout">0 objects</span></div>
       </div>
       <div class="panelResizeHandle" data-resize-panel="playbackPanel"></div>
@@ -536,41 +575,79 @@ input[type="range"]{accent-color:var(--accent)}
         <div class="propertyLine"><span>Every minutes</span><input id="autoSaveMinutes" type="number" min="1" max="30" value="2"></div>
         <div class="panelButtons"><button class="small" id="backupProjectButton">Backup JSON</button><button class="small" id="importProjectButton">Import JSON</button></div>
         <div class="projectSaveStatus" id="projectSaveStatus">Ready</div>
-        <div class="widgetSectionTitle" style="margin-top:9px">Audio Track</div>
-        <div class="panelButtons"><button class="small" id="audioImportButton">Import Audio</button><button class="small" id="audioRemoveButton">Remove</button></div>
-        <div class="propertyLine"><span>Volume</span><input id="audioVolume" type="range" min="0" max="100" value="100"></div>
-        <div class="projectSaveStatus" id="audioStatus">No audio</div>
-        <input type="file" id="audioFileInput" accept="audio/*" style="display:none">
       </div>
       <div class="panelResizeHandle" data-resize-panel="projectPanel"></div>
     </div>
 
     <div class="panel" id="timelinePanel">
-      <div class="panelHeader"><span class="panelTitle">Timeline</span><button class="panelClose small" data-close-panel="timelinePanel">Hide</button></div>
-      <div class="timelineBody">
-        <button class="small" id="playBtn">Play</button>
-        <label class="control">FPS <input id="fps" type="number" min="1" max="30" value="8" style="width:48px"></label>
-        <label class="control"><input id="onion" type="checkbox" checked> Onion Skin</label>
-        <div id="frames"></div>
-        <button class="small" id="addFrame">Add Frame</button>
-        <button class="small" id="duplicateFrame">Duplicate</button>
-        <button class="small" id="deleteFrame">Delete</button>
-        <div class="widgetSectionTitle" style="margin-top:9px">Tween</div>
-        <div class="propertyLine"><span>In-between frames</span><input id="tweenCount" type="number" min="1" max="30" value="4" style="width:52px"></div>
-        <button class="small" id="tweenToNextBtn" title="Interpolates position, rotation, and scale for any objects shared between this frame and the next frame">Tween to Next Frame</button>
-        <div class="widgetSectionTitle" style="margin-top:9px">Frame Range</div>
-        <div class="propertyLine"><span>From</span><input id="rangeStartInput" type="number" min="1" value="1" style="width:48px"><span>to</span><input id="rangeEndInput" type="number" min="1" value="1" style="width:48px"></div>
-        <div class="widgetButtonGrid">
-          <button class="small" id="dupRangeBtn">Duplicate Range</button>
-          <button class="small" id="delRangeBtn">Delete Range</button>
-          <button class="small" id="revRangeBtn">Reverse Range</button>
+      <div class="panelHeader">
+        <span class="panelTitle">Timeline Studio</span>
+        <span class="timelineHeaderReadout" id="timelineHeaderReadout">Frame 1 / 1</span>
+        <button class="panelClose small" data-close-panel="timelinePanel">Hide</button>
+      </div>
+      <div class="timelineBody timelineStudioBody">
+        <div class="timelineCommandBar">
+          <div class="timelineButtonCluster">
+            <button class="small timelineIconButton" id="timelineFirstBtn" title="First frame">|&lt;</button>
+            <button class="small timelineIconButton" id="timelinePrevBtn" title="Previous frame">&lt;</button>
+            <button class="small primary timelinePlayButton" id="playBtn">Play</button>
+            <button class="small timelineIconButton" id="timelineNextBtn" title="Next frame">&gt;</button>
+            <button class="small timelineIconButton" id="timelineLastBtn" title="Last frame">&gt;|</button>
+          </div>
+          <div class="timelineDivider"></div>
+          <div class="timelineButtonCluster">
+            <button class="small" id="addFrame">Add Blank</button>
+            <button class="small" id="duplicateFrame">Duplicate</button>
+            <button class="small" id="timelineInsertBeforeBtn">Insert Before</button>
+            <button class="small" id="timelineInsertAfterBtn">Insert After</button>
+            <button class="small" id="deleteFrame">Delete</button>
+          </div>
+          <div class="timelineSpacer"></div>
+          <label class="timelineCompactControl">FPS <input id="fps" type="number" min="1" max="60" value="8"></label>
+          <label class="timelineCompactControl">Zoom <input id="timelineZoom" type="range" min="60" max="220" value="100"><span id="timelineZoomText">100%</span></label>
+          <label class="timelineCheck"><input id="timelinePingPong" type="checkbox"> Ping-pong</label>
+          <label class="timelineCheck"><input id="onion" type="checkbox" checked> Onion</label>
         </div>
-        <div class="widgetSectionTitle" style="margin-top:9px">Clipboard</div>
-        <div class="widgetButtonGrid">
-          <button class="small" id="copyFrameBtn">Copy Frame</button>
-          <button class="small" id="pasteFrameBtn">Paste Frame</button>
+
+        <div class="timelineInfoBar">
+          <div><strong id="timelineFrameReadout">Frame 1</strong><span id="timelineFrameLabelReadout">Untitled frame</span></div>
+          <div class="timelineStats"><span id="timelineFrameObjects">0 objects</span><span id="timelineFrameDuration">Hold 1×</span><span id="timelineLayerCount">1 layer</span></div>
         </div>
-        <div class="hint">Copied frames paste into any animation, matched to layers by name.</div>
+
+        <div class="timelineTrackShell">
+          <div class="timelineTrackHeader"><span class="timelineTrackTitle">Frames</span><span id="timelineTrackHint">Click to select · drag across to scrub · double-click to rename</span></div>
+          <div id="frames" class="timelineFrames"></div>
+        </div>
+
+        <div class="timelineDetailBar">
+          <div class="timelineDetailGroup">
+            <span class="timelineDetailTitle">Exposure</span>
+            <label class="timelineCompactControl">Hold <input id="timelineDuration" type="number" min="1" max="60" value="1">×</label>
+            <button class="small" id="timelineApplyDurationRangeBtn">Apply to Range</button>
+          </div>
+          <div class="timelineDetailGroup">
+            <span class="timelineDetailTitle">Loop Range</span>
+            <label class="timelineCompactControl">In <input id="timelineLoopStartInput" type="number" min="1" value="1"></label>
+            <button class="small" id="timelineSetInBtn">Set In</button>
+            <label class="timelineCompactControl">Out <input id="timelineLoopEndInput" type="number" min="1" value="1"></label>
+            <button class="small" id="timelineSetOutBtn">Set Out</button>
+            <button class="small" id="timelineClearRangeBtn">Clear</button>
+          </div>
+          <div class="timelineDetailGroup timelineToolsGroup">
+            <button class="small" id="tweenToNextBtn">Tween</button>
+            <input id="tweenCount" type="number" min="1" max="30" value="4" title="Tween frame count">
+            <button class="small" id="dupRangeBtn">Duplicate Range</button>
+            <button class="small" id="delRangeBtn">Delete Range</button>
+            <button class="small" id="revRangeBtn">Reverse Range</button>
+            <button class="small" id="copyFrameBtn">Copy Frame</button>
+            <button class="small" id="pasteFrameBtn">Paste Frame</button>
+          </div>
+        </div>
+
+        <div class="timelineStatusBar">
+          <span class="timelineStatusDot"></span><span id="timelineStatusText">Ready</span><span class="timelineStatusSpacer"></span>
+          <span>Current layer: <strong id="timelineCurrentLayer">Layer 1</strong></span>
+        </div>
       </div>
       <div class="panelResizeHandle" data-resize-panel="timelinePanel"></div>
     </div>
@@ -827,16 +904,7 @@ const BRUSH_PRESETS=[
   {name:"Calligraphy",desc:"Angular nib effect",width:7,opacity:1,cap:"butt",join:"bevel",composite:"source-over",dash:[]},
   {name:"Sketch",desc:"Lighter construction line",width:2,opacity:.55,cap:"round",join:"round",composite:"source-over",dash:[]},
   {name:"Dotted",desc:"Evenly spaced dots",width:5,opacity:1,cap:"round",join:"round",composite:"source-over",dash:[1,8]},
-  {name:"Eraser",desc:"Erases rendered strokes",width:16,opacity:1,cap:"round",join:"round",composite:"destination-out",dash:[]},
-  {name:"Fine Liner",desc:"Very thin precise line",width:1,opacity:1,cap:"round",join:"round",composite:"source-over",dash:[]},
-  {name:"Charcoal",desc:"Textured heavy stroke",width:14,opacity:.6,cap:"round",join:"round",composite:"source-over",dash:[]},
-  {name:"Crayon",desc:"Grainy medium stroke",width:9,opacity:.8,cap:"round",join:"round",composite:"source-over",dash:[]},
-  {name:"Watercolor",desc:"Soft layered translucent wash",width:22,opacity:.18,cap:"round",join:"round",composite:"source-over",dash:[]},
-  {name:"Neon",desc:"Bright glowing thin line",width:3,opacity:1,cap:"round",join:"round",composite:"lighter",dash:[]},
-  {name:"Chisel Tip",desc:"Flat angled marker edge",width:13,opacity:1,cap:"square",join:"miter",composite:"source-over",dash:[]},
-  {name:"Dashes",desc:"Long even dashes",width:4,opacity:1,cap:"butt",join:"round",composite:"source-over",dash:[10,6]},
-  {name:"Stipple",desc:"Fine scattered dots",width:2,opacity:1,cap:"round",join:"round",composite:"source-over",dash:[.5,5]},
-  {name:"Big Eraser",desc:"Wide eraser for large areas",width:36,opacity:1,cap:"round",join:"round",composite:"destination-out",dash:[]}
+  {name:"Eraser",desc:"Erases rendered strokes",width:16,opacity:1,cap:"round",join:"round",composite:"destination-out",dash:[]}
 ];
 function renderBrushPresets(){
   const grid=document.getElementById("brushPresetGrid");if(!grid)return;
@@ -2111,278 +2179,208 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
   window.addEventListener("resize",()=>{for(const id of (window.workspacePanelIds||[])){try{clampPanel(document.getElementById(id));updatePanelContentScale(document.getElementById(id))}catch{}}updateCanvasFitScale()});
 })();
 
-/* Audio track: import a clip, sync it with playback, persist it with the project, and mix it into WebM exports. */
+</script>
+
+<script>
+/* Timeline Studio + universal widget focus layer. */
 (function(){
-  let audioDataUrl=null, audioVolume=1;
-  const bgAudio=document.createElement("audio");
-  bgAudio.id="bgAudio"; bgAudio.style.display="none"; bgAudio.loop=true;
-  document.body.appendChild(bgAudio);
+  "use strict";
 
-  function syncAudioPanel(){
-    const status=document.getElementById("audioStatus");
-    if(status)status.textContent=audioDataUrl?"Audio loaded":"No audio";
-    const vol=document.getElementById("audioVolume");
-    if(vol)vol.value=Math.round(audioVolume*100);
-    bgAudio.volume=audioVolume;
-  }
+  let timelineZoom = 100;
+  let timelinePingPong = false;
+  let playbackDirection = 1;
+  let timelineWired = false;
 
-  document.getElementById("audioImportButton")?.addEventListener("click",()=>document.getElementById("audioFileInput").click());
-  document.getElementById("audioFileInput")?.addEventListener("change",()=>{
-    const file=document.getElementById("audioFileInput").files?.[0];
-    if(!file)return;
-    const r=new FileReader();
-    r.onload=()=>{audioDataUrl=r.result;bgAudio.src=audioDataUrl;syncAudioPanel()};
-    r.readAsDataURL(file);
-  });
-  document.getElementById("audioRemoveButton")?.addEventListener("click",()=>{
-    audioDataUrl=null;bgAudio.pause();bgAudio.removeAttribute("src");bgAudio.load();syncAudioPanel();
-  });
-  document.getElementById("audioVolume")?.addEventListener("input",e=>{
-    audioVolume=(Number(e.target.value)||0)/100;bgAudio.volume=audioVolume;
-  });
-
-  const baseProjectState2=projectState;
-  projectState=function(){const s=baseProjectState2();s.audio={dataUrl:audioDataUrl,volume:audioVolume};return s};
-  const baseInitProject2=initProject;
-  initProject=function(){baseInitProject2();audioDataUrl=null;audioVolume=1;bgAudio.pause();bgAudio.removeAttribute("src");bgAudio.load();syncAudioPanel()};
-  const baseOpenProject2=openProject;
-  openProject=function(id){const p=loadProjects().find(x=>x.id===id);const a=p?.state?.audio||{};audioDataUrl=a.dataUrl||null;audioVolume=typeof a.volume==="number"?a.volume:1;bgAudio.src=audioDataUrl||"";baseOpenProject2(id);syncAudioPanel()};
-
-  const baseStartPlaying=startPlaying;
-  startPlaying=function(){
-    if(audioDataUrl){
-      const fps=Math.max(1,Number(document.getElementById("fps")?.value)||8);
-      bgAudio.currentTime=currentFrame/fps;
-      bgAudio.play().catch(()=>{});
-    }
-    baseStartPlaying();
-  };
-  const baseStopPlaying=stopPlaying;
-  stopPlaying=function(){bgAudio.pause();baseStopPlaying()};
-
-  const baseExportWebm=exportWebm;
-  exportWebm=async function(scale,transparent){
-    if(!audioDataUrl)return baseExportWebm(scale,transparent);
-    if(!canvas.captureStream||typeof MediaRecorder==="undefined")throw new Error("WebM recording is not supported by this browser.");
-    const fps=Math.max(1,Math.min(30,Number(document.getElementById("playbackFps")?.value||document.getElementById("fps")?.value||8)));
-    const out=document.createElement("canvas");out.width=W*scale;out.height=H*scale;
-    const stream=out.captureStream(fps);
-    try{
-      bgAudio.currentTime=0;
-      await bgAudio.play();
-      const audioStream=bgAudio.captureStream?bgAudio.captureStream():(bgAudio.mozCaptureStream?bgAudio.mozCaptureStream():null);
-      if(audioStream)audioStream.getAudioTracks().forEach(t=>stream.addTrack(t));
-    }catch(e){}
-    const mime=MediaRecorder.isTypeSupported("video/webm;codecs=vp9")?"video/webm;codecs=vp9":(MediaRecorder.isTypeSupported("video/webm")?"video/webm":"");
-    if(!mime){bgAudio.pause();throw new Error("WebM recording is not supported by this browser.")}
-    const chunks=[],rec=new MediaRecorder(stream,{mimeType:mime});
-    const stopped=new Promise((resolve,reject)=>{rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};rec.onerror=e=>reject(e.error||new Error("Recording failed"));rec.onstop=resolve});
-    rec.start();
-    const o=out.getContext("2d");
+  function ensureFrameMeta(){
+    if(!Array.isArray(window.frames) && typeof frames === "undefined") return;
     for(const frame of frames){
-      const f=logicalFrameCanvas(frame,scale,transparent);
-      o.clearRect(0,0,out.width,out.height);
-      if(!transparent){o.fillStyle="#fff";o.fillRect(0,0,out.width,out.height)}
-      o.drawImage(f,0,0);
-      await new Promise(r=>setTimeout(r,1000/fps));
+      if(!Number.isFinite(Number(frame.duration))) frame.duration=1;
+      if(frame.duration<1) frame.duration=1;
+      if(frame.label==null) frame.label="";
     }
-    rec.stop();
-    bgAudio.pause();
-    await stopped;
-    downloadBlob(new Blob(chunks,{type:"video/webm"}),`${safeFileName(projectName)}.webm`);
-  };
-
-  syncAudioPanel();
-})();
-
-/* Tweening, frame-range tools, cross-project frame clipboard, loop-range playback,
-   full-library backup/restore, timeline scrubbing, and small comfort upgrades. */
-(function(){
-  function statusMsg(text){const st=document.getElementById("projectSaveStatus");if(st)st.textContent=text}
-
-  // --- Tween to next frame: interpolates objects that share an id across the two frames. ---
-  function tweenToNext(){
-    if(currentFrame>=frames.length-1){statusMsg("No next frame to tween to.");return}
-    const count=Math.max(1,Math.min(30,Number(document.getElementById("tweenCount")?.value)||4));
-    const fromF=frames[currentFrame],toF=frames[currentFrame+1];
-    pushHistory();
-    const inserts=[];
-    for(let step=1;step<=count;step++){
-      const t=step/(count+1);
-      const nf=makeFrame();
-      for(const l of layers){
-        const fromArr=fromF.layers[l.id]||[],toArr=toF.layers[l.id]||[];
-        const out=[];
-        for(const o of fromArr){
-          const match=toArr.find(x=>x.id===o.id);
-          if(!match)continue;
-          const c=deep(o);
-          c.x=o.x+((match.x||0)-(o.x||0))*t;
-          c.y=o.y+((match.y||0)-(o.y||0))*t;
-          c.rotation=(o.rotation||0)+((match.rotation||0)-(o.rotation||0))*t;
-          c.scaleX=(o.scaleX||1)+((match.scaleX||1)-(o.scaleX||1))*t;
-          c.scaleY=(o.scaleY||1)+((match.scaleY||1)-(o.scaleY||1))*t;
-          const oOp=o.opacity==null?1:o.opacity,mOp=match.opacity==null?1:match.opacity;
-          c.opacity=oOp+(mOp-oOp)*t;
-          out.push(c);
-        }
-        nf.layers[l.id]=out;
-      }
-      inserts.push(nf);
-    }
-    frames.splice(currentFrame+1,0,...inserts);
-    currentFrame=currentFrame+1;
-    ensureFrameLayers();
-    selected.clear();
-    renderAll();
-    statusMsg("Added "+inserts.length+" tweened frame(s).");
   }
-  document.getElementById("tweenToNextBtn")?.addEventListener("click",tweenToNext);
 
-  // --- Frame-range operations ---
-  function clampFrameNum(n){return Math.max(1,Math.min(frames.length,Math.round(n)||1))}
-  function getRange(){
-    const s=clampFrameNum(Number(document.getElementById("rangeStartInput")?.value)),
-          e=clampFrameNum(Number(document.getElementById("rangeEndInput")?.value));
-    return[Math.min(s,e)-1,Math.max(s,e)-1];
+  function timelineRange(){
+    const a=document.getElementById("timelineLoopStartInput");
+    const b=document.getElementById("timelineLoopEndInput");
+    const av=Number(a?.value),bv=Number(b?.value);
+    if(av>=1&&bv>=1) return [Math.min(av,bv)-1,Math.max(av,bv)-1];
+    return [0,Math.max(0,frames.length-1)];
   }
-  document.getElementById("dupRangeBtn")?.addEventListener("click",()=>{
-    const[s,e]=getRange();
-    pushHistory();
-    const clones=frames.slice(s,e+1).map(f=>{const c=deep(f);c.id=nextFrameId++;return c});
-    frames.splice(e+1,0,...clones);
-    currentFrame=e+1;selected.clear();renderAll();
-    statusMsg("Duplicated "+clones.length+" frame(s).");
-  });
-  document.getElementById("delRangeBtn")?.addEventListener("click",()=>{
-    const[s,e]=getRange();
-    if(frames.length-(e-s+1)<1){statusMsg("Can't delete every frame.");return}
-    pushHistory();
-    frames.splice(s,e-s+1);
-    currentFrame=Math.max(0,Math.min(frames.length-1,s));
-    selected.clear();renderAll();
-    statusMsg("Deleted frame range.");
-  });
-  document.getElementById("revRangeBtn")?.addEventListener("click",()=>{
-    const[s,e]=getRange();
-    pushHistory();
-    const seg=frames.slice(s,e+1).reverse();
-    frames.splice(s,seg.length,...seg);
-    selected.clear();renderAll();
-    statusMsg("Reversed frame range.");
-  });
 
-  // --- Frame clipboard: copy a frame from any animation, paste into any other by matching layer names. ---
-  const FRAME_CLIPBOARD_KEY="bba_frame_clipboard_v1";
-  document.getElementById("copyFrameBtn")?.addEventListener("click",()=>{
+  function timelineReadout(){
+    ensureFrameMeta();
     const f=frames[currentFrame];
-    const payload={layers:layers.map(l=>({id:l.id,name:l.name})),data:deep(f.layers)};
-    try{localStorage.setItem(FRAME_CLIPBOARD_KEY,JSON.stringify(payload));statusMsg("Frame copied.")}catch(e){statusMsg("Copy failed.")}
-  });
-  document.getElementById("pasteFrameBtn")?.addEventListener("click",()=>{
-    let payload=null;
-    try{payload=JSON.parse(localStorage.getItem(FRAME_CLIPBOARD_KEY)||"null")}catch(e){}
-    if(!payload){statusMsg("Clipboard is empty.");return}
-    pushHistory();
-    const nf=makeFrame();
-    for(const srcLayer of payload.layers){
-      const objs=(payload.data[srcLayer.id]||[]).map(o=>{const c=deep(o);c.id=nextObjectId++;return c});
-      if(!objs.length)continue;
-      let target=layers.find(l=>l.name.toLowerCase()===String(srcLayer.name).toLowerCase());
-      if(!target){target=makeLayer(srcLayer.name);layers.push(target);ensureFrameLayers()}
-      nf.layers[target.id]=(nf.layers[target.id]||[]).concat(objs);
+    const head=document.getElementById("timelineHeaderReadout");
+    const read=document.getElementById("timelineFrameReadout");
+    const label=document.getElementById("timelineFrameLabelReadout");
+    const objects=document.getElementById("timelineFrameObjects");
+    const duration=document.getElementById("timelineFrameDuration");
+    const layer=document.getElementById("timelineLayerCount");
+    const currentLayer=document.getElementById("timelineCurrentLayer");
+    const durInput=document.getElementById("timelineDuration");
+    if(head) head.textContent=`Frame ${frames.length ? currentFrame+1 : 0} / ${frames.length}`;
+    if(read) read.textContent=`Frame ${frames.length ? currentFrame+1 : 0}`;
+    if(label) label.textContent=f?.label || "Untitled frame";
+    if(objects){
+      const total=f ? Object.values(f.layers||{}).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0) : 0;
+      objects.textContent=total+" object"+(total===1?"":"s");
     }
-    frames.splice(currentFrame+1,0,nf);
-    currentFrame=currentFrame+1;
-    ensureFrameLayers();selected.clear();renderAll();
-    statusMsg("Frame pasted.");
-  });
+    if(duration) duration.textContent=`Hold ${Math.max(1,Number(f?.duration)||1)}×`;
+    if(layer) layer.textContent=layers.length+" layer"+(layers.length===1?"":"s");
+    if(currentLayer) currentLayer.textContent=activeLayer()?.name||"Layer";
+    if(durInput && document.activeElement!==durInput) durInput.value=Math.max(1,Number(f?.duration)||1);
+  }
 
-  // --- Loop-range playback: overrides the timer to wrap inside a chosen sub-range. ---
-  rebuildPlaybackTimer=function(){
-    clearInterval(playTimer);playTimer=null;
-    if(!playing)return;
-    const fpsValue=Math.max(1,Math.min(30,Number(document.getElementById("playbackFps")?.value||document.getElementById("fps")?.value||8)));
-    const sRaw=Number(document.getElementById("loopStartInput")?.value),eRaw=Number(document.getElementById("loopEndInput")?.value);
-    const hasRange=sRaw>=1&&eRaw>=1;
-    const lo=hasRange?Math.max(0,Math.min(sRaw,eRaw)-1):0;
-    const hi=hasRange?Math.min(frames.length-1,Math.max(sRaw,eRaw)-1):frames.length-1;
-    playTimer=setInterval(()=>{
-      if(frames.length<=1)return;
-      if(currentFrame<lo)currentFrame=lo;
-      else if(currentFrame>=hi){ if(loopPlayback)currentFrame=lo; else { stopPlaying(); return } }
-      else currentFrame++;
-      selected.clear();renderAll();
-    },1000/fpsValue);
-  };
-  document.getElementById("setLoopRangeBtn")?.addEventListener("click",()=>{
-    const s=document.getElementById("loopStartInput"),e=document.getElementById("loopEndInput");
-    if(s&&!s.value)s.value=1;
-    if(e)e.value=currentFrame+1;
-  });
-  document.getElementById("clearLoopRangeBtn")?.addEventListener("click",()=>{
-    const s=document.getElementById("loopStartInput"),e=document.getElementById("loopEndInput");
-    if(s)s.value="";if(e)e.value="";
-  });
+  function renderTimeline(){
+    const el=document.getElementById("frames");
+    if(!el) return;
+    ensureFrameMeta();
+    el.innerHTML="";
+    const cellWidth=Math.max(62,Math.round(76*(timelineZoom/100)));
+    el.style.setProperty("--timeline-cell-width",cellWidth+"px");
+    frames.forEach((frame,index)=>{
+      const b=document.createElement("button");
+      b.type="button";
+      b.className="frameBtn timelineFrameCell"+(index===currentFrame?" active":"")+(index===currentFrame?" playhead":"");
+      b.title=(frame.label?frame.label+" — ":"")+`Frame ${index+1} · Hold ${Math.max(1,Number(frame.duration)||1)}×`;
 
-  // --- Full-library backup / restore, from the home screen. ---
-  document.getElementById("backupAllBtn")?.addEventListener("click",()=>{
-    const all={format:"Bare Bones Animator Full Backup",version:1,exportedAt:Date.now(),projects:loadProjects()};
-    downloadBlob(new Blob([JSON.stringify(all,null,2)],{type:"application/json"}),"bare_bones_animator_backup.json");
-  });
-  document.getElementById("restoreAllBtn")?.addEventListener("click",()=>document.getElementById("restoreAllInput").click());
-  document.getElementById("restoreAllInput")?.addEventListener("change",()=>{
-    const file=document.getElementById("restoreAllInput").files?.[0];
-    if(!file)return;
-    const r=new FileReader();
-    r.onload=()=>{
-      try{
-        const data=JSON.parse(r.result);
-        if(!Array.isArray(data.projects))throw new Error("Invalid backup file");
-        const existing=loadProjects();
-        const merged=existing.concat(data.projects.map(p=>({...p,id:existing.some(x=>x.id===p.id)?uid("p_"):p.id})));
-        saveProjects(merged);renderHome();
-        openModal("Import Complete",'<div style="font-size:13px">Imported '+data.projects.length+" animation(s).</div>","OK",(m,close)=>close());
-      }catch(err){
-        openModal("Import Failed",'<div style="font-size:13px">'+escapeHtml(err.message||"Invalid backup file")+"</div>","OK",(m,close)=>close());
+      const top=document.createElement("div");
+      top.className="timelineFrameTop";
+      const num=document.createElement("span");num.className="timelineFrameNumber";num.textContent=index+1;
+      const hold=document.createElement("span");hold.className="timelineFrameDuration";hold.textContent=(Math.max(1,Number(frame.duration)||1))+"×";
+      top.append(num,hold);
+
+      const thumb=document.createElement("div");thumb.className="timelineThumbWrap";
+      if(typeof thumbForFrame==="function") thumb.appendChild(thumbForFrame(frame));
+
+      const label=document.createElement("div");label.className="timelineFrameLabel";label.textContent=frame.label||"Untitled frame";
+      const strip=document.createElement("div");strip.className="timelineLayerStrip";
+      for(const layer of layers){
+        const dot=document.createElement("span");
+        dot.className="timelineLayerDot"+(Array.isArray(frame.layers?.[layer.id])&&frame.layers[layer.id].length?" filled":"")+(layer.id===currentLayerId?" current":"");
+        dot.title=layer.name;
+        strip.appendChild(dot);
       }
+
+      b.append(top,thumb,label,strip);
+      b.addEventListener("click",()=>{
+        if(playing) return;
+        currentFrame=index;
+        selected.clear();
+        renderAll();
+        b.scrollIntoView({block:"nearest",inline:"center"});
+      });
+      b.addEventListener("dblclick",e=>{
+        e.preventDefault();
+        openModal("Rename Frame",'<input id="timelineRenameFrameInput" type="text" maxlength="60">',"Rename",(m,close)=>{
+          frame.label=(m.querySelector("#timelineRenameFrameInput")?.value||"").trim();
+          renderAll();close();
+        });
+        const input=document.getElementById("timelineRenameFrameInput");
+        if(input){input.value=frame.label||"";setTimeout(()=>{input.focus();input.select()},0)}
+      });
+      el.appendChild(b);
+    });
+    timelineReadout();
+  }
+
+  function refreshTimeline(){renderTimeline();timelineReadout();}
+
+  function replacePlaybackScheduler(){
+    const scheduler=function(){
+      clearInterval(playTimer);clearTimeout(playTimer);playTimer=null;
+      if(!playing)return;
+      const fpsValue=Math.max(1,Math.min(60,Number(document.getElementById("fps")?.value||8)));
+      const [lo,hi]=timelineRange();
+      currentFrame=Math.max(lo,Math.min(hi,currentFrame));
+      const hold=Math.max(1,Number(frames[currentFrame]?.duration)||1);
+      playTimer=setTimeout(()=>{
+        if(frames.length<=1){renderAll();scheduler();return}
+        let next=currentFrame+playbackDirection;
+        if(timelinePingPong){
+          if(next>hi){playbackDirection=-1;next=Math.max(lo,hi-1)}
+          else if(next<lo){
+            if(loopPlayback){playbackDirection=1;next=Math.min(hi,lo+1)}
+            else{stopPlaying();return}
+          }
+        }else if(next>hi){
+          if(loopPlayback) next=lo;
+          else{stopPlaying();return}
+        }
+        currentFrame=Math.max(lo,Math.min(hi,next));
+        selected.clear();
+        renderAll();
+        scheduler();
+      },(1000/fpsValue)*hold);
     };
-    r.readAsText(file);
-  });
+    rebuildPlaybackTimer=scheduler;
+  }
 
-  // --- Scrub the timeline: drag across frame thumbnails to preview instead of clicking one at a time. ---
-  const framesEl=document.getElementById("frames");
-  let scrubbing=false;
-  framesEl?.addEventListener("pointerdown",e=>{
-    if(playing)return;
-    const btn=e.target.closest(".frameBtn");
-    if(!btn)return;
-    scrubbing=true;
-    const idx=[...framesEl.children].indexOf(btn);
-    if(idx>=0){currentFrame=idx;selected.clear();renderAll()}
-  });
-  framesEl?.addEventListener("pointermove",e=>{
-    if(!scrubbing||playing)return;
-    const el=document.elementFromPoint(e.clientX,e.clientY);
-    const btn=el&&el.closest&&el.closest(".frameBtn");
-    if(btn){const idx=[...framesEl.children].indexOf(btn);if(idx>=0&&idx!==currentFrame){currentFrame=idx;selected.clear();renderAll()}}
-  });
-  window.addEventListener("pointerup",()=>{scrubbing=false});
+  function wireTimeline(){
+    if(timelineWired) return;
+    timelineWired=true;
+    ensureFrameMeta();
+    replacePlaybackScheduler();
 
-  // --- Comfort: wheel-to-zoom over the canvas, and a friendlier cursor for the transform tool. ---
-  const canvasArea=document.getElementById("canvasArea");
-  canvasArea?.addEventListener("wheel",e=>{
-    e.preventDefault();
-    setZoom(zoom+(e.deltaY>0?-10:10));
-  },{passive:false});
-  const baseSetToolForCursor=setTool;
-  setTool=function(t){
-    baseSetToolForCursor(t);
-    const dc=document.getElementById("drawCanvas");
-    if(dc)dc.style.cursor=t==="transform"?"default":"crosshair";
-  };
+    document.getElementById("timelineFirstBtn")?.addEventListener("click",()=>{currentFrame=0;selected.clear();renderAll()});
+    document.getElementById("timelinePrevBtn")?.addEventListener("click",()=>goFrame(-1));
+    document.getElementById("timelineNextBtn")?.addEventListener("click",()=>goFrame(1));
+    document.getElementById("timelineLastBtn")?.addEventListener("click",()=>{currentFrame=Math.max(0,frames.length-1);selected.clear();renderAll()});
+    document.getElementById("timelineZoom")?.addEventListener("input",e=>{timelineZoom=Math.max(60,Math.min(220,Number(e.target.value)||100));document.getElementById("timelineZoomText").textContent=timelineZoom+"%";renderTimeline()});
+    document.getElementById("timelinePingPong")?.addEventListener("change",e=>{timelinePingPong=e.target.checked;playbackDirection=1;rebuildPlaybackTimer()});
+    document.getElementById("timelineDuration")?.addEventListener("change",e=>{const v=Math.max(1,Math.min(60,Number(e.target.value)||1));if(frames[currentFrame]){pushHistory();frames[currentFrame].duration=v;renderAll();rebuildPlaybackTimer()}});
+    document.getElementById("timelineSetInBtn")?.addEventListener("click",()=>{document.getElementById("timelineLoopStartInput").value=currentFrame+1;rebuildPlaybackTimer();renderTimeline()});
+    document.getElementById("timelineSetOutBtn")?.addEventListener("click",()=>{document.getElementById("timelineLoopEndInput").value=currentFrame+1;rebuildPlaybackTimer();renderTimeline()});
+    document.getElementById("timelineClearRangeBtn")?.addEventListener("click",()=>{document.getElementById("timelineLoopStartInput").value="";document.getElementById("timelineLoopEndInput").value="";rebuildPlaybackTimer();renderTimeline()});
+    document.getElementById("timelineInsertBeforeBtn")?.addEventListener("click",()=>{
+      pushHistory();frames.splice(Math.max(0,currentFrame),0,makeFrame());ensureFrameLayers();selected.clear();renderAll();
+    });
+    document.getElementById("timelineInsertAfterBtn")?.addEventListener("click",()=>{
+      pushHistory();frames.splice(Math.min(frames.length,currentFrame+1),0,makeFrame());currentFrame++;ensureFrameLayers();selected.clear();renderAll();
+    });
+    document.getElementById("timelineApplyDurationRangeBtn")?.addEventListener("click",()=>{
+      const start=Math.max(1,Math.min(frames.length,Number(document.getElementById("rangeStartInput")?.value)||1));
+      const end=Math.max(1,Math.min(frames.length,Number(document.getElementById("rangeEndInput")?.value)||start));
+      const a=Math.min(start,end)-1,b=Math.max(start,end)-1,v=Math.max(1,Math.min(60,Number(document.getElementById("timelineDuration")?.value)||1));
+      pushHistory();for(let i=a;i<=b;i++)frames[i].duration=v;renderAll();rebuildPlaybackTimer();
+    });
+
+    // Enhance existing Add Blank so it is guaranteed blank.
+    const add=document.getElementById("addFrame");
+    if(add){add.onclick=()=>{pushHistory();const f=makeFrame();ensureFrameLayers();frames.splice(currentFrame+1,0,f);currentFrame++;selected.clear();renderAll()}}
+    const dup=document.getElementById("duplicateFrame");
+    if(dup){dup.onclick=()=>{pushHistory();const f=makeFrame(),src=frames[currentFrame];for(const layer of layers)f.layers[layer.id]=deep(src.layers[layer.id]||[]);f.duration=Number(src.duration)||1;f.label=src.label||"";frames.splice(currentFrame+1,0,f);currentFrame++;selected.clear();renderAll()}}
+    const del=document.getElementById("deleteFrame");
+    if(del){del.onclick=()=>{if(frames.length<=1)return;pushHistory();frames.splice(currentFrame,1);currentFrame=Math.min(currentFrame,frames.length-1);selected.clear();renderAll()}}
+
+    // Loop-range controls replace any older loop fields if present.
+    refreshTimeline();
+  }
+
+  function focusEveryWidget(){
+    const ids=Array.isArray(workspacePanelIds)?workspacePanelIds:[];
+    let max=30;
+    for(const id of ids){
+      const panel=document.getElementById(id);
+      if(!panel) continue;
+      max=Math.max(max,Number(panel.style.zIndex)||20);
+      if(panel.dataset.frontBound==="1") continue;
+      panel.dataset.frontBound="1";
+      const bring=()=>{panel.style.zIndex=++max;panelZ=Math.max(panelZ,max)};
+      panel.addEventListener("pointerdown",bring,true);
+      panel.addEventListener("focusin",bring,true);
+      panel.addEventListener("mouseenter",()=>{},false);
+    }
+    panelZ=Math.max(panelZ,max)+1;
+  }
+
+  const baseRenderAll=renderAll;
+  renderAll=function(){ensureFrameMeta();baseRenderAll();if(document.getElementById("timelinePanel"))refreshTimeline();};
+
+  // Wait until the existing app's initialization has completed.
+  setTimeout(()=>{focusEveryWidget();wireTimeline();refreshTimeline()},0);
 })();
-
 </script>
 </body>
 </html>
