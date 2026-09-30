@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+ 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bare Bones Animator</title>
@@ -127,8 +128,8 @@ button.primary{background-image:linear-gradient(180deg,color-mix(in srgb,var(--a
 #canvasViewport{position:relative;width:640px;height:480px;background:var(--canvas);box-shadow:0 0 0 1px var(--border);transform-origin:center center;touch-action:none}
 #canvasViewport canvas{position:absolute;inset:0;width:100%;height:100%}
 #drawCanvas{z-index:3;pointer-events:auto;cursor:crosshair;touch-action:none}
-#onionCanvas{z-index:1;pointer-events:none}
-#gridCanvas{z-index:2;pointer-events:none}
+#onionCanvas{z-index:4;pointer-events:none}
+#gridCanvas{z-index:4;pointer-events:none}
 #selectionCanvas{z-index:4;pointer-events:none}
 .propertyLine{display:flex;align-items:center;justify-content:space-between;gap:7px;font-size:12px;margin:6px 0}
 .propertyLine input[type="number"]{width:82px}
@@ -141,7 +142,7 @@ button.primary{background-image:linear-gradient(180deg,color-mix(in srgb,var(--a
 .frameBtn.active{border:2px solid var(--accent)}
 .frameBtn canvas{width:100%;height:45px;background:var(--canvas);display:block}
 .frameNumber{text-align:center;font-size:10px;color:var(--muted);margin-top:2px}
-.modalShade{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center}
+.modalShade{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000000;display:flex;align-items:center;justify-content:center}
 .modal{width:330px;max-width:90vw;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:16px}
 .modal h2{font-size:15px;margin:0 0 12px}
 .modal input[type="text"]{width:100%;padding:7px;border:1px solid var(--border);border-radius:5px;background:var(--bg);color:var(--text)}
@@ -897,24 +898,28 @@ function updateMove(p){const dx=p.x-pointerAction.start.x,dy=p.y-pointerAction.s
 function updateRotate(p){const b=pointerAction.bounds,cx=(b.minX+b.maxX)/2,cy=(b.minY+b.maxY)/2,a0=Math.atan2(pointerAction.start.y-cy,pointerAction.start.x-cx),a1=Math.atan2(p.y-cy,p.x-cx),delta=(a1-a0)*180/Math.PI,rad=delta*Math.PI/180;for(const o of selectedObjects()){const q=originalFor(o.id),dx=q.x-cx,dy=q.y-cy;o.x=cx+dx*Math.cos(rad)-dy*Math.sin(rad);o.y=cy+dx*Math.sin(rad)+dy*Math.cos(rad);o.rotation=q.rotation+delta}renderAll()}
 function updateScale(p,handle){const b=pointerAction.bounds,start=pointerAction.start;let anchor,sx=1,sy=1;if(handle==="nw")anchor={x:b.maxX,y:b.maxY};else if(handle==="n")anchor={x:(b.minX+b.maxX)/2,y:b.maxY};else if(handle==="ne")anchor={x:b.minX,y:b.maxY};else if(handle==="e")anchor={x:b.minX,y:(b.minY+b.maxY)/2};else if(handle==="se")anchor={x:b.minX,y:b.minY};else if(handle==="s")anchor={x:(b.minX+b.maxX)/2,y:b.minY};else if(handle==="sw")anchor={x:b.maxX,y:b.minY};else anchor={x:b.maxX,y:(b.minY+b.maxY)/2};if(handle==="n"||handle==="s"){sy=Math.max(.05,Math.abs(p.y-anchor.y)/Math.max(1,b.height))}else if(handle==="e"||handle==="w"){sx=Math.max(.05,Math.abs(p.x-anchor.x)/Math.max(1,b.width))}else{const x=Math.max(8,Math.abs(p.x-anchor.x))/Math.max(1,b.width),y=Math.max(8,Math.abs(p.y-anchor.y))/Math.max(1,b.height),s=Math.max(.05,Math.max(x,y));sx=s;sy=s}for(const o of selectedObjects()){const q=originalFor(o.id);o.x=anchor.x+(q.x-anchor.x)*sx;o.y=anchor.y+(q.y-anchor.y)*sy;o.scaleX=Math.max(.05,q.scaleX*sx);o.scaleY=Math.max(.05,q.scaleY*sy)}renderAll()}
 function renderGrid(){gridCtx.clearRect(0,0,W,H);if(!grid)return;gridCtx.strokeStyle="rgba(120,120,120,.35)";gridCtx.lineWidth=1;for(let x=20;x<W;x+=20){gridCtx.beginPath();gridCtx.moveTo(x+.5,0);gridCtx.lineTo(x+.5,H);gridCtx.stroke()}for(let y=20;y<H;y+=20){gridCtx.beginPath();gridCtx.moveTo(0,y+.5);gridCtx.lineTo(W,y+.5);gridCtx.stroke()}}
+const onionLayerCanvas=document.createElement("canvas"),onionLayerCtx=onionLayerCanvas.getContext("2d");
+function drawOnionFrame(frame,alpha){
+  // drawObject() sets its own globalAlpha per stroke, so draw the whole frame to a scratch canvas first, then apply onion opacity once.
+  const sw=onionCanvas.width,sh=onionCanvas.height;
+  if(onionLayerCanvas.width!==sw||onionLayerCanvas.height!==sh){onionLayerCanvas.width=sw;onionLayerCanvas.height=sh}
+  onionLayerCtx.setTransform(1,0,0,1,0,0);onionLayerCtx.clearRect(0,0,sw,sh);
+  onionLayerCtx.setTransform(sw/W,0,0,sh/H,0,0);
+  for(const l of layers)if(l.visible)for(const o of(frame.layers[l.id]||[]))drawObject(onionLayerCtx,o);
+  onionCtx.save();onionCtx.globalAlpha=Math.max(0,Math.min(1,alpha));onionCtx.drawImage(onionLayerCanvas,0,0,W,H);onionCtx.restore();
+}
 function renderOnion(){
   onionCtx.clearRect(0,0,W,H);
   onionCanvas.style.display=(onion&&!playing)?"block":"none";
   if(!onion||playing)return;
-  onionCtx.save();
   for(let step=1;step<=onionPreviousCount;step++){
     const idx=currentFrame-step;if(idx<0)break;
-    const alpha=onionOpacity/Math.max(1,step);
-    onionCtx.globalAlpha=alpha;const prev=frames[idx];
-    for(const l of layers)if(l.visible)for(const o of(prev.layers[l.id]||[]))drawObject(onionCtx,o);
+    drawOnionFrame(frames[idx],onionOpacity/Math.max(1,step));
   }
   for(let step=1;step<=onionNextCount;step++){
     const idx=currentFrame+step;if(idx>=frames.length)break;
-    const alpha=(onionOpacity*.7)/Math.max(1,step);
-    onionCtx.globalAlpha=alpha;const next=frames[idx];
-    for(const l of layers)if(l.visible)for(const o of(next.layers[l.id]||[]))drawObject(onionCtx,o);
+    drawOnionFrame(frames[idx],(onionOpacity*.7)/Math.max(1,step));
   }
-  onionCtx.restore();
 }
 function renderLayers(){const el=document.getElementById("layerList");el.innerHTML="";[...layers].reverse().forEach(l=>{const row=document.createElement("div");row.className="layerRow"+(l.id===currentLayerId?" active":"");const cb=document.createElement("input");cb.type="checkbox";cb.checked=l.visible;cb.onclick=e=>{e.stopPropagation();l.visible=cb.checked;renderAll()};const span=document.createElement("span");span.textContent=l.name;row.append(cb,span);row.onclick=()=>{currentLayerId=l.id;selected.clear();renderAll()};el.appendChild(row)})}
 function thumbForFrame(frame){const c=document.createElement("canvas");c.width=160;c.height=120;const t=c.getContext("2d");t.fillStyle="#fff";t.fillRect(0,0,160,120);t.scale(.25,.25);for(const l of layers)if(l.visible)for(const o of(frame.layers[l.id]||[]))drawObject(t,o);return c}
@@ -1167,19 +1172,34 @@ function deleteProject(id){const p=loadProjects().find(x=>x.id===id);if(!p)retur
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]))}
 function renderHome(){const grid=document.getElementById("projectGrid");const query=(document.getElementById("homeSearch")?.value||"").trim().toLowerCase();const sort=document.getElementById("homeSort")?.value||"updated";const view=localStorage.getItem("bba_home_view_v3")||"grid";const list=loadProjects();const stats=list.reduce((a,p)=>{const s=projectStats(p);a.projects++;a.frames+=s.frames;a.objects+=s.objects;return a},{projects:0,frames:0,objects:0});document.getElementById("homeStats").innerHTML='<div class="homeStat"><div class="homeStatValue">'+stats.projects+'</div><div class="homeStatLabel">Animations</div></div><div class="homeStat"><div class="homeStatValue">'+stats.frames+'</div><div class="homeStatLabel">Total Frames</div></div><div class="homeStat"><div class="homeStatValue">'+stats.objects+'</div><div class="homeStatLabel">Drawn Objects</div></div>';let filtered=list.filter(p=>(p.name||"").toLowerCase().includes(query));filtered.sort((a,b)=>{if(sort==="nameAsc")return String(a.name).localeCompare(String(b.name));if(sort==="nameDesc")return String(b.name).localeCompare(String(a.name));if(sort==="frames")return projectStats(b).frames-projectStats(a).frames;if(sort==="created")return (b.createdAt||0)-(a.createdAt||0);return (b.updatedAt||0)-(a.updatedAt||0)});grid.className="projectGrid "+view;if(!filtered.length){grid.innerHTML='<div class="homeEmpty"><strong>'+(list.length?'No matching animations':'No animations yet')+'</strong><span>'+(list.length?'Try a different search or sort option.':'Create your first animation to get started.')+'</span></div>'}else{grid.innerHTML="";for(const p of filtered){const st=projectStats(p);const card=document.createElement("div");card.className="projectCard";const th=document.createElement("div");th.className="projectThumb";th.appendChild(projectThumbCanvas(p));const info=document.createElement("div");info.className="projectInfo";const n=document.createElement("div");n.className="projectName";n.textContent=p.name||"Untitled";const meta=document.createElement("div");meta.className="projectMeta";meta.innerHTML='<span>'+st.frames+' frame'+(st.frames===1?'':'s')+'</span><span>'+st.layers+' layer'+(st.layers===1?'':'s')+'</span><span>'+formatProjectDate(p.updatedAt)+'</span>';const actions=document.createElement("div");actions.className="projectActions";const open=document.createElement("button");open.textContent="Open";open.onclick=e=>{e.stopPropagation();openProject(p.id)};const rename=document.createElement("button");rename.textContent="Rename";rename.onclick=e=>{e.stopPropagation();renameProject(p.id)};const duplicate=document.createElement("button");duplicate.textContent="Duplicate";duplicate.onclick=e=>{e.stopPropagation();duplicateProject(p.id)};const del=document.createElement("button");del.textContent="Delete";del.onclick=e=>{e.stopPropagation();deleteProject(p.id)};actions.append(open,rename,duplicate,del);info.append(n,meta,actions);card.append(th,info);card.onclick=()=>openProject(p.id);grid.appendChild(card)}}const latest=list.slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];const cont=document.getElementById("continueCard");if(latest&&!query){cont.style.display="flex";const st=projectStats(latest);cont.innerHTML='<div class="continueText"><strong>Continue with '+escapeHtml(latest.name||"Untitled")+'</strong><span>'+st.frames+' frame'+(st.frames===1?'':'s')+' · Last saved '+formatProjectDate(latest.updatedAt)+'</span></div><button class="small primary" id="continueBtn">Open Project</button>';document.getElementById("continueBtn").onclick=()=>openProject(latest.id)}else{cont.style.display="none"}}
 function enterEditor(){document.getElementById("homeView").style.display="none";document.getElementById("editorView").style.display="flex";document.getElementById("projectTitle").textContent=projectName;loadPanelLayout();updateAllPanelContentScales();renderAll();setZoom(zoom);setViewRotation(viewRotation);updateCanvasFitScale()}
-function stopPlaying(){playing=false;clearInterval(playTimer);playTimer=null;document.getElementById("playBtn").textContent="Play";const t=document.getElementById("playToggle");if(t)t.textContent="Play";renderAll()}
 function goHome(){saveCurrent();stopPlaying();document.getElementById("editorView").style.display="none";document.getElementById("homeView").style.display="flex";renderHome()}
 function saveFromButton(){
   saveCurrent();
   openModal("Save Widget Presets?",'<div style="font-size:13px;line-height:1.5">Do you want to save your widget presets too?</div>',"Yes",(m,close)=>{close();openSaveWidgetPresetModal()},"No");
 }
 document.getElementById("saveBtn").onclick=saveFromButton;document.getElementById("homeBtn").onclick=goHome;
-document.getElementById("playBtn").onclick=()=>{if(playing)stopPlaying();else startPlaying()};document.getElementById("fps").onchange=e=>{const v=Math.max(1,Math.min(30,+e.target.value||8));e.target.value=v;document.getElementById("playbackFps").value=v;rebuildPlaybackTimer()};
+document.getElementById("fps").onchange=e=>{const v=Math.max(1,Math.min(30,+e.target.value||8));e.target.value=v;document.getElementById("playbackFps").value=v;rebuildPlaybackTimer()};
 function panelDrag(panel){const head=panel.querySelector(".panelHeader");let d=null;head.addEventListener("pointerdown",e=>{d={x:e.clientX,y:e.clientY,left:panel.offsetLeft,top:panel.offsetTop};head.setPointerCapture(e.pointerId)});head.addEventListener("pointermove",e=>{if(!d)return;panel.style.left=d.left+e.clientX-d.x+"px";panel.style.top=d.top+e.clientY-d.y+"px";panel.style.right="auto";panel.style.bottom="auto"});head.addEventListener("pointerup",()=>{d=null;savePanelPositions()})}
 const workspacePanelIds=["canvasPanel","layersPanel","propertiesPanel","toolsPanel","brushesPanel","playbackPanel","onionPanel","navigatorPanel","exportPanel","colorPanel","symmetryPanel","createPanel","guidesPanel","appearancePanel","projectPanel","timelinePanel"];
 const WORKSPACE_LAYOUT_KEY="bba_workspace_layout_v5";
 const WORKSPACE_PRESETS_KEY="bba_workspace_presets_v1";
 let panelZ=30;
+/* Single source of truth for widget stacking. Always puts the panel above every other panel; modals sit far above all panels. */
+function frontPanel(panel){
+  if(!panel)return;
+  const panels=[...document.querySelectorAll(".panel")];
+  let top=30;
+  for(const p of panels)if(p!==panel)top=Math.max(top,Number(p.style.zIndex)||0);
+  if(top>=50000){
+    const sorted=panels.filter(p=>p!==panel).sort((a,b)=>(Number(a.style.zIndex)||0)-(Number(b.style.zIndex)||0));
+    top=30;sorted.forEach(p=>{p.style.zIndex=++top});
+  }
+  panel.style.zIndex=top+1;panelZ=top+1;
+}
+document.addEventListener("pointerdown",e=>{
+  const p=e.target&&e.target.closest?e.target.closest(".panel"):null;
+  if(p&&!p.classList.contains("is-hidden"))frontPanel(p);
+},true);
 
 function getWidgetPresets(){
   try{
@@ -1451,7 +1471,7 @@ function setupPanels(){
       header.addEventListener("pointerdown",e=>{
         if(e.target.closest("button"))return;
         drag={x:e.clientX,y:e.clientY,left:panel.offsetLeft,top:panel.offsetTop};
-        panel.style.zIndex=++panelZ;
+        frontPanel(panel);
         try{header.setPointerCapture(e.pointerId)}catch{}
       });
       header.addEventListener("pointermove",e=>{if(!drag)return;panel.style.left=Math.max(0,drag.left+e.clientX-drag.x)+"px";panel.style.top=Math.max(0,drag.top+e.clientY-drag.y)+"px"});
@@ -1466,7 +1486,7 @@ function setupPanels(){
     const resize=panel.querySelector(".panelResizeHandle");
     if(resize){
       let r=null;
-      resize.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();r={x:e.clientX,y:e.clientY,w:panel.offsetWidth,h:panel.offsetHeight};panel.style.zIndex=++panelZ;try{resize.setPointerCapture(e.pointerId)}catch{}});
+      resize.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();r={x:e.clientX,y:e.clientY,w:panel.offsetWidth,h:panel.offsetHeight};frontPanel(panel);try{resize.setPointerCapture(e.pointerId)}catch{}});
       resize.addEventListener("pointermove",e=>{if(!r)return;panel.style.width=Math.max(170,r.w+e.clientX-r.x)+"px";panel.style.height=Math.max(90,r.h+e.clientY-r.y)+"px";updatePanelContentScale(panel);if(panel.id==="canvasPanel")updateCanvasFitScale()});
       resize.addEventListener("pointerup",()=>{if(r){r=null;clampPanel(panel);updatePanelContentScale(panel);updateCanvasFitScale();savePanelLayout()}});
     }
@@ -1477,8 +1497,7 @@ function setupPanels(){
   updateAllPanelContentScales();
 }
 // Playback widget
-function wirePlaybackWidget(){document.getElementById("playPrev").onclick=()=>goFrame(-1);document.getElementById("playNext").onclick=()=>goFrame(1);document.getElementById("playToggle").onclick=()=>{if(playing)stopPlaying();else startPlaying();};document.getElementById("playbackFps").onchange=e=>{document.getElementById("fps").value=e.target.value;rebuildPlaybackTimer()};document.getElementById("loopPlayback").onchange=e=>loopPlayback=e.target.checked}
-function startPlaying(){if(playing)return;playing=true;document.getElementById("playBtn").textContent="Stop";document.getElementById("playToggle").textContent="Stop";rebuildPlaybackTimer();renderAll()}
+// wirePlaybackWidget is defined in renderer.js
 
 // Onion skin widget
 function wireOnionWidget(){document.getElementById("onionEnabledWidget").onchange=e=>{onion=e.target.checked;document.getElementById("onion").checked=onion;renderOnion()};document.getElementById("onionOpacity").oninput=e=>{onionOpacity=(+e.target.value||25)/100;document.getElementById("onionOpacityText").textContent=Math.round(onionOpacity*100)+"%";renderOnion()};document.getElementById("onionPreviousCount").onchange=e=>{onionPreviousCount=Math.max(1,Math.min(3,+e.target.value||1));e.target.value=onionPreviousCount;renderOnion()};document.getElementById("onionNextCount").onchange=e=>{onionNextCount=Math.max(0,Math.min(2,+e.target.value||0));e.target.value=onionNextCount;renderOnion()}}
@@ -1492,7 +1511,7 @@ setupQualityAndSymmetry();
 syncQualityControls();
 wireExportWidget();
 setupPanels();
-wirePlaybackWidget();
+// wirePlaybackWidget() is called in renderer.js
 wireOnionWidget();
 wireNavigator();
 syncPenControls();
@@ -1654,7 +1673,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
   makeFrame=function(){const f=baseMakeFrame();f.label="";return f};
 
   // Extra panels get the same drag/resize/collapse behavior as the existing panels.
-  function wireExtraPanel(id){const panel=document.getElementById(id);if(!panel)return;const header=panel.querySelector(".panelHeader"),resize=panel.querySelector(".panelResizeHandle"),close=panel.querySelector("[data-close-panel]");let d=null,r=null;header?.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;d={x:e.clientX,y:e.clientY,left:panel.offsetLeft,top:panel.offsetTop};panel.style.zIndex=++panelZ;try{header.setPointerCapture(e.pointerId)}catch{}});header?.addEventListener("pointermove",e=>{if(!d)return;panel.style.left=Math.max(0,d.left+e.clientX-d.x)+"px";panel.style.top=Math.max(0,d.top+e.clientY-d.y)+"px"});header?.addEventListener("pointerup",()=>{if(d){d=null;clampPanel(panel);savePanelLayout()}});header?.addEventListener("dblclick",()=>{const collapse=!panel.classList.contains("collapsed"),body=panel.querySelector(".panelBody");if(collapse){panel.dataset.previousHeight=panel.offsetHeight+"px";panel.classList.add("collapsed");if(body)body.style.display="none";if(resize)resize.style.display="none";panel.style.height="34px"}else{panel.classList.remove("collapsed");if(body)body.style.display="";if(resize)resize.style.display="";panel.style.height=panel.dataset.previousHeight||"240px"}savePanelLayout()});resize?.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();r={x:e.clientX,y:e.clientY,w:panel.offsetWidth,h:panel.offsetHeight};panel.style.zIndex=++panelZ;try{resize.setPointerCapture(e.pointerId)}catch{}});resize?.addEventListener("pointermove",e=>{if(!r)return;panel.style.width=Math.max(170,r.w+e.clientX-r.x)+"px";panel.style.height=Math.max(90,r.h+e.clientY-r.y)+"px";updatePanelContentScale(panel);if(panel.id==="canvasPanel")updateCanvasFitScale()});resize?.addEventListener("pointerup",()=>{if(r){r=null;clampPanel(panel);updatePanelContentScale(panel);updateCanvasFitScale();savePanelLayout()}});close?.addEventListener("click",e=>{e.stopPropagation();panel.classList.add("is-hidden");savePanelLayout()})}
+  function wireExtraPanel(id){const panel=document.getElementById(id);if(!panel)return;const header=panel.querySelector(".panelHeader"),resize=panel.querySelector(".panelResizeHandle"),close=panel.querySelector("[data-close-panel]");let d=null,r=null;header?.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;d={x:e.clientX,y:e.clientY,left:panel.offsetLeft,top:panel.offsetTop};frontPanel(panel);try{header.setPointerCapture(e.pointerId)}catch{}});header?.addEventListener("pointermove",e=>{if(!d)return;panel.style.left=Math.max(0,d.left+e.clientX-d.x)+"px";panel.style.top=Math.max(0,d.top+e.clientY-d.y)+"px"});header?.addEventListener("pointerup",()=>{if(d){d=null;clampPanel(panel);savePanelLayout()}});header?.addEventListener("dblclick",()=>{const collapse=!panel.classList.contains("collapsed"),body=panel.querySelector(".panelBody");if(collapse){panel.dataset.previousHeight=panel.offsetHeight+"px";panel.classList.add("collapsed");if(body)body.style.display="none";if(resize)resize.style.display="none";panel.style.height="34px"}else{panel.classList.remove("collapsed");if(body)body.style.display="";if(resize)resize.style.display="";panel.style.height=panel.dataset.previousHeight||"240px"}savePanelLayout()});resize?.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();r={x:e.clientX,y:e.clientY,w:panel.offsetWidth,h:panel.offsetHeight};frontPanel(panel);try{resize.setPointerCapture(e.pointerId)}catch{}});resize?.addEventListener("pointermove",e=>{if(!r)return;panel.style.width=Math.max(170,r.w+e.clientX-r.x)+"px";panel.style.height=Math.max(90,r.h+e.clientY-r.y)+"px";updatePanelContentScale(panel);if(panel.id==="canvasPanel")updateCanvasFitScale()});resize?.addEventListener("pointerup",()=>{if(r){r=null;clampPanel(panel);updatePanelContentScale(panel);updateCanvasFitScale();savePanelLayout()}});close?.addEventListener("click",e=>{e.stopPropagation();panel.classList.add("is-hidden");savePanelLayout()})}
   EXTRA_LAYOUT_IDS.forEach(wireExtraPanel);
   workspacePanelIds.push(...EXTRA_LAYOUT_IDS.filter(id=>!workspacePanelIds.includes(id)));
   loadPanelLayout();
@@ -2135,7 +2154,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
       const bringFront=id=>{
         const panel=document.getElementById(id);if(!panel)return;
         panel.classList.remove("is-hidden");
-        panel.style.zIndex=++panelZ;
+        frontPanel(panel);
         clampPanel(panel);
         savePanelLayout();
         openWidgetLibrary();
@@ -2151,7 +2170,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
           if(!panel)return;
           const show=panel.classList.contains("is-hidden");
           panel.classList.toggle("is-hidden",!show);
-          if(show){panel.style.zIndex=++panelZ;clampPanel(panel)}
+          if(show){frontPanel(panel);clampPanel(panel)}
           savePanelLayout();
           openWidgetLibrary();
         });
@@ -2176,7 +2195,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
 
     const focusWidget=panel=>{
       if(!panel||panel.classList.contains("is-hidden"))return;
-      panel.style.zIndex=++panelZ;
+      frontPanel(panel);
       savePanelLayout();
     };
 
@@ -2392,7 +2411,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
       max=Math.max(max,Number(panel.style.zIndex)||20);
       if(panel.dataset.frontBound==="1") continue;
       panel.dataset.frontBound="1";
-      const bring=()=>{panel.style.zIndex=++max;panelZ=Math.max(panelZ,max)};
+      const bring=()=>frontPanel(panel);
       panel.addEventListener("pointerdown",bring,true);
       panel.addEventListener("focusin",bring,true);
       panel.addEventListener("mouseenter",()=>{},false);
