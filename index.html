@@ -269,6 +269,17 @@ input[type="range"]{accent-color:var(--accent)}
 .timelineStatusSpacer{flex:1}
 @media(max-width:1050px){#timelinePanel{width:calc(100% - 30px);left:15px}.timelineStats{display:none}}
 
+
+/* Widget tabbing: drop a widget onto another to merge them into one tabbed widget */
+.panel.tab-hidden{display:none!important}
+.panelTabs{display:flex;align-items:flex-end;gap:2px;flex:1;min-width:0;height:100%;overflow:hidden}
+.panelTab{display:inline-flex;align-items:center;flex:0 1 auto;min-width:36px;max-width:140px;height:26px;padding:0 10px;margin-bottom:-1px;border:1px solid transparent;border-bottom:0;border-radius:6px 6px 0 0;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:grab;user-select:none;-webkit-user-select:none}
+.panelTab:hover{color:var(--text);background:color-mix(in srgb,var(--text) 7%,transparent)}
+.panelTab:focus{outline:none}
+.panelTab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.panelTab.active{color:var(--text);background:var(--panel);border-color:var(--border);border-bottom:1px solid var(--panel);cursor:grab}
+.tabDropHint{position:absolute;display:none;align-items:center;justify-content:center;pointer-events:none;z-index:59990;border:2px dashed var(--accent);border-radius:7px;background:color-mix(in srgb,var(--accent) 16%,transparent)}
+.tabDropHint span{background:var(--accent);color:var(--accentText);font-size:12px;font-weight:700;padding:5px 12px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
 </style>
 </head>
 <body>
@@ -653,9 +664,9 @@ input[type="range"]{accent-color:var(--accent)}
           </div>
           <div class="timelineDetailGroup">
             <span class="timelineDetailTitle">Loop Range</span>
-            <label class="timelineCompactControl">In <input id="timelineLoopStartInput" type="number" min="1" value="1"></label>
+            <label class="timelineCompactControl">In <input id="timelineLoopStartInput" type="number" min="1" value="" placeholder="All"></label>
             <button class="small" id="timelineSetInBtn">Set In</button>
-            <label class="timelineCompactControl">Out <input id="timelineLoopEndInput" type="number" min="1" value="1"></label>
+            <label class="timelineCompactControl">Out <input id="timelineLoopEndInput" type="number" min="1" value="" placeholder="All"></label>
             <button class="small" id="timelineSetOutBtn">Set Out</button>
             <button class="small" id="timelineClearRangeBtn">Clear</button>
           </div>
@@ -2247,9 +2258,12 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
   function timelineRange(){
     const a=document.getElementById("timelineLoopStartInput");
     const b=document.getElementById("timelineLoopEndInput");
+    const last=Math.max(0,frames.length-1);
     const av=Number(a?.value),bv=Number(b?.value);
-    if(av>=1&&bv>=1) return [Math.min(av,bv)-1,Math.max(av,bv)-1];
-    return [0,Math.max(0,frames.length-1)];
+    const hasA=a&&a.value!==""&&av>=1,hasB=b&&b.value!==""&&bv>=1;
+    if(!hasA&&!hasB) return [0,last];
+    const x=hasA?av-1:0,y=hasB?bv-1:last;
+    return [Math.max(0,Math.min(last,Math.min(x,y))),Math.max(0,Math.min(last,Math.max(x,y)))];
   }
 
   function timelineReadout(){
@@ -2685,6 +2699,457 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
   };
   loadPanelLayout();
 })();
+
+/* Widget tabbing: drag a widget on top of another widget and it becomes a tab of that widget */
+(function(){
+  "use strict";
+  const tabGroups=[]; /* each: {ids:[panelId,...], active:panelId}. Only the active panel is visible; the rest are .tab-hidden */
+  const byId=id=>document.getElementById(id);
+  const groupOf=id=>tabGroups.find(g=>g.ids.includes(id))||null;
+  const titleOf=p=>(p&&p.querySelector(".panelTitle")?.textContent||p?.id||"").trim();
+  const ws=byId("workspace");
+  if(!ws)return;
+
+  const hint=document.createElement("div");
+  hint.className="tabDropHint";
+  hint.innerHTML="<span>Drop to add as tab</span>";
+  ws.appendChild(hint);
+  const showHint=t=>{hint.style.left=t.offsetLeft+"px";hint.style.top=t.offsetTop+"px";hint.style.width=t.offsetWidth+"px";hint.style.height=t.offsetHeight+"px";hint.style.display="flex"};
+  const hideHint=()=>{hint.style.display="none"};
+
+  /* ---------- geometry helpers ---------- */
+  function readGeom(p){
+    const visible=p.offsetWidth>0&&p.offsetHeight>0;
+    const cs=getComputedStyle(p);
+    return {
+      left:visible?p.offsetLeft:(parseFloat(cs.left)||0),
+      top:visible?p.offsetTop:(parseFloat(cs.top)||0),
+      width:visible?p.offsetWidth:(parseFloat(cs.width)||260),
+      height:visible?p.offsetHeight:(parseFloat(cs.height)||200),
+      z:p.style.zIndex||cs.zIndex,
+      collapsed:p.classList.contains("collapsed"),
+      prevH:p.dataset.previousHeight
+    };
+  }
+  function setCollapsed(p,collapse,prevH){
+    const body=p.querySelector(".panelBody"),resize=p.querySelector(".panelResizeHandle");
+    if(collapse){
+      if(!p.classList.contains("collapsed"))p.dataset.previousHeight=prevH||(p.offsetHeight+"px");
+      p.classList.add("collapsed");
+      if(body)body.style.display="none";
+      if(resize)resize.style.display="none";
+    }else{
+      p.classList.remove("collapsed");
+      if(body)body.style.display="";
+      if(resize)resize.style.display="";
+    }
+  }
+  function transfer(from,to){
+    const g=readGeom(from);
+    setCollapsed(to,g.collapsed,g.prevH);
+    to.style.left=g.left+"px";
+    to.style.top=g.top+"px";
+    to.style.width=g.width+"px";
+    to.style.height=(g.collapsed?34:g.height)+"px";
+    if(g.z&&g.z!=="auto")to.style.zIndex=g.z;
+  }
+
+  /* ---------- tab strip rendering ---------- */
+  function stripOff(p){
+    const header=p.querySelector(":scope > .panelHeader");if(!header)return;
+    header.querySelector(":scope > .panelTabs")?.remove();
+    const t=header.querySelector(".panelTitle");if(t)t.style.display="";
+  }
+  function renderTabs(g){
+    for(const id of g.ids){
+      const p=byId(id);if(!p)continue;
+      const header=p.querySelector(":scope > .panelHeader");if(!header)continue;
+      const title=header.querySelector(".panelTitle");
+      let strip=header.querySelector(":scope > .panelTabs");
+      if(!strip){
+        strip=document.createElement("div");
+        strip.className="panelTabs";
+        strip.setAttribute("role","tablist");
+        header.insertBefore(strip,title||header.firstChild);
+      }
+      if(title)title.style.display="none";
+      strip.textContent="";
+      for(const mid of g.ids){
+        const mp=byId(mid);
+        const tab=document.createElement("span");
+        tab.className="panelTab"+(mid===g.active?" active":"");
+        tab.dataset.tabPanel=mid;
+        tab.tabIndex=mid===g.active?0:-1;
+        tab.setAttribute("role","tab");
+        tab.setAttribute("aria-selected",mid===g.active?"true":"false");
+        tab.textContent=titleOf(mp);
+        tab.title=titleOf(mp);
+        strip.appendChild(tab);
+      }
+      const act=strip.querySelector(".panelTab.active");
+      if(act)strip.scrollLeft=Math.max(0,act.offsetLeft-(strip.clientWidth-act.offsetWidth)/2);
+    }
+  }
+
+  /* ---------- group operations ---------- */
+  function afterShow(p){
+    if(!p)return;
+    try{updatePanelContentScale(p)}catch(err){}
+    try{updateCanvasFitScale()}catch(err){}
+  }
+  function activate(g,id){
+    const next=byId(id);if(!next)return;
+    const cur=byId(g.active);
+    if(cur&&cur!==next){
+      transfer(cur,next);
+      cur.classList.add("tab-hidden");
+    }
+    next.classList.remove("tab-hidden");
+    g.active=id;
+    renderTabs(g);
+    baseFrontPanel(next);
+    afterShow(next);
+    savePanelLayout();
+  }
+  function removeFromGroup(id){
+    const g=groupOf(id);if(!g)return;
+    const p=byId(id);
+    const idx=g.ids.indexOf(id),wasActive=g.active===id;
+    g.ids.splice(idx,1);
+    if(p){p.classList.remove("tab-hidden");stripOff(p)}
+    if(g.ids.length===0){tabGroups.splice(tabGroups.indexOf(g),1);return}
+    let nextId=g.active;
+    if(wasActive){
+      nextId=g.ids[Math.min(idx,g.ids.length-1)];
+      const nx=byId(nextId);
+      if(nx){if(p)transfer(p,nx);nx.classList.remove("tab-hidden")}
+      g.active=nextId;
+    }
+    if(g.ids.length===1){
+      const last=byId(g.ids[0]);
+      if(last){last.classList.remove("tab-hidden");stripOff(last)}
+      tabGroups.splice(tabGroups.indexOf(g),1);
+    }else{
+      renderTabs(g);
+    }
+    afterShow(byId(nextId));
+  }
+  function mergeInto(dragPanel,targetPanel){
+    const dId=dragPanel.id,tId=targetPanel.id;
+    if(!dId||!tId||dId===tId)return;
+    const dg=groupOf(dId);
+    let tg=groupOf(tId);
+    if(dg&&dg===tg)return;
+    if(!tg){tg={ids:[tId],active:tId};tabGroups.push(tg)}
+    const moving=dg?dg.ids.slice():[dId];
+    const newActive=dg?dg.active:dId;
+    if(dg)tabGroups.splice(tabGroups.indexOf(dg),1);
+    for(const id of moving){
+      if(!tg.ids.includes(id))tg.ids.push(id);
+      if(id!==newActive)byId(id)?.classList.add("tab-hidden");
+    }
+    activate(tg,newActive);
+  }
+  function ungroupAll(){
+    for(const g of tabGroups.slice()){
+      for(const id of g.ids){const p=byId(id);if(p){p.classList.remove("tab-hidden");stripOff(p)}}
+    }
+    tabGroups.length=0;
+  }
+  function restoreGroups(list){
+    ungroupAll();
+    if(!Array.isArray(list))return;
+    const used=new Set();
+    for(const s of list){
+      if(!s||!Array.isArray(s.ids))continue;
+      const ids=s.ids.filter(id=>workspacePanelIds.includes(id)&&byId(id)&&!used.has(id));
+      if(ids.length<2)continue;
+      ids.forEach(id=>used.add(id));
+      const g={ids,active:ids.includes(s.active)?s.active:ids[0]};
+      tabGroups.push(g);
+      for(const id of ids)byId(id).classList.toggle("tab-hidden",id!==g.active);
+      renderTabs(g);
+    }
+  }
+
+  /* ---------- hit testing: which widget is the pointer over ---------- */
+  function panelAt(x,y,exclude){
+    let best=null,bestZ=-Infinity;
+    for(const id of workspacePanelIds){
+      const p=byId(id);
+      if(!p||p===exclude)continue;
+      if(p.classList.contains("is-hidden")||p.classList.contains("tab-hidden")||p.classList.contains("collapsed"))continue;
+      const r=p.getBoundingClientRect();
+      if(r.width<2||r.height<2)continue;
+      if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom){
+        const z=Number(getComputedStyle(p).zIndex)||0;
+        if(z>=bestZ){best=p;bestZ=z}
+      }
+    }
+    return best;
+  }
+  function updateHint(dragPanel,e){
+    if(e.altKey){hideHint();return null}
+    const t=panelAt(e.clientX,e.clientY,dragPanel);
+    if(t)showHint(t);else hideHint();
+    return t;
+  }
+
+  /* ---------- pointer handling ---------- */
+  let hd=null; /* header drag (moves the whole widget or tab group) */
+  let td=null; /* tab drag (click to switch, drag out to detach) */
+
+  document.addEventListener("pointerdown",e=>{
+    if(e.button!==0)return;
+    const tab=e.target.closest?e.target.closest(".panelTab"):null;
+    if(tab){
+      const id=tab.dataset.tabPanel,g=groupOf(id);
+      if(!g)return;
+      e.stopPropagation(); /* keeps the normal whole-widget header drag from starting */
+      e.preventDefault(); /* no follow-up mouse events / focus change for this press */
+      if(g.active!==id)activate(g,id);
+      td={id,pointerId:e.pointerId,sx:e.clientX,sy:e.clientY,detached:false,panel:null,offX:0,offY:0,target:null};
+      try{ws.setPointerCapture(e.pointerId)}catch(err){}
+      return;
+    }
+    const header=e.target.closest?e.target.closest(".panelHeader"):null;
+    if(!header||e.target.closest("button"))return;
+    const panel=header.closest(".panel");
+    if(!panel||!workspacePanelIds.includes(panel.id))return;
+    hd={panel,pointerId:e.pointerId,sx:e.clientX,sy:e.clientY,moved:false,target:null};
+  },true);
+
+  document.addEventListener("pointermove",e=>{
+    if(hd&&e.pointerId===hd.pointerId){
+      if(!hd.moved&&Math.hypot(e.clientX-hd.sx,e.clientY-hd.sy)>4)hd.moved=true;
+      if(hd.moved)hd.target=updateHint(hd.panel,e);
+    }
+    if(td&&e.pointerId===td.pointerId){
+      if(!td.detached&&Math.hypot(e.clientX-td.sx,e.clientY-td.sy)>6){
+        const g=groupOf(td.id);
+        if(g){
+          const p=byId(td.id);
+          if(g.active!==td.id)activate(g,td.id);
+          const r=p.getBoundingClientRect();
+          td.offX=td.sx-r.left;td.offY=td.sy-r.top;
+          removeFromGroup(td.id);
+          baseFrontPanel(p);
+          td.panel=p;td.detached=true;
+        }else{td=null;return}
+      }
+      if(td.detached){
+        const wr=ws.getBoundingClientRect();
+        td.panel.style.left=Math.max(0,e.clientX-wr.left-td.offX)+"px";
+        td.panel.style.top=Math.max(0,e.clientY-wr.top-td.offY)+"px";
+        td.target=updateHint(td.panel,e);
+      }
+    }
+  });
+
+  function endDrag(e,cancelled){
+    if(hd&&e.pointerId===hd.pointerId){
+      const s=hd;hd=null;hideHint();
+      if(!cancelled&&s.moved&&!e.altKey){
+        const t=panelAt(e.clientX,e.clientY,s.panel);
+        if(t)mergeInto(s.panel,t);
+      }
+    }
+    if(td&&e.pointerId===td.pointerId){
+      const s=td;td=null;hideHint();
+      try{ws.releasePointerCapture(e.pointerId)}catch(err){}
+      if(s.detached&&s.panel){
+        const t=(!cancelled&&!e.altKey)?panelAt(e.clientX,e.clientY,s.panel):null;
+        if(t)mergeInto(s.panel,t);
+        else{clampPanel(s.panel);savePanelLayout()}
+      }
+    }
+  }
+  /* Safety net: a press that started on a tab can still deliver a late mousedown to the tab's old (now hidden) widget.
+     Other focus-on-mousedown handlers would then "bring that widget to front" and switch the tab straight back. */
+  document.addEventListener("mousedown",e=>{
+    if(e.target.closest&&e.target.closest(".panel.tab-hidden")){e.stopPropagation();e.preventDefault()}
+  },true);
+  document.addEventListener("pointerup",e=>endDrag(e,false));
+  document.addEventListener("pointercancel",e=>endDrag(e,true));
+
+  /* ---------- integration with the rest of the workspace code ---------- */
+  /* Bringing a background tab to the front (widget library, etc.) switches to that tab. */
+  const baseFrontPanel=frontPanel;
+  frontPanel=function(panel){
+    if(panel&&panel.classList.contains("tab-hidden")){
+      const g=groupOf(panel.id);
+      if(g){activate(g,panel.id);return}
+    }
+    baseFrontPanel(panel);
+  };
+
+  /* Hiding a tabbed widget (Hide button, widget library, workspace manager) takes it out of its group. */
+  const mo=new MutationObserver(records=>{
+    let changed=false;
+    for(const r of records){
+      const p=r.target;
+      if(p.classList.contains("is-hidden")&&groupOf(p.id)){removeFromGroup(p.id);changed=true}
+    }
+    if(changed)savePanelLayout();
+  });
+  for(const id of workspacePanelIds){const p=byId(id);if(p)mo.observe(p,{attributes:true,attributeFilter:["class"]})}
+
+  /* Save tab groups with the layout (and with widget presets). Background tabs take the group's geometry. */
+  const baseCapture=capturePanelLayout;
+  capturePanelLayout=function(){
+    const out=baseCapture();
+    out.__tabGroups=tabGroups.map(g=>({ids:g.ids.slice(),active:g.active}));
+    for(const g of tabGroups){
+      const a=out[g.active];if(!a)continue;
+      for(const id of g.ids){
+        if(id===g.active||!out[id])continue;
+        out[id]={...out[id],left:a.left,top:a.top,width:a.width,height:a.height,collapsed:a.collapsed,hidden:false};
+      }
+    }
+    return out;
+  };
+  const baseLoad=loadPanelLayout;
+  loadPanelLayout=function(){
+    baseLoad();
+    let layout=null;
+    try{layout=JSON.parse(localStorage.getItem(WORKSPACE_LAYOUT_KEY)||"null")}catch(err){}
+    restoreGroups(layout&&layout.__tabGroups);
+  };
+  const baseReset=resetWorkspaceLayout;
+  resetWorkspaceLayout=function(){
+    ungroupAll();
+    baseReset();
+  };
+  const baseApplyPreset=applyWidgetPreset;
+  applyWidgetPreset=function(name){
+    ungroupAll();
+    const ok=baseApplyPreset(name);
+    if(ok){
+      const preset=getWidgetPresets().find(p=>p.name===name);
+      restoreGroups(preset&&preset.layout&&preset.layout.__tabGroups);
+      updateAllPanelContentScales();
+      savePanelLayout();
+    }
+    return ok;
+  };
+
+  /* ---------- extra ways to switch tabs ---------- */
+  function cycle(g,dir){
+    const i=g.ids.indexOf(g.active);
+    const n=(i+dir+g.ids.length)%g.ids.length;
+    activate(g,g.ids[n]);
+    return g.ids[n];
+  }
+  function focusTab(id){
+    const p=byId(id);
+    const t=p&&p.querySelector('.panelTab[data-tab-panel="'+id+'"]');
+    if(t)t.focus({preventScroll:true});
+  }
+  /* Keyboard: focus a tab, then Left/Right (or Home/End) to switch, Enter/Space to select. */
+  document.addEventListener("keydown",e=>{
+    const tab=e.target.closest?e.target.closest(".panelTab"):null;
+    if(!tab)return;
+    const g=groupOf(tab.dataset.tabPanel);if(!g)return;
+    let id=null;
+    if(e.key==="ArrowRight")id=cycle(g,1);
+    else if(e.key==="ArrowLeft")id=cycle(g,-1);
+    else if(e.key==="Home"){activate(g,g.ids[0]);id=g.active}
+    else if(e.key==="End"){activate(g,g.ids[g.ids.length-1]);id=g.active}
+    else if(e.key==="Enter"||e.key===" "){activate(g,tab.dataset.tabPanel);id=g.active}
+    if(id){e.preventDefault();focusTab(id)}
+  });
+  /* Mouse wheel over the tab strip cycles through the tabs. */
+  let wheelLock=0;
+  document.addEventListener("wheel",e=>{
+    const strip=e.target.closest?e.target.closest(".panelTabs"):null;
+    if(!strip)return;
+    const g=groupOf(strip.closest(".panel")?.id);if(!g)return;
+    e.preventDefault();
+    const now=Date.now();
+    if(now-wheelLock<120)return;
+    wheelLock=now;
+    const d=Math.abs(e.deltaY)>=Math.abs(e.deltaX)?e.deltaY:e.deltaX;
+    if(d)cycle(g,d>0?1:-1);
+  },{passive:false});
+  /* Ctrl+Alt+Left / Ctrl+Alt+Right switches tabs in the front-most tabbed widget. */
+  document.addEventListener("keydown",e=>{
+    if(!(e.ctrlKey&&e.altKey)||(e.key!=="ArrowLeft"&&e.key!=="ArrowRight"))return;
+    if(/^(input|textarea|select)$/i.test(e.target.tagName||""))return;
+    let best=null,bz=-Infinity;
+    for(const g of tabGroups){
+      const p=byId(g.active);if(!p)continue;
+      const z=Number(p.style.zIndex)||0;
+      if(z>=bz){bz=z;best=g}
+    }
+    if(!best)return;
+    e.preventDefault();
+    cycle(best,e.key==="ArrowRight"?1:-1);
+  });
+
+  /* Restore saved groups on startup. */
+  try{
+    const saved=JSON.parse(localStorage.getItem(WORKSPACE_LAYOUT_KEY)||"null");
+    restoreGroups(saved&&saved.__tabGroups);
+  }catch(err){}
+})();
+
+/* Playback: start/stop, Play/Stop button labels, and wiring for every play control */
+function setPlayButtonLabels(){
+  const label=playing?"Stop":"Play";
+  for(const id of ["playToggle","playBtn"]){
+    const b=document.getElementById(id);
+    if(!b)continue;
+    b.textContent=label;
+    b.setAttribute("aria-pressed",playing?"true":"false");
+    b.title=playing?"Stop playback (Space)":"Play animation (Space)";
+  }
+}
+function startPlaying(){
+  if(playing)return;
+  if(!frames.length)return;
+  playing=true;
+  if(!loopPlayback&&currentFrame>=frames.length-1)currentFrame=0;
+  selected.clear();
+  setPlayButtonLabels();
+  rebuildPlaybackTimer();
+  renderAll();
+  try{renderOnion()}catch(err){}
+}
+function stopPlaying(){
+  const was=playing;
+  playing=false;
+  clearInterval(playTimer);clearTimeout(playTimer);playTimer=null;
+  setPlayButtonLabels();
+  if(was){
+    try{renderAll()}catch(err){}
+    try{renderOnion()}catch(err){}
+  }
+}
+function togglePlaying(){if(playing)stopPlaying();else startPlaying()}
+function wirePlaybackWidget(){
+  for(const id of ["playToggle","playBtn"]){
+    const b=document.getElementById(id);
+    if(b)b.onclick=togglePlaying;
+  }
+  const prev=document.getElementById("playPrev");if(prev)prev.onclick=()=>goFrame(-1);
+  const next=document.getElementById("playNext");if(next)next.onclick=()=>goFrame(1);
+  const loop=document.getElementById("playbackLoopToggle")||document.getElementById("loopPlayback");
+  if(loop){
+    loop.checked=!!loopPlayback;
+    loop.onchange=e=>{loopPlayback=e.target.checked;if(playing)rebuildPlaybackTimer()};
+  }
+  const fps=document.getElementById("playbackFps");
+  if(fps){
+    fps.onchange=e=>{
+      const v=Math.max(1,Math.min(30,+e.target.value||8));
+      e.target.value=v;
+      const main=document.getElementById("fps");if(main)main.value=v;
+      if(playing)rebuildPlaybackTimer();
+    };
+  }
+  setPlayButtonLabels();
+}
+wirePlaybackWidget();
 </script>
 </body>
 </html>
