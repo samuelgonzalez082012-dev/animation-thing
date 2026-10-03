@@ -6,6 +6,13 @@
  *
  * https://www.electronjs.org/docs/latest/tutorial/sandbox
  */
+const { contextBridge, ipcRenderer } = require('electron')
+
+contextBridge.exposeInMainWorld('animationProjectFiles', {
+  save: payload => ipcRenderer.invoke('project-file:save', payload),
+  open: () => ipcRenderer.invoke('project-file:open')
+})
+
 window.addEventListener('DOMContentLoaded', () => {
   const replaceText = (selector, text) => {
     const element = document.getElementById(selector)

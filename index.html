@@ -133,6 +133,8 @@ button.primary{background-image:linear-gradient(180deg,color-mix(in srgb,var(--a
 #navigatorPanel{right:10px;top:545px;width:220px;height:220px}
 #timelinePanel{left:260px;bottom:10px;width:720px;height:135px}
 .layerRow{display:flex;align-items:center;gap:6px;padding:6px;border:1px solid transparent;border-radius:5px;font-size:12px;cursor:pointer}
+.layerRow>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.layerRow.locked{color:var(--muted)}.layerLockButton{min-width:38px;padding:3px 5px;font-size:10px}
+.layerFolderHeading{display:flex;align-items:center;gap:5px;padding:5px 4px 3px;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 .layerRow.active{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .layerRow span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 .panelButtons{display:flex;gap:5px;margin-top:7px}
@@ -255,12 +257,14 @@ input[type="range"]{accent-color:var(--accent)}
 .timelineTrackShell{min-height:0;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:7px;overflow:hidden;background:color-mix(in srgb,var(--panel) 97%,var(--bg))}
 .timelineTrackHeader{height:24px;display:flex;align-items:center;justify-content:space-between;padding:0 8px;background:color-mix(in srgb,var(--panel) 90%,var(--bg));border-bottom:1px solid var(--border);font-size:9px;color:var(--muted)}
 .timelineTrackTitle{text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--text)}
+.audioWaveformTrack{display:none;height:42px;padding:3px 7px;border-bottom:1px solid var(--border);overflow:hidden}.audioWaveformTrack.active{display:block}.audioWaveformViewport{height:34px;overflow:hidden;touch-action:none;cursor:crosshair}.audioWaveformViewport canvas{display:block;height:34px}.audioWaveformLabel{height:8px;font-size:8px;line-height:8px;color:var(--muted)}
 .timelineFrames{display:flex;align-items:stretch;gap:4px;overflow:auto;padding:7px;min-height:84px;scroll-behavior:smooth}
 .timelineFrameCell{width:var(--timeline-cell-width,78px);min-width:var(--timeline-cell-width,78px);height:92px;display:flex;flex-direction:column;gap:3px;padding:4px;border:1px solid var(--border);border-radius:7px;background:var(--panel);cursor:grab;position:relative;flex:0 0 var(--timeline-cell-width,78px);overflow:hidden}
 .timelineFrameCell.dragging{opacity:.45;cursor:grabbing}
 .timelineFrameCell.dropTarget{outline:2px solid var(--accent);outline-offset:1px}
 .timelineFrameCell:hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--border));background:color-mix(in srgb,var(--accent) 4%,var(--panel))}
 .timelineFrameCell.active{border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
+.timelineFrameCell.multiSelected{outline:2px solid color-mix(in srgb,var(--accent) 68%,transparent);outline-offset:-3px}
 .timelineFrameCell.playhead::after{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:3px;background:var(--accent);border-radius:7px 7px 0 0}
 .timelineThumbWrap{height:46px;border:1px solid var(--border);border-radius:4px;background:var(--canvas);overflow:hidden;display:flex;align-items:center;justify-content:center}
 .timelineThumbWrap canvas{display:block;width:100%;height:100%;object-fit:contain}
@@ -293,6 +297,15 @@ input[type="range"]{accent-color:var(--accent)}
 .panelTab.active{color:var(--text);background:var(--panel);border-color:var(--border);border-bottom:1px solid var(--panel);cursor:grab}
 .tabDropHint{position:absolute;display:none;align-items:center;justify-content:center;pointer-events:none;z-index:59990;border:2px dashed var(--accent);border-radius:7px;background:color-mix(in srgb,var(--accent) 16%,transparent)}
 .tabDropHint span{background:var(--accent);color:var(--accentText);font-size:12px;font-weight:700;padding:5px 12px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.projectStorageStatus{max-width:900px;margin:8px auto;color:var(--muted);font-size:11px}
+.featureExplorerSearch{width:100%;box-sizing:border-box;padding:11px 12px;margin:8px 0;border:1px solid var(--border);border-radius:8px;background:var(--panel);color:var(--text);font:inherit}
+.featureExplorerCategories{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 10px}
+.featureExplorerCategories button{border:1px solid var(--border);border-radius:999px;padding:5px 10px;background:var(--panel);color:var(--text);cursor:pointer}
+.featureExplorerCategories button.active{background:var(--accent);color:var(--accentText);border-color:var(--accent)}
+.featureExplorerResults{max-height:min(55vh,520px);overflow:auto;display:grid;gap:5px}
+.featureExplorerResult{display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:left;padding:9px 11px;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:7px;cursor:pointer}
+.featureExplorerResult:hover,.featureExplorerResult:focus{outline:2px solid var(--accent)}
+.featureExplorerResult small{color:var(--muted);text-align:right}
 </style>
 </head>
 <body>
@@ -326,6 +339,7 @@ input[type="range"]{accent-color:var(--accent)}
       </div>
     </div>
     <div id="homeStats" class="homeStats"></div>
+    <div id="projectStorageStatus" class="projectStorageStatus" aria-live="polite"></div>
     <div class="homeContent" id="homeContent">
       <div id="continueCard" class="continueCard" style="display:none"></div>
       <div class="homeSectionTitle">Projects</div>
@@ -350,8 +364,10 @@ input[type="range"]{accent-color:var(--accent)}
     <button class="small" id="redoBtn">Redo</button>
     <button class="small" id="fileMenuBtn">File</button>
     <button class="small" id="editMenuBtn">Edit</button>
+    <button class="small" id="canvasSettingsBtn" title="Set project canvas dimensions and aspect ratio">Canvas Size</button>
     <button class="small" id="workspaceBtn">Workspace</button><button class="small" id="widgetLibraryBtn">Widget Library</button>
     <button class="small" id="shortcutBtn" title="Keyboard shortcuts (Ctrl+?)">Shortcuts</button>
+    <button class="small primary" id="exploreFeaturesBtn" title="Search and explore tools and features (Ctrl+K)">Explore</button>
     <div class="spacer"></div>
     <label class="control">Zoom <input id="zoom" type="range" min="25" max="400" value="100"><span id="zoomText">100%</span></label>
     <label class="control">View Rotation <input id="viewRotation" type="range" min="-180" max="180" value="0"><span id="viewRotationText">0°</span></label>
@@ -379,6 +395,9 @@ input[type="range"]{accent-color:var(--accent)}
       <div class="panelHeader"><span class="panelTitle">Layers</span><button class="panelClose small" data-close-panel="layersPanel">Hide</button></div>
       <div class="panelBody">
         <div id="layerList"></div>
+        <div class="propertyLine"><span>Folder</span><select id="layerFolderSelect" style="max-width:140px"><option value="">Unfiled</option></select></div>
+        <button class="small" id="addLayerFolderButton" type="button">New Layer Folder</button>
+        <div class="propertyLine"><span>Layer timing</span><select id="layerTimingScale" title="Retimes this layer independently relative to the project timeline"><option value="0.25">¼×</option><option value="0.5">½×</option><option value="0.75">¾×</option><option value="1">1×</option><option value="1.25">1¼×</option><option value="1.5">1½×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option></select></div>
         <div class="propertyLine"><span>Layer opacity</span><input id="layerOpacity" type="range" min="0" max="100" value="100"><span id="layerOpacityText">100%</span></div>
         <div class="propertyLine"><span>Blend mode</span><select id="layerBlendMode" style="max-width:140px">
           <option value="normal">Normal</option>
@@ -396,6 +415,9 @@ input[type="range"]{accent-color:var(--accent)}
           <option value="color">Color</option>
           <option value="luminosity">Luminosity</option>
         </select></div>
+        <label class="checkRow"><input id="layerClipToBelow" type="checkbox"> Clip to layer below</label>
+        <div class="propertyLine"><span>Layer effect</span><select id="layerEffect" style="max-width:140px"><option value="none">None</option><option value="blur">Soft blur</option><option value="glow">Glow</option><option value="shadow">Drop shadow</option><option value="color-adjust">Color adjust</option></select></div>
+        <div class="propertyLine"><span>Effect strength</span><input id="layerEffectAmount" type="range" min="1" max="20" value="5"><span id="layerEffectAmountText">5</span></div>
         <div class="hint">Drag a layer row to reorder it. Blend mode controls how this layer combines with the ones below it.</div>
         <div class="panelButtons"><button class="small" id="addLayer">Add Layer</button><button class="small" id="duplicateLayer">Duplicate</button><button class="small" id="deleteLayer">Delete</button></div>
       </div>
@@ -418,6 +440,9 @@ input[type="range"]{accent-color:var(--accent)}
         <div class="propertyLine"><span>Opacity</span><input id="strokeOpacity" type="range" min="5" max="100" value="100"><span id="strokeOpacityText">100%</span></div>
         <label class="checkRow"><input id="shapeFill" type="checkbox"> Fill shapes</label>
         <div class="propertyLine"><span>Fill color</span><input id="fillColor" type="color" value="#ffffff"></div>
+        <label class="checkRow"><input id="shapeGradient" type="checkbox"> Linear gradient fill</label>
+        <div class="propertyLine"><span>Gradient end</span><input id="gradientColor" type="color" value="#4a5cff"></div>
+        <div class="propertyLine"><span>Corner radius</span><input id="shapeCornerRadius" type="number" min="0" max="200" value="0"></div>
         <div class="propertyLine"><span>Bucket gap close</span><input id="bucketGapClose" type="range" min="0" max="12" value="0" title="Expand line barriers by this many pixels to stop small fill leaks"><span id="bucketGapCloseText">0 px</span></div>
         <div class="propertyLine"><span>Rotation</span><input id="objectRotation" type="number" step="1" value="0"></div>
         <div class="propertyLine"><span>Scale</span><input id="objectScale" type="number" step=".05" min=".05" value="1"></div>
@@ -435,12 +460,16 @@ input[type="range"]{accent-color:var(--accent)}
           <button class="small toolChoice" data-tool="line">Line</button>
           <button class="small toolChoice" data-tool="rectangle">Rectangle</button>
           <button class="small toolChoice" data-tool="ellipse">Ellipse</button>
+          <button class="small toolChoice" data-tool="polygon">Polygon</button>
+          <button class="small toolChoice" data-tool="star">Star</button>
+          <button class="small toolChoice" data-tool="lasso">Lasso Select</button>
           <button class="small toolChoice" data-tool="transform">Transform</button>
           <button class="small toolChoice" data-tool="node">Edit Points</button>
           <button class="small toolChoice" data-tool="eyedropper">Eyedropper</button>
           <button class="small toolChoice" data-tool="bucket">Paint Bucket</button>
           <button class="small toolChoice" data-tool="camera">Edit Camera</button>
           <button class="small toolChoice" data-tool="rig">Pose Rig</button>
+          <button class="small toolChoice" data-tool="rig-ik">IK Pose</button>
         </div>
         <div class="hint">Edit Points: click a stroke segment to add a node. Edit Camera: drag inside the frame to pan, a corner to zoom, or the handle above it to rotate. Pose Rig: drag a bone to rotate it and its descendants around its joint pivot.</div>
         <div class="widgetSectionTitle">Quick actions</div>
@@ -531,6 +560,11 @@ input[type="range"]{accent-color:var(--accent)}
         <div id="paletteSwatches" class="swatchGrid" style="margin-top:6px"></div>
         <div class="paletteRow"><input id="paletteName" maxlength="50" placeholder="New palette name"><button class="small" id="savePalette">Save</button></div>
         <div class="paletteRow"><button class="small" id="addToPalette">Add Current Color</button><button class="small" id="deletePalette">Delete Palette</button></div>
+        <div class="widgetSectionTitle" style="margin-top:10px">Linked Colors</div>
+        <div class="propertyLine"><span>Source slot</span><input id="paletteLinkSource" type="color" value="#111111"></div>
+        <div class="panelButtons"><button class="small" id="linkSelectionColor" type="button">Link Selection</button><button class="small" id="recolorLinkedColor" type="button">Recolor Links</button><button class="small" id="replaceProjectColor" type="button">Replace All Matching</button></div>
+        <div class="projectSaveStatus" id="paletteLinkStatus">No linked colors changed yet.</div>
+        <div class="hint">Link selected objects to this source color. Choose a new drawing color and Recolor Links to update linked artwork throughout this project.</div>
         <div class="tipCard">Recent colors and saved palettes persist across animations.</div>
       </div>
       <div class="panelResizeHandle" data-resize-panel="colorPanel"></div>
@@ -582,6 +616,10 @@ input[type="range"]{accent-color:var(--accent)}
         <label class="checkRow"><input id="safeGuideEnabled" type="checkbox"> Safe frame</label>
         <div class="propertyLine"><span>Safe margin</span><input id="safeGuideMargin" type="number" min="0" max="200" value="40"></div>
         <label class="checkRow"><input id="pixelGuideEnabled" type="checkbox"> Pixel crosshair</label>
+        <label class="checkRow"><input id="perspectiveGuideEnabled" type="checkbox"> Perspective grid</label>
+        <div class="propertyLine"><span>Perspective</span><select id="perspectiveGuideMode"><option value="one-point">1-point</option><option value="two-point">2-point</option></select></div>
+        <button class="small" id="setPerspectiveGuideBtn" type="button">Place Vanishing Point</button>
+        <div class="hint">Choose one- or two-point perspective, then click the stage to place its vanishing point(s).</div>
         <button class="small" id="clearGuidesButton" style="margin-top:7px">Clear guide view</button>
         <div class="guideBadge" id="guideReadout">Guides ready</div>
       </div>
@@ -633,7 +671,8 @@ input[type="range"]{accent-color:var(--accent)}
         <div class="propertyLine"><span>Parent object</span><select id="rigParentSelect"><option value="">Choose parent</option></select></div>
         <div class="panelButtons"><button class="small" id="rigSetRoleBtn">Set Role</button><button class="small" id="rigPivotBtn">Auto Pivot</button><button class="small" id="rigPlaceJointBtn">Place Joint</button><button class="small" id="rigUnlinkBtn">Unlink</button></div>
         <button class="small" id="rigPoseBtn" style="width:100%;margin-top:5px">Pose Selected Bone</button>
-        <div class="hint" id="rigStatus">Assign roles and parents, then use Pose Rig to rotate a bone and its descendants at the visible pivot. Use Place Joint, then click the exact joint location to refine the pivot.</div>
+        <div class="panelButtons"><button class="small" id="rigIKBtn">IK Pose</button><button class="small" id="rigKeyPoseBtn">Key Rig Pose</button></div>
+        <div class="hint" id="rigStatus">Assign roles and parents, then use Pose Rig to rotate a bone and its descendants at the visible pivot. For IK, select the hand/end part, choose IK Pose, then drag the stage to move it. Key Rig Pose stores the selected bone chain on this frame.</div>
         <div class="widgetSectionTitle" style="margin-top:9px">Reusable Symbols</div>
         <div class="propertyLine"><span>Library</span><select id="symbolLibrarySelect"><option value="">No symbols yet</option></select></div>
         <div class="panelButtons"><button class="small" id="createSymbolBtn">Create from Selection</button><button class="small" id="insertSymbolBtn">Insert</button></div>
@@ -668,7 +707,8 @@ input[type="range"]{accent-color:var(--accent)}
             <button class="small" id="prevKeyframeBtn" title="Go to previous marked keyframe">Prev Key</button>
             <button class="small" id="markKeyframeBtn" title="Mark selected objects on this frame as keyframes">Keyframe</button>
             <button class="small" id="nextKeyframeBtn" title="Go to next marked keyframe">Next Key</button>
-            <label class="timelineCompactControl">Easing <select id="keyframeEasing"><option value="linear">Linear</option><option value="ease-in">Ease In</option><option value="ease-out">Ease Out</option><option value="ease-in-out">Ease In/Out</option></select></label>
+            <label class="timelineCompactControl">Easing <select id="keyframeEasing"><option value="linear">Linear</option><option value="ease-in">Ease In</option><option value="ease-out">Ease Out</option><option value="ease-in-out">Ease In/Out</option><option value="custom">Custom Curve</option></select></label>
+            <button class="small" id="editEasingCurveBtn" type="button">Edit Curve</button>
           </div>
           <div class="timelineButtonCluster">
             <button class="small" id="addFrame">Add Blank</button>
@@ -690,7 +730,8 @@ input[type="range"]{accent-color:var(--accent)}
         </div>
 
         <div class="timelineTrackShell">
-          <div class="timelineTrackHeader"><span class="timelineTrackTitle">Frames</span><span id="timelineTrackHint">Click to select · drag frames to reorder · drag ◆ to move keys</span></div>
+          <div class="timelineTrackHeader"><span class="timelineTrackTitle">Frames &amp; Audio</span><span id="timelineTrackHint">Click to select · drag frames to reorder · drag ◆ to move keys</span></div>
+          <div id="audioWaveformTrack" class="audioWaveformTrack" hidden><div class="audioWaveformLabel" id="audioWaveformLabel">Audio waveform</div><div class="audioWaveformViewport"><canvas id="audioWaveformCanvas" height="34"></canvas></div></div>
           <div id="frames" class="timelineFrames"></div>
         </div>
 
@@ -709,6 +750,8 @@ input[type="range"]{accent-color:var(--accent)}
             <button class="small" id="timelineClearRangeBtn">Clear</button>
           </div>
           <div class="timelineDetailGroup timelineToolsGroup">
+            <button class="small" id="exposureSheetBtn" type="button">X-sheet</button>
+            <button class="small" id="sceneManagerBtn" type="button">Scenes</button>
             <button class="small" id="tweenToNextBtn">Tween</button>
             <input id="tweenCount" type="number" min="1" max="30" value="4" title="Tween frame count">
             <button class="small" id="dupRangeBtn">Duplicate Range</button>
@@ -731,39 +774,62 @@ input[type="range"]{accent-color:var(--accent)}
 <div id="modalRoot"></div>
 <script>
 "use strict";
-const W=640,H=480;
+let W=640,H=480;
 const canvas=document.getElementById("drawCanvas"),ctx=canvas.getContext("2d");
 const selCanvas=document.getElementById("selectionCanvas"),selCtx=selCanvas.getContext("2d");
 const onionCanvas=document.getElementById("onionCanvas"),onionCtx=onionCanvas.getContext("2d");
 const gridCanvas=document.getElementById("gridCanvas"),gridCtx=gridCanvas.getContext("2d");
-const DPR=Math.min(6,Math.max(4,window.devicePixelRatio||1));
+let DPR=Math.min(6,Math.max(4,window.devicePixelRatio||1));
 function configureHiDPICanvas(el,c){el.width=Math.round(W*DPR);el.height=Math.round(H*DPR);el.style.width="100%";el.style.height="100%";c.setTransform(DPR,0,0,DPR,0,0);c.imageSmoothingEnabled=true}
 configureHiDPICanvas(canvas,ctx);configureHiDPICanvas(selCanvas,selCtx);configureHiDPICanvas(onionCanvas,onionCtx);configureHiDPICanvas(gridCanvas,gridCtx);
+function setProjectCanvasSize(width,height,adjustCoordinates=false){
+  const nextWidth=Math.round(Number(width)),nextHeight=Math.round(Number(height));
+  if(!Number.isFinite(nextWidth)||!Number.isFinite(nextHeight)||nextWidth<64||nextHeight<64||nextWidth>8192||nextHeight>8192||nextWidth*nextHeight>12_000_000)throw new Error("Canvas dimensions must be 64–8192 px per side and no more than 12 million pixels.");
+  const oldWidth=W,oldHeight=H;if(nextWidth===W&&nextHeight===H)return;
+  W=nextWidth;H=nextHeight;
+  DPR=Math.max(1,Math.min(6,Math.max(4,window.devicePixelRatio||1),Math.sqrt(8_000_000/(W*H))));
+  configureHiDPICanvas(canvas,ctx);configureHiDPICanvas(selCanvas,selCtx);configureHiDPICanvas(onionCanvas,onionCtx);configureHiDPICanvas(gridCanvas,gridCtx);
+  if(adjustCoordinates){
+    const sx=W/oldWidth,sy=H/oldHeight;
+    camera.x*=sx;camera.y*=sy;
+    for(const state of Object.values(cameraKeys)){if(state){state.x*=sx;state.y*=sy}}
+    perspectiveVanishingPoints=perspectiveVanishingPoints.map(point=>({x:point.x*sx,y:point.y*sy}));
+  }
+  updateCanvasFitScale();renderAll();
+}
 const viewport=document.getElementById("canvasViewport");
 let nextObjectId=1,nextLayerId=1,nextFrameId=1;
 let layers=[],frames=[],currentLayerId=null,currentFrame=0;
-let tool="brush",color="#111111",brushSize=4,penOpacity=1,penCap="round",penJoin="round",penComposite="source-over",penDash=[],currentPen="Basic Round";
+let tool="brush",color="#111111",brushSize=4,penOpacity=1,penCap="round",penJoin="round",penComposite="source-over",penDash=[],penStyle="solid",currentPen="Basic Round";
 let fillEnabled=false,fillColor="#ffffff",bucketGapClose=0;
 let strokeSmoothing=.35,strokeStabilizer=.18,strokeSpacing=2,ultraCrisp=true,widgetContentBaseScale=.95;
 let symmetryEnabled=false,symmetryHorizontal=false,symmetryVertical=false,symmetryRadial=1;
 const COLOR_STORE_KEY="bba_color_studio_v2";
-let selected=new Set(),history=[],future=[];
+let selected=new Set(),history=[],future=[],scenes=[],activeSceneId=null;
+let selectedTimelineFrames=new Set(),timelineAnchorFrame=0;
 let pointerAction=null,playing=false,playTimer=null,panToolActive=false;
 let zoom=100,viewRotation=0,canvasFitScale=1,panX=0,panY=0,onion=true,grid=false,onionOpacity=.25,onionPreviousCount=1,onionNextCount=0,loopPlayback=true;
 let projectId=null,projectName="Untitled",projectAudio=null;
 let camera={x:W/2,y:H/2,zoom:1,rotation:0},cameraKeys={},symbols=[];
 let projectBackground="#FFFFFF",projectTransparent=false,projectNotes="";
 let autoSaveEnabled=true,autoSaveMinutes=2,autoSaveTimer=null;
-let snapEnabled=false,snapSize=20,centerGuideEnabled=true,safeGuideEnabled=false,safeGuideMargin=40,pixelGuideEnabled=false;
+let snapEnabled=false,snapSize=20,centerGuideEnabled=true,safeGuideEnabled=false,safeGuideMargin=40,pixelGuideEnabled=false,perspectiveGuideEnabled=false,perspectiveGuideMode="one-point",perspectiveVanishingPoints=[{x:W/2,y:H/2},{x:W*.8,y:H/2}];
 const IMAGE_CACHE=new Map();
-const PROJECTS="bba_projects_v3",SETTINGS="bba_settings_v3",RECOVERY_PREFIX="bba_recovery_v1_",HISTORY_LIMIT=60;
+const PROJECTS="bba_projects_v3",SETTINGS="bba_settings_v3",RECOVERY_PREFIX="bba_recovery_v1_",HISTORY_LIMIT=200;
 function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function deep(v){return JSON.parse(JSON.stringify(v))}
 function activeFrame(){return frames[currentFrame]}
 function activeLayer(){return layers.find(l=>l.id===currentLayerId)}
-function makeLayer(name){return{id:nextLayerId++,name,visible:true,opacity:1}}
+function lockedLayerForObject(object){const frame=activeFrame();return frame?layers.find(layer=>layer.locked&&(frame.layers[layer.id]||[]).some(item=>item.id===object.id))||null:null}
+function canEditObjects(objects=selectedObjects(),includeActiveLayer=false){
+  const locked=objects.map(lockedLayerForObject).find(Boolean)||(includeActiveLayer&&activeLayer()?.locked?activeLayer():null);
+  if(!locked)return true;
+  const status=document.getElementById("rigStatus");if(status)status.textContent=`"${locked.name}" is locked. Unlock it in the Layers panel before editing.`;
+  return false;
+}
+function makeLayer(name){return{id:nextLayerId++,name,folderName:"",timingScale:1,visible:true,opacity:1,locked:false,guide:false,clipToBelow:false,effect:"none",effectAmount:5}}
 function makeFrame(){return{id:nextFrameId++,layers:{}}}
-function initProject(){nextObjectId=1;nextLayerId=1;nextFrameId=1;layers=[makeLayer("Layer 1")];frames=[makeFrame()];currentLayerId=layers[0].id;currentFrame=0;camera={x:W/2,y:H/2,zoom:1,rotation:0};cameraKeys={};symbols=[];projectAudio=null;ensureFrameLayers();selected.clear();history=[];future=[]}
+function initProject(){nextObjectId=1;nextLayerId=1;nextFrameId=1;layers=[makeLayer("Layer 1")];frames=[makeFrame()];currentLayerId=layers[0].id;currentFrame=0;camera={x:W/2,y:H/2,zoom:1,rotation:0};cameraKeys={};symbols=[];scenes=[];activeSceneId=null;projectAudio=null;ensureFrameLayers();selected.clear();selectedTimelineFrames.clear();history=[];future=[]}
 function ensureFrameLayers(){for(const l of layers)if(l.opacity==null)l.opacity=1;for(const f of frames){for(const l of layers)if(!f.layers[l.id])f.layers[l.id]=[];for(const id of Object.keys(f.layers))if(!layers.some(l=>String(l.id)===String(id)))delete f.layers[id]}}
 function currentObjects(){
   const f=activeFrame(),l=activeLayer();
@@ -772,8 +838,8 @@ function currentObjects(){
   return f.layers[l.id];
 }
 function allVisibleObjects(){const f=activeFrame(),out=[];for(const l of layers)if(l.visible)out.push(...(f.layers[l.id]||[]));return out}
-function snapshot(){return{layers:deep(layers),frames:deep(frames),camera:deep(camera),cameraKeys:deep(cameraKeys),symbols:deep(symbols),projectAudio:deep(projectAudio),currentLayerId,currentFrame,nextObjectId,nextLayerId,nextFrameId}}
-function restore(s){layers=deep(s.layers);frames=deep(s.frames);camera=deep(s.camera||{x:W/2,y:H/2,zoom:1,rotation:0});cameraKeys=deep(s.cameraKeys||{});symbols=deep(s.symbols||[]);projectAudio=deep(s.projectAudio||null);currentLayerId=s.currentLayerId;currentFrame=s.currentFrame;nextObjectId=s.nextObjectId;nextLayerId=s.nextLayerId;nextFrameId=s.nextFrameId;selected.clear();ensureFrameLayers();renderAll()}
+function snapshot(){return{layers:deep(layers),frames:deep(frames),camera:deep(camera),cameraKeys:deep(cameraKeys),symbols:deep(symbols),scenes:deep(scenes),activeSceneId,projectAudio:deep(projectAudio),currentLayerId,currentFrame,nextObjectId,nextLayerId,nextFrameId,canvasWidth:W,canvasHeight:H}}
+function restore(s){if(s.canvasWidth&&s.canvasHeight)setProjectCanvasSize(s.canvasWidth,s.canvasHeight);layers=deep(s.layers);frames=deep(s.frames);camera=deep(s.camera||{x:W/2,y:H/2,zoom:1,rotation:0});cameraKeys=deep(s.cameraKeys||{});symbols=deep(s.symbols||[]);scenes=deep(s.scenes||[]);activeSceneId=s.activeSceneId||null;projectAudio=deep(s.projectAudio||null);currentLayerId=s.currentLayerId;currentFrame=s.currentFrame;nextObjectId=s.nextObjectId;nextLayerId=s.nextLayerId;nextFrameId=s.nextFrameId;selected.clear();ensureFrameLayers();renderAll()}
 function pushHistory(){history.push(snapshot());if(history.length>HISTORY_LIMIT)history.shift();future=[]}
 function undo(){if(!history.length)return;future.push(snapshot());restore(history.pop())}
 function redo(){if(!future.length)return;history.push(snapshot());restore(future.pop())}
@@ -805,14 +871,16 @@ function transformStrokePoints(points,mask,angle){
   const rad=angle*Math.PI/180,c=Math.cos(rad),s=Math.sin(rad),cx=W/2,cy=H/2;
   return points.map(p=>{let x=p.x,y=p.y;if(mask&1)x=W-x;if(mask&2)y=H-y;x-=cx;y-=cy;return{x:x*c-y*s+cx,y:x*s+y*c+cy}});
 }
-function makeStrokeObject(points,strokeType){
+function makeStrokeObject(points,strokeType,allocateId=true){
   let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
   for(const p of points){if(!Number.isFinite(p.x)||!Number.isFinite(p.y))continue;minX=Math.min(minX,p.x);minY=Math.min(minY,p.y);maxX=Math.max(maxX,p.x);maxY=Math.max(maxY,p.y)}
   if(!Number.isFinite(minX))return null;
   const cx=(minX+maxX)/2,cy=(minY+maxY)/2;
-  return{id:nextObjectId++,type:strokeType,points:points.map(p=>({x:p.x-cx,y:p.y-cy})),x:cx,y:cy,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),fill:fillEnabled&&(strokeType==="rectangle"||strokeType==="ellipse"),fillColor};
+  const isFilledShape=fillEnabled&&["rectangle","ellipse","polygon","star"].includes(strokeType);
+  return{id:allocateId?nextObjectId++:0,type:strokeType,points:points.map(p=>({x:p.x-cx,y:p.y-cy})),x:cx,y:cy,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,fill:isFilledShape,fillColor,fillGradient:isFilledShape&&!!document.getElementById("shapeGradient")?.checked,gradientColor:document.getElementById("gradientColor")?.value||"#4a5cff",cornerRadius:Math.max(0,Math.min(200,Number(document.getElementById("shapeCornerRadius")?.value)||0))};
 }
 function addStroke(points,strokeType="stroke"){
+  if(!canEditObjects([],true))return;
   if(!Array.isArray(points)||points.length<2)return;
   const cleaned=strokeType==="stroke"?stabilizeStrokePoints(points):points.map(p=>({x:p.x,y:p.y}));
   const variants=[];
@@ -830,6 +898,27 @@ function addStroke(points,strokeType="stroke"){
   renderAll();
 }
 
+function drawRasterSpray(c,obj,widths=null){
+  const points=obj.points;if(!points.length)return;
+  let seed=(Math.abs(Number(obj.id)||1)*2654435761)>>>0;
+  const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+  const opacity=obj.opacity==null?1:obj.opacity;
+  c.fillStyle=obj.color||"#111111";
+  const segments=points.length>1?points.length-1:1;
+  for(let segment=0;segment<segments;segment++){
+    const a=points[segment]||points[0],b=points[Math.min(points.length-1,segment+1)]||a;
+    const length=Math.hypot(b.x-a.x,b.y-a.y),steps=Math.max(1,Math.ceil(length/Math.max(2,(obj.width||1)*.18)));
+    for(let step=0;step<=steps;step++){
+      const t=step/steps,x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t,width=widths?.[Math.min(segment,Math.max(0,widths.length-1))]||obj.width||8,count=Math.max(4,Math.min(36,Math.round(width*.8)));
+      for(let dab=0;dab<count;dab++){
+        const angle=random()*Math.PI*2,radius=Math.sqrt(random())*width*.55,size=.6+random()*1.6;
+        c.globalAlpha=opacity*(.18+random()*.48);
+        c.fillRect(Math.round(x+Math.cos(angle)*radius),Math.round(y+Math.sin(angle)*radius),size,size);
+      }
+    }
+  }
+}
+
 function drawObject(c,obj){
   if(!obj||!obj.points||!obj.points.length)return;
   c.save();
@@ -840,13 +929,21 @@ function drawObject(c,obj){
     c.restore();return;
   }
   c.globalAlpha=obj.opacity==null?1:obj.opacity;c.globalCompositeOperation=obj.composite||"source-over";
+  if(obj.brushStyle==="spray"){drawRasterSpray(c,obj);c.restore();return}
   c.strokeStyle=obj.color||"#111111";c.lineWidth=obj.width||1;c.lineCap=obj.lineCap||"round";c.lineJoin=obj.lineJoin||"round";c.miterLimit=8;c.setLineDash(Array.isArray(obj.dash)?obj.dash:[]);
   c.beginPath();
   let shouldFill=false;
   if(obj.type==="rectangle"||obj.type==="ellipse"){
     const a=obj.points[0],b=obj.points[obj.points.length-1],x=Math.min(a.x,b.x),y=Math.min(a.y,b.y),w=Math.abs(b.x-a.x),h=Math.abs(b.y-a.y);
-    if(obj.type==="rectangle")c.rect(x,y,w,h);else c.ellipse(x+w/2,y+h/2,w/2,h/2,0,0,Math.PI*2);
+    if(obj.type==="rectangle"){
+      const radius=Math.max(0,Math.min(Number(obj.cornerRadius)||0,w/2,h/2));
+      if(radius&&typeof c.roundRect==="function")c.roundRect(x,y,w,h,radius);else c.rect(x,y,w,h);
+    }else c.ellipse(x+w/2,y+h/2,w/2,h/2,0,0,Math.PI*2);
     shouldFill=!!obj.fill;
+  }else if(obj.type==="polygon"||obj.type==="star"){
+    c.moveTo(obj.points[0].x,obj.points[0].y);
+    for(let i=1;i<obj.points.length;i++)c.lineTo(obj.points[i].x,obj.points[i].y);
+    c.closePath();shouldFill=!!obj.fill;
   }else if(obj.type==="line"){
     c.moveTo(obj.points[0].x,obj.points[0].y);c.lineTo(obj.points[obj.points.length-1].x,obj.points[obj.points.length-1].y);
   }else{
@@ -855,8 +952,15 @@ function drawObject(c,obj){
     else if(obj.points.length===2)c.lineTo(obj.points[1].x,obj.points[1].y);
     else for(let i=1;i<obj.points.length;i++){const a=obj.points[i-1],b=obj.points[i],mx=(a.x+b.x)/2,my=(a.y+b.y)/2;c.quadraticCurveTo(a.x,a.y,mx,my);if(i===obj.points.length-1)c.lineTo(b.x,b.y)}
   }
-  if(shouldFill){c.save();c.fillStyle=obj.fillColor||obj.color||"#fff";c.fill();c.restore()}
-  c.stroke();c.restore();
+  if(shouldFill){c.save();const bounds=objectLocalBounds(obj),gradient=!!obj.fillGradient&&bounds?c.createLinearGradient(bounds.minX,bounds.minY,bounds.maxX,bounds.maxY):null;if(gradient){gradient.addColorStop(0,obj.fillColor||obj.color||"#fff");gradient.addColorStop(1,obj.gradientColor||"#4a5cff");c.fillStyle=gradient}else c.fillStyle=obj.fillColor||obj.color||"#fff";c.fill();c.restore()}
+  if(obj.brushStyle==="soft"){
+    c.save();c.globalAlpha*=.42;c.shadowColor=obj.color||"#111111";c.shadowBlur=Math.max(2,(obj.width||1)*.8);c.stroke();c.restore();
+    c.save();c.globalAlpha*=.58;c.stroke();c.restore();
+  }else if(obj.brushStyle==="chalk"){
+    c.save();c.globalAlpha*=.85;c.lineCap="round";c.setLineDash([Math.max(.7,(obj.width||1)*.12),Math.max(2,(obj.width||1)*.5)]);c.stroke();c.restore();
+  }else if(obj.brushStyle==="watercolor"){
+    c.save();c.globalAlpha*=.52;c.globalCompositeOperation="multiply";c.stroke();c.restore();
+  }else c.stroke();c.restore();
 }
 
 function objectLocalBounds(o){let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;for(const p of o.points){minX=Math.min(minX,p.x);minY=Math.min(minY,p.y);maxX=Math.max(maxX,p.x);maxY=Math.max(maxY,p.y)}if(!isFinite(minX))return null;return{minX,minY,maxX,maxY,width:maxX-minX,height:maxY-minY}}
@@ -866,9 +970,41 @@ function objectLocalToWorld(o,point){const p=objectPivot(o),sx=o.scaleX||1,sy=o.
 function objectWorldCorners(o){const b=objectLocalBounds(o);if(!b)return[];return[[b.minX,b.minY],[b.maxX,b.minY],[b.maxX,b.maxY],[b.minX,b.maxY]].map(p=>objectLocalToWorld(o,{x:p[0],y:p[1]}))}
 function objectWorldBounds(o){const pts=objectWorldCorners(o);if(!pts.length)return null;return{minX:Math.min(...pts.map(p=>p.x)),minY:Math.min(...pts.map(p=>p.y)),maxX:Math.max(...pts.map(p=>p.x)),maxY:Math.max(...pts.map(p=>p.y))}}
 function selectionBounds(){const objs=allVisibleObjects().filter(o=>selected.has(o.id));if(!objs.length)return null;const pts=objs.flatMap(objectWorldCorners),minX=Math.min(...pts.map(p=>p.x)),minY=Math.min(...pts.map(p=>p.y)),maxX=Math.max(...pts.map(p=>p.x)),maxY=Math.max(...pts.map(p=>p.y));return{minX,minY,maxX,maxY,width:maxX-minX,height:maxY-minY}}
-function easeKeyframeProgress(t,easing="linear"){if(easing==="ease-in")return t*t;if(easing==="ease-out")return 1-(1-t)*(1-t);if(easing==="ease-in-out")return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;return t}
+function easeKeyframeProgress(t,easing="linear",curve){
+  if(easing==="ease-in")return t*t;
+  if(easing==="ease-out")return 1-(1-t)*(1-t);
+  if(easing==="ease-in-out")return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  if(easing==="custom"&&curve){
+    const{x1=.25,y1=.1,x2=.25,y2=1}=curve;
+    let low=0,high=1,u=t;
+    for(let i=0;i<14;i++){u=(low+high)/2;const inverse=1-u,x=3*inverse*inverse*u*x1+3*inverse*u*u*x2+u*u*u;if(x<t)low=u;else high=u}
+    const inverse=1-u;return 3*inverse*inverse*u*y1+3*inverse*u*u*y2+u*u*u;
+  }
+  return t;
+}
+function resampleShapePath(points,count){
+  if(!points.length)return[];
+  if(points.length===1)return Array.from({length:count},()=>({...points[0]}));
+  const lengths=[0];for(let i=1;i<points.length;i++)lengths.push(lengths[i-1]+Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y));
+  const total=lengths[lengths.length-1];if(total<.001)return Array.from({length:count},()=>({...points[0]}));
+  return Array.from({length:count},(_,index)=>{
+    const target=total*index/Math.max(1,count-1);let segment=0;
+    while(segment<lengths.length-2&&lengths[segment+1]<target)segment++;
+    const span=lengths[segment+1]-lengths[segment],t=span?(target-lengths[segment])/span:0,a=points[segment],b=points[segment+1];
+    return{x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t};
+  });
+}
 function objectsForRender(frameIndex,layer){
-  const frame=frames[frameIndex];if(!frame)return[];
+  let sampleIndex=frameIndex;
+  const timingScale=Math.max(.25,Math.min(4,Number(layer.timingScale)||1));
+  if(timingScale!==1&&frames.length>1){
+    const durations=frames.map(frame=>Math.max(1,Number(frame.duration)||1)),total=durations.reduce((sum,duration)=>sum+duration,0);
+    let elapsed=durations.slice(0,frameIndex).reduce((sum,duration)=>sum+duration,0)+Math.max(1,Number(frames[frameIndex]?.duration)||1)/2;
+    let target=(elapsed*timingScale)%total;
+    sampleIndex=durations.findIndex(duration=>{if(target<duration)return true;target-=duration;return false});
+    if(sampleIndex<0)sampleIndex=frames.length-1;
+  }
+  const frame=frames[sampleIndex];if(!frame)return[];
   const output=(frame.layers[layer.id]||[]).slice(),ids=new Set(frames.flatMap(item=>Array.isArray(item.keyframes)?item.keyframes:[]));
   for(const id of ids){
     const keys=[];
@@ -878,11 +1014,16 @@ function objectsForRender(frameIndex,layer){
       if(object)keys.push({index,object,frame:frames[index]});
     }
     for(let i=0;i<keys.length-1;i++){
-      const a=keys[i],b=keys[i+1];if(frameIndex<=a.index||frameIndex>=b.index)continue;
-      const t=easeKeyframeProgress((frameIndex-a.index)/(b.index-a.index),a.frame.easing||"linear"),source=output.find(item=>item.id===id)||a.object,animated=deep(source);
+      const a=keys[i],b=keys[i+1];if(sampleIndex<=a.index||sampleIndex>=b.index)continue;
+      const t=easeKeyframeProgress((sampleIndex-a.index)/(b.index-a.index),a.frame.easing||"linear",a.frame.easingCurve),source=output.find(item=>item.id===id)||a.object,animated=deep(source);
       const mix=(left,right)=>Number(left||0)+(Number(right||0)-Number(left||0))*t;
-      for(const key of ["x","y","scaleX","scaleY","opacity"]){const defaultValue=key.startsWith("scale")?1:key==="opacity"?1:0;animated[key]=mix(a.object[key]??defaultValue,b.object[key]??defaultValue)}
+      for(const key of ["x","y","scaleX","scaleY","opacity","pivotX","pivotY"]){const defaultValue=key.startsWith("scale")?1:key==="opacity"?1:0;animated[key]=mix(a.object[key]??defaultValue,b.object[key]??defaultValue)}
       const rotationA=Number(a.object.rotation)||0,rotationDelta=((Number(b.object.rotation)||0)-rotationA+540)%360-180;animated.rotation=rotationA+rotationDelta*t;
+      const tweenableShapes=new Set(["stroke","line","rectangle","ellipse"]);
+      if(a.object.type===b.object.type&&tweenableShapes.has(a.object.type)&&Array.isArray(a.object.points)&&Array.isArray(b.object.points)&&a.object.points.length&&b.object.points.length){
+        const count=Math.max(a.object.points.length,b.object.points.length),from=resampleShapePath(a.object.points,count),to=resampleShapePath(b.object.points,count);
+        animated.points=from.map((point,index)=>({x:point.x+(to[index].x-point.x)*t,y:point.y+(to[index].y-point.y)*t}));
+      }
       const found=output.findIndex(item=>item.id===id);if(found>=0)output.splice(found,1,animated);else output.push(animated);
       break;
     }
@@ -891,8 +1032,36 @@ function objectsForRender(frameIndex,layer){
 }
 let keyframeEasing="linear";
 document.getElementById("keyframeEasing")?.addEventListener("change",event=>{keyframeEasing=event.target.value;const frame=activeFrame();if(frame){pushHistory();frame.easing=keyframeEasing}renderAll()});
+document.getElementById("editEasingCurveBtn")?.addEventListener("click",()=>{
+  const frame=activeFrame();if(!frame)return;
+  const current=frame.easingCurve||{x1:.25,y1:.1,x2:.25,y2:1},fields=[["x1","Control 1 — time"],["y1","Control 1 — influence"],["x2","Control 2 — time"],["y2","Control 2 — influence"]];
+  const controls=fields.map(([key,label])=>`<label class="propertyLine"><span>${label}</span><input type="range" min="0" max="100" value="${Math.round(current[key]*100)}" data-curve="${key}"><span data-curve-value="${key}">${Math.round(current[key]*100)}%</span></label>`).join("");
+  const modal=openModal("Custom Easing Curve",`<canvas id="easingCurvePreview" width="240" height="140" style="display:block;width:100%;height:140px;margin-bottom:10px;border:1px solid var(--border);border-radius:6px"></canvas>${controls}<div class="hint">This curve controls the outgoing interpolation from the current frame to the next key pose.</div>`,"Apply",(element,close)=>{
+    const curve={};for(const key of ["x1","y1","x2","y2"])curve[key]=Number(element.querySelector(`[data-curve="${key}"]`).value)/100;
+    pushHistory();frame.easing="custom";frame.easingCurve=curve;keyframeEasing="custom";renderAll();close();
+  });
+  const preview=modal.querySelector("#easingCurvePreview"),draw=()=>{
+    const context=preview.getContext("2d"),width=preview.width,height=preview.height,padding=18,point=key=>Number(modal.querySelector(`[data-curve="${key}"]`).value)/100;
+    context.clearRect(0,0,width,height);context.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue("--border");context.lineWidth=1;context.beginPath();context.moveTo(padding,height-padding);context.lineTo(width-padding,padding);context.stroke();
+    const x1=padding+(width-2*padding)*point("x1"),y1=height-padding-(height-2*padding)*point("y1"),x2=padding+(width-2*padding)*point("x2"),y2=height-padding-(height-2*padding)*point("y2");
+    context.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()||"#4a5cff";context.lineWidth=3;context.beginPath();context.moveTo(padding,height-padding);context.bezierCurveTo(x1,y1,x2,y2,width-padding,padding);context.stroke();
+    context.setLineDash([4,4]);context.lineWidth=1;context.beginPath();context.moveTo(padding,height-padding);context.lineTo(x1,y1);context.moveTo(width-padding,padding);context.lineTo(x2,y2);context.stroke();context.setLineDash([]);
+  };
+  modal.querySelectorAll("[data-curve]").forEach(input=>input.addEventListener("input",()=>{modal.querySelector(`[data-curve-value="${input.dataset.curve}"]`).textContent=input.value+"%";draw()}));
+  draw();
+});
 function render(){ctx.clearRect(0,0,W,H);const f=activeFrame();if(f)for(const l of layers)if(l.visible)for(const o of objectsForRender(currentFrame,l))drawObject(ctx,o);renderSelection();renderOnion()}
-function renderSelection(){selCtx.clearRect(0,0,W,H);if(tool!=="transform"||!selected.size)return;const b=selectionBounds();if(!b)return;selCtx.save();selCtx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()||"#4a5cff";selCtx.fillStyle="#fff";selCtx.lineWidth=1.5;selCtx.setLineDash([5,4]);selCtx.strokeRect(b.minX,b.minY,b.width,b.height);selCtx.setLineDash([]);for(const h of["nw","n","ne","e","se","s","sw","w"]){const p=handlePoint(b,h);selCtx.fillRect(p.x-4,p.y-4,8,8);selCtx.strokeRect(p.x-4,p.y-4,8,8)}const top={x:(b.minX+b.maxX)/2,y:b.minY};selCtx.beginPath();selCtx.moveTo(top.x,top.y);selCtx.lineTo(top.x,top.y-30);selCtx.stroke();selCtx.beginPath();selCtx.arc(top.x,top.y-35,5,0,Math.PI*2);selCtx.fill();selCtx.stroke();if(selected.size===1){const o=selectedObjects()[0],p=objectPivot(o),pivot={x:o.x+p.x,y:o.y+p.y};selCtx.setLineDash([]);selCtx.beginPath();selCtx.arc(pivot.x,pivot.y,4,0,Math.PI*2);selCtx.fillStyle="#ffb020";selCtx.fill();selCtx.stroke()}selCtx.restore()}
+function renderSelection(){
+  selCtx.clearRect(0,0,W,H);
+  if(pointerAction?.kind==="lasso"){selCtx.save();selCtx.strokeStyle="#4a5cff";selCtx.lineWidth=1.5;selCtx.setLineDash([5,4]);selCtx.beginPath();selCtx.moveTo(pointerAction.points[0].x,pointerAction.points[0].y);for(const point of pointerAction.points.slice(1))selCtx.lineTo(point.x,point.y);selCtx.stroke();selCtx.restore()}
+  if(tool!=="transform"||!selected.size)return;
+  const b=selectionBounds();if(!b)return;
+  selCtx.save();selCtx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()||"#4a5cff";selCtx.fillStyle="#fff";selCtx.lineWidth=1.5;selCtx.setLineDash([5,4]);selCtx.strokeRect(b.minX,b.minY,b.width,b.height);selCtx.setLineDash([]);
+  for(const h of["nw","n","ne","e","se","s","sw","w"]){const p=handlePoint(b,h);selCtx.fillRect(p.x-4,p.y-4,8,8);selCtx.strokeRect(p.x-4,p.y-4,8,8)}
+  const top={x:(b.minX+b.maxX)/2,y:b.minY};selCtx.beginPath();selCtx.moveTo(top.x,top.y);selCtx.lineTo(top.x,top.y-30);selCtx.stroke();selCtx.beginPath();selCtx.arc(top.x,top.y-35,5,0,Math.PI*2);selCtx.fill();selCtx.stroke();
+  if(selected.size===1){const o=selectedObjects()[0],p=objectPivot(o),pivot={x:o.x+p.x,y:o.y+p.y};selCtx.setLineDash([]);selCtx.beginPath();selCtx.arc(pivot.x,pivot.y,4,0,Math.PI*2);selCtx.fillStyle="#ffb020";selCtx.fill();selCtx.stroke()}
+  selCtx.restore();
+}
 function handlePoint(b,h){const cx=(b.minX+b.maxX)/2,cy=(b.minY+b.maxY)/2;return{nw:{x:b.minX,y:b.minY},n:{x:cx,y:b.minY},ne:{x:b.maxX,y:b.minY},e:{x:b.maxX,y:cy},se:{x:b.maxX,y:b.maxY},s:{x:cx,y:b.maxY},sw:{x:b.minX,y:b.maxY},w:{x:b.minX,y:cy}}[h]}
 function pointInObject(x,y,o){const p=objectPivot(o),r=-(o.rotation||0)*Math.PI/180,c=Math.cos(r),s=Math.sin(r),dx=x-(o.x||0)-p.x,dy=y-(o.y||0)-p.y,lx=(dx*c-dy*s)/(o.scaleX||1)+p.x,ly=(dx*s+dy*c)/(o.scaleY||1)+p.y,b=objectLocalBounds(o);if(!b)return false;const pad=Math.max(5,(o.width||1)/2);return lx>=b.minX-pad&&lx<=b.maxX+pad&&ly>=b.minY-pad&&ly<=b.maxY+pad}
 function topObjectAt(x,y){const f=activeFrame();for(let li=layers.length-1;li>=0;li--){const l=layers[li];if(!l.visible)continue;const arr=f.layers[l.id]||[];for(let i=arr.length-1;i>=0;i--)if(pointInObject(x,y,arr[i]))return arr[i]}return null}
@@ -941,11 +1110,36 @@ function getCanvasPoint(e){
 }
 function previewObjectFromAction(){
   const a=pointerAction;if(!a)return null;
-  if(a.kind==="line")return{points:[a.points[0],a.points[a.points.length-1]],x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),type:"line"};
-  if(a.kind==="rectangle")return{points:[a.start,a.current],x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),type:"rectangle"};
-  if(a.kind==="ellipse")return{points:[a.start,a.current],x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),type:"ellipse"};
-  if(a.kind==="draw")return{points:a.points,x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),type:"stroke"};
+  if(a.kind==="line")return{points:[a.points[0],a.points[a.points.length-1]],x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,type:"line"};
+  if(a.kind==="rectangle")return{points:[a.start,a.current],x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,type:"rectangle"};
+  if(a.kind==="ellipse")return{points:[a.start,a.current],x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,type:"ellipse"};
+  if(a.kind==="polygon"||a.kind==="star"){return makeStrokeObject(shapeVertices(a.kind,a.start,a.current),a.kind,false)}
+  if(a.kind==="draw")return{points:a.points,x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,type:"stroke"};
   return null;
+}
+function shapeVertices(kind,start,end){
+  const cx=(start.x+end.x)/2,cy=(start.y+end.y)/2,rx=Math.abs(end.x-start.x)/2,ry=Math.abs(end.y-start.y)/2,count=kind==="star"?10:6;
+  return Array.from({length:count},(_,index)=>{
+    const angle=-Math.PI/2+index*Math.PI*2/count,radius=kind==="star"&&index%2?.42:1;
+    return{x:cx+Math.cos(angle)*rx*radius,y:cy+Math.sin(angle)*ry*radius};
+  });
+}
+function pointInPolygon(point,polygon){
+  let inside=false;
+  for(let i=0,j=polygon.length-1;i<polygon.length;j=i++){
+    const a=polygon[i],b=polygon[j];
+    if(((a.y>point.y)!==(b.y>point.y))&&point.x<(b.x-a.x)*(point.y-a.y)/(b.y-a.y)+a.x)inside=!inside;
+  }
+  return inside;
+}
+function finishLasso(points){
+  if(points.length<3){selected.clear();renderAll();return}
+  selected.clear();
+  for(const object of allVisibleObjects()){
+    const corners=objectWorldCorners(object),center={x:(Math.min(...corners.map(point=>point.x))+Math.max(...corners.map(point=>point.x)))/2,y:(Math.min(...corners.map(point=>point.y))+Math.max(...corners.map(point=>point.y)))/2};
+    if(pointInPolygon(center,points)||corners.some(point=>pointInPolygon(point,points))||points.some(point=>pointInObject(point.x,point.y,object)))selected.add(object.id);
+  }
+  renderAll();
 }
 function renderPreview(){render();const preview=previewObjectFromAction();if(preview)drawObject(ctx,preview)}
 canvas.addEventListener("pointerdown",e=>{
@@ -959,6 +1153,7 @@ canvas.addEventListener("pointerdown",e=>{
   if(e.button!==0)return;
   e.preventDefault();
   const p=getCanvasPoint(e);
+  if(tool==="lasso"){pointerAction={kind:"lasso",pointerId:e.pointerId,points:[p],current:p};try{canvas.setPointerCapture(e.pointerId)}catch{}renderSelection();return}
   if(tool==="node"){
     const hit=topObjectAt(p.x,p.y);if(!hit){selected.clear();renderAll();return}
     if(!selected.has(hit.id)){selected.clear();selected.add(hit.id)}
@@ -986,7 +1181,7 @@ canvas.addEventListener("pointerdown",e=>{
   if(tool==="eyedropper"){sampleCanvasColor(p.x,p.y);return;}
   if(tool!=="transform"){
     pushHistory();
-    if(tool==="line"||tool==="rectangle"||tool==="ellipse")pointerAction={kind:tool,pointerId:e.pointerId,start:p,current:p,points:[p,p]};
+    if(["line","rectangle","ellipse","polygon","star"].includes(tool))pointerAction={kind:tool,pointerId:e.pointerId,start:p,current:p,points:[p,p]};
     else pointerAction={kind:"draw",pointerId:e.pointerId,start:p,current:p,points:[p]};
     try{canvas.setPointerCapture(e.pointerId)}catch{}
     renderPreview();return;
@@ -1006,12 +1201,12 @@ canvas.addEventListener("pointerdown",e=>{
   if(hit){if(!e.shiftKey){selected.clear();if(hit.groupId){for(const obj of allVisibleObjects())if(obj.groupId===hit.groupId)selected.add(obj.id)}else selected.add(hit.id)}else if(hit.groupId){for(const obj of allVisibleObjects())if(obj.groupId===hit.groupId)selected.add(obj.id)}else selected.add(hit.id);beginTransform(e,"move")}
   else{selected.clear();pointerAction={kind:"box",pointerId:e.pointerId,start:p,current:p};try{canvas.setPointerCapture(e.pointerId)}catch{}renderSelectionBox()}
 });
-canvas.addEventListener("pointermove",e=>{if(!pointerAction||pointerAction.pointerId!==e.pointerId)return;if(pointerAction.kind==="pan"){panX=pointerAction.origin.x+e.clientX-pointerAction.start.x;panY=pointerAction.origin.y+e.clientY-pointerAction.start.y;setCanvasViewportTransform();return}const p=getCanvasPoint(e);if(pointerAction.kind==="node"){const object=allVisibleObjects().find(item=>item.id===pointerAction.objectId);if(object){const pivot=objectPivot(object),r=-(object.rotation||0)*Math.PI/180,c=Math.cos(r),s=Math.sin(r),dx=p.x-(object.x||0)-pivot.x,dy=p.y-(object.y||0)-pivot.y;object.points[pointerAction.pointIndex]={x:(dx*c-dy*s)/(object.scaleX||1)+pivot.x,y:(dx*s+dy*c)/(object.scaleY||1)+pivot.y};renderAll()}return}if(pointerAction.kind==="draw"){pointerAction.points.push(p);pointerAction.current=p;renderPreview()}else if(pointerAction.kind==="line"){pointerAction.points=[pointerAction.start,p];pointerAction.current=p;renderPreview()}else if(pointerAction.kind==="rectangle"||pointerAction.kind==="ellipse"){pointerAction.current=p;pointerAction.points=[pointerAction.start,p];renderPreview()}else if(pointerAction.kind==="box"){pointerAction.current=p;renderSelectionBox()}else if(pointerAction.kind==="move")updateMove(p);else if(pointerAction.kind==="rotate")updateRotate(p);else if(pointerAction.kind==="scale")updateScale(p,pointerAction.handle)});
+canvas.addEventListener("pointermove",e=>{if(!pointerAction||pointerAction.pointerId!==e.pointerId)return;if(pointerAction.kind==="pan"){panX=pointerAction.origin.x+e.clientX-pointerAction.start.x;panY=pointerAction.origin.y+e.clientY-pointerAction.start.y;setCanvasViewportTransform();return}const p=getCanvasPoint(e);if(pointerAction.kind==="node"){const object=allVisibleObjects().find(item=>item.id===pointerAction.objectId);if(object){const pivot=objectPivot(object),r=-(object.rotation||0)*Math.PI/180,c=Math.cos(r),s=Math.sin(r),dx=p.x-(object.x||0)-pivot.x,dy=p.y-(object.y||0)-pivot.y;object.points[pointerAction.pointIndex]={x:(dx*c-dy*s)/(object.scaleX||1)+pivot.x,y:(dx*s+dy*c)/(object.scaleY||1)+pivot.y};renderAll()}return}if(pointerAction.kind==="draw"){pointerAction.points.push(p);pointerAction.current=p;renderPreview()}else if(pointerAction.kind==="line"){pointerAction.points=[pointerAction.start,p];pointerAction.current=p;renderPreview()}else if(["rectangle","ellipse","polygon","star"].includes(pointerAction.kind)){pointerAction.current=p;pointerAction.points=[pointerAction.start,p];renderPreview()}else if(pointerAction.kind==="lasso"){pointerAction.points.push(p);pointerAction.current=p;renderSelection()}else if(pointerAction.kind==="box"){pointerAction.current=p;renderSelectionBox()}else if(pointerAction.kind==="move")updateMove(p);else if(pointerAction.kind==="rotate")updateRotate(p);else if(pointerAction.kind==="scale")updateScale(p,pointerAction.handle)});
 canvas.addEventListener("pointerup",finishPointer);canvas.addEventListener("pointercancel",finishPointer);canvas.addEventListener("lostpointercapture",finishPointer);
 function finishPointer(event){
   if(!pointerAction||pointerAction.pointerId!==event.pointerId)return;
   const action=pointerAction;
-  if(event.type==="pointerup"&&["draw","line","rectangle","ellipse"].includes(action.kind)){
+  if(event.type==="pointerup"&&["draw","line","rectangle","ellipse","polygon","star","lasso"].includes(action.kind)){
     const point=getCanvasPoint(event),last=action.points[action.points.length-1];
     if(!last||Math.hypot(point.x-last.x,point.y-last.y)>.01)action.points.push(point);
     action.current=point;
@@ -1021,6 +1216,8 @@ function finishPointer(event){
   else if(action.kind==="line")addStroke([action.start,action.current],"line");
   else if(action.kind==="rectangle")addStroke([action.start,action.current],"rectangle");
   else if(action.kind==="ellipse")addStroke([action.start,action.current],"ellipse");
+  else if(action.kind==="polygon"||action.kind==="star")addStroke(shapeVertices(action.kind,action.start,action.current),action.kind);
+  else if(action.kind==="lasso")finishLasso(action.points);
   else if(action.kind==="box")finishBox(action.start,action.current);
   else renderAll();
 }
@@ -1033,7 +1230,7 @@ function rigAffectedObjects(roots){
   while(changed){changed=false;for(const obj of objects)if(obj.rigParentId!=null&&found.has(obj.rigParentId)&&!found.has(obj.id)){found.set(obj.id,obj);changed=true}}
   return [...found.values()];
 }
-function beginTransform(e,kind,handle){const p=getCanvasPoint(e),roots=selectedObjects(),objs=kind==="move"||kind==="rotate"?rigAffectedObjects(roots):roots,b=selectionBounds();pushHistory();pointerAction={kind,pointerId:e.pointerId,transformKind:kind,handle,start:p,original:objs.map(o=>({id:o.id,x:o.x,y:o.y,rotation:o.rotation,scaleX:o.scaleX,scaleY:o.scaleY})),bounds:deep(b)};canvas.setPointerCapture(e.pointerId)}
+function beginTransform(e,kind,handle){const p=getCanvasPoint(e),roots=selectedObjects(),objs=kind==="move"||kind==="rotate"?rigAffectedObjects(roots):roots,b=selectionBounds();if(!canEditObjects(objs))return;pushHistory();pointerAction={kind,pointerId:e.pointerId,transformKind:kind,handle,start:p,original:objs.map(o=>({id:o.id,x:o.x,y:o.y,rotation:o.rotation,scaleX:o.scaleX,scaleY:o.scaleY})),bounds:deep(b)};canvas.setPointerCapture(e.pointerId)}
 function originalFor(id){return pointerAction.original.find(x=>x.id===id)}
 function updateMove(p){const dx=p.x-pointerAction.start.x,dy=p.y-pointerAction.start.y;for(const o of rigAffectedObjects(selectedObjects())){const q=originalFor(o.id);if(q){o.x=q.x+dx;o.y=q.y+dy}}renderAll()}
 function updateRotate(p){const b=pointerAction.bounds,cx=(b.minX+b.maxX)/2,cy=(b.minY+b.maxY)/2,a0=Math.atan2(pointerAction.start.y-cy,pointerAction.start.x-cx),a1=Math.atan2(p.y-cy,p.x-cx),delta=(a1-a0)*180/Math.PI,rad=delta*Math.PI/180;for(const o of rigAffectedObjects(selectedObjects())){const q=originalFor(o.id);if(!q)continue;const pivot=objectPivot(o),px=q.x+pivot.x,py=q.y+pivot.y,dx=px-cx,dy=py-cy;o.x=cx+dx*Math.cos(rad)-dy*Math.sin(rad)-pivot.x;o.y=cy+dx*Math.sin(rad)+dy*Math.cos(rad)-pivot.y;o.rotation=q.rotation+delta}renderAll()}
@@ -1055,7 +1252,7 @@ function drawOnionFrame(frame,alpha){
   if(onionLayerCanvas.width!==sw||onionLayerCanvas.height!==sh){onionLayerCanvas.width=sw;onionLayerCanvas.height=sh}
   onionLayerCtx.setTransform(1,0,0,1,0,0);onionLayerCtx.clearRect(0,0,sw,sh);
   onionLayerCtx.setTransform(sw/W,0,0,sh/H,0,0);
-  for(const l of layers)if(l.visible)for(const o of(frame.layers[l.id]||[]))drawObject(onionLayerCtx,o);
+  drawCompositedLayers(onionLayerCtx,frame,frames.indexOf(frame));
   onionCtx.save();onionCtx.globalAlpha=Math.max(0,Math.min(1,alpha));onionCtx.drawImage(onionLayerCanvas,0,0,W,H);onionCtx.restore();
 }
 function renderOnion(){
@@ -1071,20 +1268,69 @@ function renderOnion(){
     drawOnionFrame(frames[idx],(onionOpacity*.7)/Math.max(1,step));
   }
 }
-function renderLayers(){const el=document.getElementById("layerList");el.innerHTML="";[...layers].reverse().forEach(l=>{const row=document.createElement("div");row.className="layerRow"+(l.id===currentLayerId?" active":"");const cb=document.createElement("input");cb.type="checkbox";cb.checked=l.visible;cb.onclick=e=>{e.stopPropagation();l.visible=cb.checked;renderAll()};const span=document.createElement("span");span.textContent=l.name;row.append(cb,span);row.onclick=()=>{currentLayerId=l.id;selected.clear();renderAll()};el.appendChild(row)})}
-function thumbForFrame(frame){const c=document.createElement("canvas");c.width=160;c.height=120;const t=c.getContext("2d"),index=frames.indexOf(frame);t.fillStyle=projectBackground||"#fff";t.fillRect(0,0,160,120);t.scale(.25,.25);for(const l of layers)if(l.visible)for(const o of objectsForRender(index<0?currentFrame:index,l))drawObject(t,o);return c}
+let collapsedLayerFolders=new Set();
+function renderLayers(){
+  const el=document.getElementById("layerList");
+  el.innerHTML="";
+  const groups=new Map();
+  for(const layer of [...layers].reverse()){
+    const folder=String(layer.folderName||"").trim();
+    const key=folder||"";
+    if(!groups.has(key))groups.set(key,[]);
+    groups.get(key).push(layer);
+  }
+  for(const [folder,groupLayers] of groups){
+    const title=folder||"Unfiled";
+    const heading=document.createElement("div");
+    heading.className="layerFolderHeading";
+    const toggle=document.createElement("button");
+    toggle.type="button";toggle.className="small";toggle.textContent=collapsedLayerFolders.has(title)?"+":"−";
+    toggle.setAttribute("aria-label",(collapsedLayerFolders.has(title)?"Expand ":"Collapse ")+title);
+    const label=document.createElement("span");label.textContent=title;
+    toggle.onclick=()=>{if(collapsedLayerFolders.has(title))collapsedLayerFolders.delete(title);else collapsedLayerFolders.add(title);renderAll()};
+    heading.append(toggle,label);el.appendChild(heading);
+    if(collapsedLayerFolders.has(title))continue;
+    for(const layer of groupLayers){
+      const row=document.createElement("div");row.dataset.layerId=String(layer.id);
+      row.className="layerRow"+(layer.id===currentLayerId?" active":"")+(layer.locked?" locked":"");
+      const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.checked=layer.visible;checkbox.title="Toggle layer visibility";
+      checkbox.onclick=event=>{event.stopPropagation();layer.visible=checkbox.checked;renderAll()};
+      const name=document.createElement("span");name.textContent=layer.name;
+      const guide=document.createElement("button");guide.type="button";guide.className="small layerLockButton";guide.textContent=layer.guide?"Guide ✓":"Guide";
+      guide.title=layer.guide?"Disable guide-layer status":"Make this a non-exporting guide layer";guide.setAttribute("aria-pressed",String(!!layer.guide));
+      guide.onclick=event=>{event.stopPropagation();pushHistory();layer.guide=!layer.guide;renderAll()};
+      const lock=document.createElement("button");lock.type="button";lock.className="small layerLockButton";lock.textContent=layer.locked?"Unlock":"Lock";
+      lock.title=layer.locked?"Unlock this layer for editing":"Lock this layer against edits";lock.setAttribute("aria-pressed",String(!!layer.locked));
+      lock.onclick=event=>{event.stopPropagation();pushHistory();layer.locked=!layer.locked;renderAll()};
+      row.append(checkbox,name,guide,lock);row.onclick=()=>{currentLayerId=layer.id;selected.clear();renderAll()};el.appendChild(row);
+    }
+  }
+  const folderSelect=document.getElementById("layerFolderSelect"),current=activeLayer();
+  if(folderSelect){
+    const folders=[...new Set(layers.map(layer=>String(layer.folderName||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+    folderSelect.replaceChildren(new Option("Unfiled",""),...folders.map(folder=>new Option(folder,folder)));
+    folderSelect.value=String(current?.folderName||"").trim();
+  }
+}
+function thumbForFrame(frame){const c=document.createElement("canvas");c.width=160;c.height=120;const t=c.getContext("2d"),index=frames.indexOf(frame);t.fillStyle=projectBackground||"#fff";t.fillRect(0,0,160,120);t.scale(.25,.25);drawCompositedLayers(t,frame,index<0?currentFrame:index);return c}
 function renderFrames(){const el=document.getElementById("frames");el.innerHTML="";frames.forEach((f,i)=>{const b=document.createElement("button");b.className="frameBtn"+(i===currentFrame?" active":"");b.appendChild(thumbForFrame(f));const n=document.createElement("div");n.className="frameNumber";n.textContent="Frame "+(i+1);b.appendChild(n);b.onclick=()=>{if(!playing){currentFrame=i;selected.clear();renderAll()}};el.appendChild(b)})}
 const BRUSH_PRESETS=[
-  {name:"Basic Round",desc:"Balanced smooth brush",width:4,opacity:1,cap:"round",join:"round",composite:"source-over",dash:[]},
+  {name:"Basic Round",desc:"Balanced smooth brush",width:4,opacity:1,cap:"round",join:"round",composite:"source-over",dash:[],style:"solid"},
   {name:"Pencil",desc:"Thin crisp sketching",width:2,opacity:.9,cap:"round",join:"round",composite:"source-over",dash:[]},
   {name:"Ink",desc:"Clean dark inking line",width:3,opacity:1,cap:"round",join:"round",composite:"source-over",dash:[]},
   {name:"Marker",desc:"Broad opaque marker",width:11,opacity:.72,cap:"square",join:"round",composite:"source-over",dash:[]},
   {name:"Highlighter",desc:"Wide translucent highlight",width:18,opacity:.24,cap:"butt",join:"bevel",composite:"source-over",dash:[]},
-  {name:"Airbrush",desc:"Soft low-opacity stroke",width:28,opacity:.13,cap:"round",join:"round",composite:"source-over",dash:[]},
+  {name:"Airbrush",desc:"Soft-edged, feathered spray",width:28,opacity:.3,cap:"round",join:"round",composite:"source-over",dash:[],style:"soft"},
   {name:"Calligraphy",desc:"Angular nib effect",width:7,opacity:1,cap:"butt",join:"bevel",composite:"source-over",dash:[]},
   {name:"Sketch",desc:"Lighter construction line",width:2,opacity:.55,cap:"round",join:"round",composite:"source-over",dash:[]},
-  {name:"Dotted",desc:"Evenly spaced dots",width:5,opacity:1,cap:"round",join:"round",composite:"source-over",dash:[1,8]},
-  {name:"Eraser",desc:"Erases rendered strokes",width:16,opacity:1,cap:"round",join:"round",composite:"destination-out",dash:[]}
+  {name:"Dotted",desc:"Evenly spaced dots",width:5,opacity:1,cap:"round",join:"round",composite:"source-over",dash:[1,8],style:"solid"},
+  {name:"Soft Airbrush",desc:"Wide feathered shading",width:34,opacity:.4,cap:"round",join:"round",composite:"source-over",dash:[],style:"soft"},
+  {name:"Dry Charcoal",desc:"Broken textured sketch marks",width:8,opacity:.88,cap:"round",join:"round",composite:"source-over",dash:[],style:"chalk"},
+  {name:"Watercolor Wash",desc:"Transparent layered paint",width:20,opacity:.4,cap:"round",join:"round",composite:"multiply",dash:[],style:"watercolor"},
+  {name:"Raster Spray",desc:"Pixel-stamped bitmap-style texture",width:12,opacity:.8,cap:"round",join:"round",composite:"source-over",dash:[],style:"spray"},
+  {name:"Flat Marker",desc:"Broad square-ended color",width:14,opacity:.78,cap:"square",join:"bevel",composite:"source-over",dash:[],style:"solid"},
+  {name:"Technical Pen",desc:"Fine, consistent linework",width:1.5,opacity:1,cap:"round",join:"round",composite:"source-over",dash:[],style:"solid"},
+  {name:"Eraser",desc:"Erases rendered strokes",width:16,opacity:1,cap:"round",join:"round",composite:"destination-out",dash:[],style:"solid"}
 ];
 function renderBrushPresets(){
   const grid=document.getElementById("brushPresetGrid");if(!grid)return;
@@ -1098,7 +1344,7 @@ function renderBrushPresets(){
 }
 function applyBrushPreset(name){
   const preset=BRUSH_PRESETS.find(p=>p.name===name);if(!preset)return;
-  currentPen=preset.name;brushSize=preset.width;penOpacity=preset.opacity;penCap=preset.cap;penJoin=preset.join;penComposite=preset.composite;penDash=deep(preset.dash);
+  currentPen=preset.name;brushSize=preset.width;penOpacity=preset.opacity;penCap=preset.cap;penJoin=preset.join;penComposite=preset.composite;penDash=deep(preset.dash);penStyle=preset.style||"solid";
   setTool("brush");syncPenControls();
 }
 
@@ -1117,7 +1363,7 @@ function syncPenControls(){
 }
 function syncPenToSelection(){
   const objs=selectedObjects();
-  if(objs.length!==1) return;
+  if(objs.length!==1||!canEditObjects(objs)) return;
   pushHistory();
   objs[0].opacity=penOpacity;
   objs[0].width=brushSize;
@@ -1125,6 +1371,7 @@ function syncPenToSelection(){
   objs[0].lineJoin=penJoin;
   objs[0].composite=penComposite;
   objs[0].dash=deep(penDash);
+  objs[0].brushStyle=penStyle;
   renderAll();
 }
 function updateWidgetReadouts(){
@@ -1191,7 +1438,7 @@ function setTool(t){
   document.getElementById("lineTool").classList.toggle("primary",t==="line");
   document.getElementById("transformTool").classList.toggle("primary",t==="transform");
   document.getElementById("pointTool").classList.toggle("primary",t==="node");
-  if(t!=="rig"&&t!=="rig-pivot")selected.clear();renderAll();
+  if(t!=="rig"&&t!=="rig-pivot"&&t!=="rig-ik")selected.clear();renderAll();
 }
 for(const b of document.querySelectorAll(".toolChoice"))b.onclick=()=>setTool(b.dataset.tool);
 document.getElementById("brushTool").onclick=()=>setTool("brush");document.getElementById("lineTool").onclick=()=>setTool("line");document.getElementById("transformTool").onclick=()=>setTool("transform");
@@ -1226,17 +1473,29 @@ document.getElementById("rotateLeftBtn").onclick=()=>rotateViewBy(-15);
 document.getElementById("rotateRightBtn").onclick=()=>rotateViewBy(15);
 document.getElementById("resetViewBtn").onclick=resetView;
 document.getElementById("undoBtn").onclick=undo;document.getElementById("redoBtn").onclick=redo;
+const TOOL_SHORTCUT_DEFAULTS={brush:"b",line:"l",rectangle:"r",ellipse:"e",transform:"t",node:"n",eyedropper:"i"};
+let toolShortcuts={...TOOL_SHORTCUT_DEFAULTS};
+try{const saved=JSON.parse(localStorage.getItem("bba_tool_shortcuts_v1")||"null");if(saved&&typeof saved==="object")for(const tool of Object.keys(TOOL_SHORTCUT_DEFAULTS))if(typeof saved[tool]==="string"&&/^[a-z]$/.test(saved[tool]))toolShortcuts[tool]=saved[tool]}catch(error){console.warn("Could not load custom tool shortcuts.",error)}
 function showShortcutList(){
   const rows=[
-    ["B","Brush"],["L","Line"],["R","Rectangle"],["E","Ellipse"],["T","Transform Tool"],["N","Edit vector points"],["I","Eyedropper"],["H","Hold and drag to pan"],
+    ["H","Hold and drag to pan"],
     ["Ctrl + Z","Undo"],["Ctrl + Shift + Z","Redo"],["Ctrl + Y","Redo"],["Ctrl + S","Save project"],["Ctrl + + / -","Zoom canvas"],["Ctrl + Shift + + / -","Resize widget contents"],["Ctrl + 0","Reset canvas view"],["F12","Camera render preview"],["Ctrl + ?","Keyboard shortcuts"],
     ["Shift + Left / Right","Previous / next frame"],["Ctrl + Home / End","First / last frame"],
     ["Delete / Backspace","Delete selected objects"],["Escape","Deselect / cancel current operation"],["Space","Play / stop timeline"],
     ["G","Toggle grid"],["O","Toggle onion skin"],["F","Fit canvas to widget"],["Ctrl + D","Duplicate selection"],["Ctrl + C","Copy selection"],["Ctrl + X","Cut selection"],["Ctrl + V","Paste selection"],
     ["[ / ]","Decrease / increase brush size"],["Up / Down","Zoom in / out"],["Left / Right","Rotate view left / right"]
   ];
-  const body='<div style="display:grid;grid-template-columns:minmax(130px,1fr) minmax(170px,1.4fr);gap:6px 12px;font-size:12px;line-height:1.45;max-height:60vh;overflow:auto">'+rows.map(r=>'<div style="font-weight:700">'+r[0]+'</div><div style="color:var(--muted)">'+r[1]+'</div>').join('')+'</div>';
-  openModal("Keyboard Shortcuts",body,"Close",(m,close)=>close());
+  const labels={brush:"Brush",line:"Line",rectangle:"Rectangle",ellipse:"Ellipse",transform:"Transform",node:"Edit points",eyedropper:"Eyedropper"},options=['<option value="">None</option>',...Array.from("abcdefghijklmnopqrstuvwxyz",letter=>`<option value="${letter}">${letter.toUpperCase()}</option>`)].join("");
+  const bindings=Object.entries(labels).map(([tool,label])=>`<label class="propertyLine"><span>${label}</span><select data-tool-shortcut="${tool}">${options}</select></label>`).join("");
+  const shortcuts='<div style="display:grid;grid-template-columns:minmax(130px,1fr) minmax(170px,1.4fr);gap:6px 12px;font-size:12px;line-height:1.45;max-height:38vh;overflow:auto">'+rows.map(row=>'<div style="font-weight:700">'+row[0]+'</div><div style="color:var(--muted)">'+row[1]+'</div>').join('')+'</div>';
+  const modal=openModal("Keyboard Shortcuts",`<div class="widgetSectionTitle">Custom Tool Keys</div>${bindings}<button type="button" class="small" id="resetToolShortcuts">Restore Default Tool Keys</button><div class="projectSaveStatus" id="toolShortcutStatus">Choose distinct letter keys, or set a tool to None.</div><div class="widgetSectionTitle" style="margin-top:12px">Other Shortcuts</div>${shortcuts}`,"Save",(m,close)=>{
+    const next={};for(const [tool] of Object.entries(labels))next[tool]=m.querySelector(`[data-tool-shortcut="${tool}"]`).value;
+    const used=Object.values(next).filter(Boolean);
+    if(new Set(used).size!==used.length){const status=m.querySelector("#toolShortcutStatus");if(status)status.textContent="Each tool needs a different key.";return}
+    toolShortcuts=next;localStorage.setItem("bba_tool_shortcuts_v1",JSON.stringify(toolShortcuts));close();
+  });
+  for(const [tool,key] of Object.entries(toolShortcuts)){const select=modal.querySelector(`[data-tool-shortcut="${tool}"]`);if(select)select.value=key}
+  modal.querySelector("#resetToolShortcuts").onclick=()=>{for(const [tool,key] of Object.entries(TOOL_SHORTCUT_DEFAULTS))modal.querySelector(`[data-tool-shortcut="${tool}"]`).value=key};
 }
 document.getElementById("shortcutBtn").onclick=showShortcutList;
 let objectClipboard=[];
@@ -1246,8 +1505,10 @@ document.addEventListener("keydown",e=>{
   const typing=tag==="input"||tag==="textarea"||tag==="select";
   const ctrl=e.ctrlKey||e.metaKey;
   const key=e.key.toLowerCase();
+  if(ctrl&&key==="k"){e.preventDefault();window.openFeatureExplorer?.();return}
   if(ctrl&&(e.key==="?"||e.code==="Slash")){e.preventDefault();showShortcutList();return}
   if(typing)return;
+  if(!ctrl&&!e.altKey&&!e.shiftKey){const shortcutTool=Object.entries(toolShortcuts).find(([,binding])=>binding===key)?.[0];if(shortcutTool){e.preventDefault();setTool(shortcutTool);return}}
   const plus=e.key==="+"||e.key==="="||e.code==="NumpadAdd";
   const minus=e.key==="-"||e.key==="_"||e.code==="NumpadSubtract";
   if(ctrl&&plus){e.preventDefault();if(e.shiftKey){widgetContentBaseScale=Math.min(1.1,widgetContentBaseScale+.05);updateAllPanelContentScales()}else setZoom(zoom+10);return}
@@ -1277,23 +1538,22 @@ document.addEventListener("keydown",e=>{
   if(e.key==="ArrowDown"){e.preventDefault();setZoom(zoom-10);return}
   if(e.key==="ArrowLeft"){e.preventDefault();rotateViewBy(-10);return}
   if(e.key==="ArrowRight"){e.preventDefault();rotateViewBy(10);return}
-  if(key==="b")setTool("brush");else if(key==="l")setTool("line");else if(key==="r")setTool("rectangle");else if(key==="e")setTool("ellipse");else if(key==="t")setTool("transform");else if(key==="n")setTool("node");else if(key==="i")setTool("eyedropper");
 });
 document.addEventListener("keyup",e=>{if(e.key.toLowerCase()==="h")panToolActive=false});
 
 function duplicateSelection(){
-  const objs=selectedObjects();if(!objs.length)return;
+  const objs=selectedObjects();if(!objs.length||!canEditObjects(objs,true))return;
   pushHistory();selected.clear();
   const clones=objs.map(o=>{const c=deep(o);c.id=nextObjectId++;c.x+=12;c.y+=12;return c});
   currentObjects().push(...clones);clones.forEach(o=>selected.add(o.id));renderAll();
 }
 function pasteClipboard(){
-  if(!objectClipboard.length)return;
+  if(!objectClipboard.length||!canEditObjects([],true))return;
   pushHistory();selected.clear();
   const clones=objectClipboard.map(o=>{const c=deep(o);c.id=nextObjectId++;c.x+=20;c.y+=20;return c});
   currentObjects().push(...clones);clones.forEach(o=>selected.add(o.id));renderAll();
 }
-function deleteSelected(){if(!selected.size)return;pushHistory();for(const l of layers)activeFrame().layers[l.id]=(activeFrame().layers[l.id]||[]).filter(o=>!selected.has(o.id));selected.clear();renderAll()}
+function deleteSelected(){if(!selected.size||!canEditObjects(selectedObjects()))return;pushHistory();for(const l of layers)activeFrame().layers[l.id]=(activeFrame().layers[l.id]||[]).filter(o=>!selected.has(o.id));selected.clear();renderAll()}
 document.getElementById("deleteSelected").onclick=deleteSelected;document.getElementById("deselect").onclick=()=>{selected.clear();renderAll()};
 document.getElementById("addLayer").onclick=()=>{pushHistory();const l=makeLayer("Layer "+nextLayerId);layers.push(l);ensureFrameLayers();currentLayerId=l.id;selected.clear();renderAll()};
 document.getElementById("duplicateLayer").onclick=()=>{const src=activeLayer();if(!src)return;pushHistory();const l=makeLayer(src.name+" Copy");layers.push(l);for(const f of frames)f.layers[l.id]=deep(f.layers[src.id]||[]).map(o=>({...o,id:nextObjectId++}));currentLayerId=l.id;selected.clear();renderAll()};
@@ -1323,9 +1583,92 @@ function newProject(){
   });
 }
 document.getElementById("newBtn").onclick=newProject;
-function loadProjects(){try{return JSON.parse(localStorage.getItem(PROJECTS)||"[]")}catch{return[]}}
-function saveProjects(p){localStorage.setItem(PROJECTS,JSON.stringify(p))}
-function projectState(){return{layers:deep(layers),frames:deep(frames),camera:deep(camera),cameraKeys:deep(cameraKeys),symbols:deep(symbols),audio:deep(projectAudio),background:projectBackground,transparent:projectTransparent,notes:projectNotes,nextObjectId,nextLayerId,nextFrameId}}
+const PROJECT_DB_NAME="bare-bones-animator-local",PROJECT_DB_VERSION=1;
+let projectCache=null,projectDbPromise=null,projectWriteQueue=Promise.resolve(),projectStorageWarning="";
+function openProjectDatabase(){
+  if(projectDbPromise)return projectDbPromise;
+  if(!("indexedDB" in window)){projectDbPromise=Promise.reject(new Error("IndexedDB is unavailable in this browser."));return projectDbPromise}
+  projectDbPromise=new Promise((resolve,reject)=>{
+    const request=indexedDB.open(PROJECT_DB_NAME,PROJECT_DB_VERSION);
+    request.onupgradeneeded=()=>{
+      const database=request.result;
+      if(!database.objectStoreNames.contains("projects"))database.createObjectStore("projects",{keyPath:"id"});
+      if(!database.objectStoreNames.contains("versions"))database.createObjectStore("versions",{keyPath:"key"});
+    };
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error||new Error("Could not open IndexedDB."));
+    request.onblocked=()=>console.warn("Project storage upgrade is blocked by another editor window.");
+  });
+  return projectDbPromise;
+}
+function idbRequest(request){return new Promise((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error||new Error("IndexedDB operation failed."))})}
+async function hydrateProjectStorage(){
+  let local=[];
+  try{const value=JSON.parse(localStorage.getItem(PROJECTS)||"[]");if(Array.isArray(value))local=value}
+  catch(error){console.warn("Could not load the legacy browser project list.",error)}
+  try{
+    const database=await openProjectDatabase(),stored=await idbRequest(database.transaction("projects","readonly").objectStore("projects").getAll()),merged=new Map();
+    for(const project of stored)if(project?.id)merged.set(project.id,project);
+    for(const project of local)if(project?.id&&(!merged.has(project.id)||(project.updatedAt||0)>(merged.get(project.id).updatedAt||0)))merged.set(project.id,project);
+    projectCache=[...merged.values()].sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+    if(local.length)await persistProjectCollection(projectCache);
+    try{localStorage.setItem(PROJECTS,JSON.stringify(projectCache));projectStorageWarning=""}
+    catch(error){projectStorageWarning="Projects are stored in IndexedDB; browser storage cache is full.";console.warn(projectStorageWarning,error)}
+  }catch(error){
+    projectCache=local;
+    projectStorageWarning="IndexedDB unavailable; using browser local storage. "+(error?.message||"");
+    console.error("Could not initialize durable IndexedDB project storage.",error);
+  }
+  return projectCache;
+}
+function persistProjectCollection(projects,version=null){
+  const copy=deep(projects);
+  projectWriteQueue=projectWriteQueue.catch(()=>{}).then(async()=>{
+    const database=await openProjectDatabase(),existing=await idbRequest(database.transaction("projects","readonly").objectStore("projects").getAll()),transaction=database.transaction(version?["projects","versions"]:["projects"],"readwrite"),store=transaction.objectStore("projects"),wanted=new Set(copy.map(project=>project.id));
+    for(const project of existing)if(!wanted.has(project.id))store.delete(project.id);
+    for(const project of copy)store.put(project);
+    if(version)transaction.objectStore("versions").put(version);
+    await new Promise((resolve,reject)=>{transaction.oncomplete=resolve;transaction.onerror=()=>reject(transaction.error||new Error("Project save to IndexedDB failed."));transaction.onabort=()=>reject(transaction.error||new Error("Project save to IndexedDB was aborted."))});
+  });
+  return projectWriteQueue;
+}
+function loadProjects(){
+  if(projectCache)return projectCache;
+  try{const value=JSON.parse(localStorage.getItem(PROJECTS)||"[]");return Array.isArray(value)?value:[]}
+  catch(error){console.warn("Could not parse the legacy browser project list.",error);return[]}
+}
+function saveProjects(projects,version=null){
+  projectCache=projects;
+  try{localStorage.setItem(PROJECTS,JSON.stringify(projects))}
+  catch(error){projectStorageWarning="Using IndexedDB because browser local storage is full.";console.warn(projectStorageWarning,error)}
+  const pending=persistProjectCollection(projects,version);
+  pending.catch(error=>{projectStorageWarning="IndexedDB project save failed: "+(error?.message||"Unknown storage error");console.error(projectStorageWarning,error);const status=document.getElementById("projectSaveStatus");if(status)status.textContent=projectStorageWarning;const homeStatus=document.getElementById("projectStorageStatus");if(homeStatus)homeStatus.textContent=projectStorageWarning});
+  return pending;
+}
+async function getProjectVersions(id){
+  const database=await openProjectDatabase(),versions=await idbRequest(database.transaction("versions","readonly").objectStore("versions").getAll());
+  return versions.filter(version=>version.projectId===id).sort((a,b)=>b.createdAt-a.createdAt);
+}
+function storeProjectVersion(project){
+  if(!project?.id)return Promise.resolve();
+  const version={key:project.id+":"+String(project.updatedAt||Date.now()).padStart(16,"0")+":"+uid("v_"),projectId:project.id,createdAt:project.updatedAt||Date.now(),name:project.name,state:deep(project.state)};
+  projectWriteQueue=projectWriteQueue.catch(()=>{}).then(async()=>{
+    const database=await openProjectDatabase(),versions=(await idbRequest(database.transaction("versions","readonly").objectStore("versions").getAll())).filter(item=>item.projectId===project.id).sort((a,b)=>b.createdAt-a.createdAt),transaction=database.transaction("versions","readwrite"),store=transaction.objectStore("versions");
+    store.put(version);
+    for(const obsolete of [...versions,version].sort((a,b)=>b.createdAt-a.createdAt).slice(20))store.delete(obsolete.key);
+    await new Promise((resolve,reject)=>{transaction.oncomplete=resolve;transaction.onerror=()=>reject(transaction.error||new Error("Could not save project history."));transaction.onabort=()=>reject(transaction.error||new Error("Project history write was aborted."))});
+  });
+  return projectWriteQueue;
+}
+function deleteProjectVersions(id){
+  projectWriteQueue=projectWriteQueue.catch(()=>{}).then(async()=>{
+    const database=await openProjectDatabase(),versions=await idbRequest(database.transaction("versions","readonly").objectStore("versions").getAll()),transaction=database.transaction("versions","readwrite"),store=transaction.objectStore("versions");
+    for(const version of versions)if(version.projectId===id)store.delete(version.key);
+    await new Promise((resolve,reject)=>{transaction.oncomplete=resolve;transaction.onerror=()=>reject(transaction.error||new Error("Could not delete project history."));transaction.onabort=()=>reject(transaction.error||new Error("Project history deletion was aborted."))});
+  });
+  return projectWriteQueue;
+}
+function projectState(){return{layers:deep(layers),frames:deep(frames),camera:deep(camera),cameraKeys:deep(cameraKeys),symbols:deep(symbols),scenes:deep(scenes),activeSceneId,audio:deep(projectAudio),background:projectBackground,transparent:projectTransparent,notes:projectNotes,nextObjectId,nextLayerId,nextFrameId,canvasWidth:W,canvasHeight:H}}
 function saveCurrent(){
   const list=loadProjects(),now=Date.now();
   if(!projectId)projectId=uid("p_");
@@ -1339,23 +1682,25 @@ function saveCurrent(){
   catch(error){console.warn("Could not free space for the project save.",error)}
   const p={id:projectId,name:projectName,createdAt:old?.createdAt||now,updatedAt:now,state:projectState()};
   const i=list.findIndex(x=>x.id===projectId);if(i>=0)list[i]=p;else list.push(p);
+  const versionWrite=old?storeProjectVersion(old):Promise.resolve();
   try{saveProjects(list)}
   catch(error){if(previousRecovery)try{localStorage.setItem(recoveryKey,previousRecovery)}catch(restoreError){console.warn("Could not restore the prior recovery copy after a failed save.",restoreError)}throw error}
   if(previous){
     try{localStorage.setItem(recoveryKey,previous)}
     catch(error){warning=" · saved, but recovery copy could not be stored";console.warn("Could not store the previous project version.",error);if(previousRecovery)try{localStorage.setItem(recoveryKey,previousRecovery)}catch(restoreError){console.warn("Could not restore the older recovery copy.",restoreError)}}
   }else if(previousRecovery)try{localStorage.setItem(recoveryKey,previousRecovery)}catch(error){console.warn("Could not restore the older recovery copy.",error)}
+  versionWrite.then(()=>{window.__recoveryWarning=(window.__recoveryWarning||"")+" · version history saved"}).catch(error=>{console.error("Could not preserve the previous project version.",error);window.__recoveryWarning=(window.__recoveryWarning||"")+" · version history unavailable"});
   window.__recoveryWarning=warning;window.__updateRecoveryButton?.();
 }
 function projectStats(p){const st=p.state||{};const ls=Array.isArray(st.layers)?st.layers:[];const fs=Array.isArray(st.frames)?st.frames:[];let objectCount=0;for(const f of fs){for(const l of ls){objectCount+=(Array.isArray(f.layers?.[l.id])?f.layers[l.id].length:0)}}return{frames:fs.length,layers:ls.length,objects:objectCount}}
 function formatProjectDate(ts){if(!ts)return"Not saved yet";try{return new Date(ts).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}catch{return"Saved project"}}
-function projectThumbCanvas(p){const c=document.createElement("canvas");c.width=320;c.height=240;const tc=c.getContext("2d"),st=p.state||{},previousSymbols=symbols;tc.fillStyle=st.background||"#fff";tc.fillRect(0,0,320,240);try{symbols=deep(st.symbols||[]);tc.save();tc.scale(.5,.5);const ls=Array.isArray(st.layers)?st.layers:[],f=Array.isArray(st.frames)?st.frames[0]:null;if(f)for(const l of ls){if(l.visible===false)continue;for(const o of(f.layers?.[l.id]||[]))drawObject(tc,o)}tc.restore()}finally{symbols=previousSymbols}return c}
-function openProject(id){const p=loadProjects().find(x=>x.id===id);if(!p)return;layers=deep(p.state.layers);frames=deep(p.state.frames);camera=deep(p.state.camera||{x:W/2,y:H/2,zoom:1,rotation:0});cameraKeys=deep(p.state.cameraKeys||{});symbols=deep(p.state.symbols||[]);projectAudio=deep(p.state.audio||null);projectBackground=p.state.background||"#FFFFFF";projectTransparent=!!p.state.transparent;projectNotes=String(p.state.notes||"");nextObjectId=p.state.nextObjectId;nextLayerId=p.state.nextLayerId;nextFrameId=p.state.nextFrameId;projectId=p.id;projectName=p.name;currentFrame=0;currentLayerId=layers[0]?.id||null;history=[];future=[];selected.clear();ensureFrameLayers();enterEditor()}
+function projectThumbCanvas(p){const c=document.createElement("canvas");c.width=320;c.height=240;const tc=c.getContext("2d"),st=p.state||{},previousSymbols=symbols,pw=Number(st.canvasWidth)||640,ph=Number(st.canvasHeight)||480,scale=Math.min(320/pw,240/ph);tc.fillStyle=st.background||"#fff";tc.fillRect(0,0,320,240);try{symbols=deep(st.symbols||[]);tc.save();tc.translate((320-pw*scale)/2,(240-ph*scale)/2);tc.scale(scale,scale);const ls=Array.isArray(st.layers)?st.layers:[],f=Array.isArray(st.frames)?st.frames[0]:null;if(f)for(const l of ls){if(l.visible===false||l.guide)continue;for(const o of(f.layers?.[l.id]||[]))drawObject(tc,o)}tc.restore()}finally{symbols=previousSymbols}return c}
+function openProject(id){const p=loadProjects().find(x=>x.id===id);if(!p)return;setProjectCanvasSize(p.state.canvasWidth||640,p.state.canvasHeight||480);layers=deep(p.state.layers);frames=deep(p.state.frames);camera=deep(p.state.camera||{x:W/2,y:H/2,zoom:1,rotation:0});cameraKeys=deep(p.state.cameraKeys||{});symbols=deep(p.state.symbols||[]);scenes=deep(p.state.scenes||[]);activeSceneId=p.state.activeSceneId||null;projectAudio=deep(p.state.audio||null);projectBackground=p.state.background||"#FFFFFF";projectTransparent=!!p.state.transparent;projectNotes=String(p.state.notes||"");nextObjectId=p.state.nextObjectId;nextLayerId=p.state.nextLayerId;nextFrameId=p.state.nextFrameId;projectId=p.id;projectName=p.name;currentFrame=0;currentLayerId=layers[0]?.id||null;history=[];future=[];selected.clear();selectedTimelineFrames.clear();ensureFrameLayers();enterEditor()}
 function duplicateProject(id){const list=loadProjects();const p=list.find(x=>x.id===id);if(!p)return;const now=Date.now();const copy={id:uid("p_"),name:(p.name||"Untitled")+" Copy",createdAt:now,updatedAt:now,state:deep(p.state)};list.push(copy);saveProjects(list);renderHome()}
 function renameProject(id){const p=loadProjects().find(x=>x.id===id);if(!p)return;openModal("Rename Animation",'<input id="renameProjectInput" type="text" maxlength="100">',"Rename",(m,close)=>{const next=m.querySelector("#renameProjectInput").value.trim();if(!next)return;const list=loadProjects();const item=list.find(x=>x.id===id);if(item){item.name=next;item.updatedAt=Date.now();saveProjects(list)}renderHome();close()});const input=document.querySelector("#renameProjectInput");if(input){input.value=p.name;setTimeout(()=>{input.focus();input.select()},0)}}
-function deleteProject(id){const p=loadProjects().find(x=>x.id===id);if(!p)return;openModal("Delete Animation",'<div style="font-size:13px;line-height:1.45">Delete <strong>'+escapeHtml(p.name||"Untitled")+'</strong>? This cannot be undone.</div>',"Delete",(m,close)=>{saveProjects(loadProjects().filter(x=>x.id!==id));if(projectId===id)projectId=null;renderHome();close()})}
+function deleteProject(id){const p=loadProjects().find(x=>x.id===id);if(!p)return;openModal("Delete Animation",'<div style="font-size:13px;line-height:1.45">Delete <strong>'+escapeHtml(p.name||"Untitled")+'</strong> and its local version history? This cannot be undone.</div>',"Delete",(m,close)=>{saveProjects(loadProjects().filter(x=>x.id!==id));deleteProjectVersions(id).catch(error=>{console.error("Could not delete project history.",error);projectStorageWarning="Project removed, but its IndexedDB history could not be deleted."});if(projectId===id)projectId=null;renderHome();close()})}
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]))}
-function renderHome(){const grid=document.getElementById("projectGrid");const query=(document.getElementById("homeSearch")?.value||"").trim().toLowerCase();const sort=document.getElementById("homeSort")?.value||"updated";const view=localStorage.getItem("bba_home_view_v3")||"grid";const list=loadProjects();const stats=list.reduce((a,p)=>{const s=projectStats(p);a.projects++;a.frames+=s.frames;a.objects+=s.objects;return a},{projects:0,frames:0,objects:0});document.getElementById("homeStats").innerHTML='<div class="homeStat"><div class="homeStatValue">'+stats.projects+'</div><div class="homeStatLabel">Animations</div></div><div class="homeStat"><div class="homeStatValue">'+stats.frames+'</div><div class="homeStatLabel">Total Frames</div></div><div class="homeStat"><div class="homeStatValue">'+stats.objects+'</div><div class="homeStatLabel">Drawn Objects</div></div>';let filtered=list.filter(p=>(p.name||"").toLowerCase().includes(query));filtered.sort((a,b)=>{if(sort==="nameAsc")return String(a.name).localeCompare(String(b.name));if(sort==="nameDesc")return String(b.name).localeCompare(String(a.name));if(sort==="frames")return projectStats(b).frames-projectStats(a).frames;if(sort==="created")return (b.createdAt||0)-(a.createdAt||0);return (b.updatedAt||0)-(a.updatedAt||0)});grid.className="projectGrid "+view;if(!filtered.length){grid.innerHTML='<div class="homeEmpty"><strong>'+(list.length?'No matching animations':'No animations yet')+'</strong><span>'+(list.length?'Try a different search or sort option.':'Create your first animation to get started.')+'</span></div>'}else{grid.innerHTML="";for(const p of filtered){const st=projectStats(p);const card=document.createElement("div");card.className="projectCard";const th=document.createElement("div");th.className="projectThumb";th.appendChild(projectThumbCanvas(p));const info=document.createElement("div");info.className="projectInfo";const n=document.createElement("div");n.className="projectName";n.textContent=p.name||"Untitled";const meta=document.createElement("div");meta.className="projectMeta";meta.innerHTML='<span>'+st.frames+' frame'+(st.frames===1?'':'s')+'</span><span>'+st.layers+' layer'+(st.layers===1?'':'s')+'</span><span>'+formatProjectDate(p.updatedAt)+'</span>';const actions=document.createElement("div");actions.className="projectActions";const open=document.createElement("button");open.textContent="Open";open.onclick=e=>{e.stopPropagation();openProject(p.id)};const rename=document.createElement("button");rename.textContent="Rename";rename.onclick=e=>{e.stopPropagation();renameProject(p.id)};const duplicate=document.createElement("button");duplicate.textContent="Duplicate";duplicate.onclick=e=>{e.stopPropagation();duplicateProject(p.id)};const del=document.createElement("button");del.textContent="Delete";del.onclick=e=>{e.stopPropagation();deleteProject(p.id)};actions.append(open,rename,duplicate,del);info.append(n,meta,actions);card.append(th,info);card.onclick=()=>openProject(p.id);grid.appendChild(card)}}const latest=list.slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];const cont=document.getElementById("continueCard");if(latest&&!query){cont.style.display="flex";const st=projectStats(latest);cont.innerHTML='<div class="continueText"><strong>Continue with '+escapeHtml(latest.name||"Untitled")+'</strong><span>'+st.frames+' frame'+(st.frames===1?'':'s')+' · Last saved '+formatProjectDate(latest.updatedAt)+'</span></div><button class="small primary" id="continueBtn">Open Project</button>';document.getElementById("continueBtn").onclick=()=>openProject(latest.id)}else{cont.style.display="none"}}
+function renderHome(){const grid=document.getElementById("projectGrid");const storageStatus=document.getElementById("projectStorageStatus");if(storageStatus)storageStatus.textContent=projectStorageWarning||"Saved locally on this device · IndexedDB storage · Version history is local only";const query=(document.getElementById("homeSearch")?.value||"").trim().toLowerCase();const sort=document.getElementById("homeSort")?.value||"updated";const view=localStorage.getItem("bba_home_view_v3")||"grid";const list=loadProjects();const stats=list.reduce((a,p)=>{const s=projectStats(p);a.projects++;a.frames+=s.frames;a.objects+=s.objects;return a},{projects:0,frames:0,objects:0});document.getElementById("homeStats").innerHTML='<div class="homeStat"><div class="homeStatValue">'+stats.projects+'</div><div class="homeStatLabel">Animations</div></div><div class="homeStat"><div class="homeStatValue">'+stats.frames+'</div><div class="homeStatLabel">Total Frames</div></div><div class="homeStat"><div class="homeStatValue">'+stats.objects+'</div><div class="homeStatLabel">Drawn Objects</div></div>';let filtered=list.filter(p=>(p.name||"").toLowerCase().includes(query));filtered.sort((a,b)=>{if(sort==="nameAsc")return String(a.name).localeCompare(String(b.name));if(sort==="nameDesc")return String(b.name).localeCompare(String(a.name));if(sort==="frames")return projectStats(b).frames-projectStats(a).frames;if(sort==="created")return (b.createdAt||0)-(a.createdAt||0);return (b.updatedAt||0)-(a.updatedAt||0)});grid.className="projectGrid "+view;if(!filtered.length){grid.innerHTML='<div class="homeEmpty"><strong>'+(list.length?'No matching animations':'No animations yet')+'</strong><span>'+(list.length?'Try a different search or sort option.':'Create your first animation to get started.')+'</span></div>'}else{grid.innerHTML="";for(const p of filtered){const st=projectStats(p);const card=document.createElement("div");card.className="projectCard";const th=document.createElement("div");th.className="projectThumb";th.appendChild(projectThumbCanvas(p));const info=document.createElement("div");info.className="projectInfo";const n=document.createElement("div");n.className="projectName";n.textContent=p.name||"Untitled";const meta=document.createElement("div");meta.className="projectMeta";meta.innerHTML='<span>'+st.frames+' frame'+(st.frames===1?'':'s')+'</span><span>'+st.layers+' layer'+(st.layers===1?'':'s')+'</span><span>'+formatProjectDate(p.updatedAt)+'</span>';const actions=document.createElement("div");actions.className="projectActions";const open=document.createElement("button");open.textContent="Open";open.onclick=e=>{e.stopPropagation();openProject(p.id)};const rename=document.createElement("button");rename.textContent="Rename";rename.onclick=e=>{e.stopPropagation();renameProject(p.id)};const duplicate=document.createElement("button");duplicate.textContent="Duplicate";duplicate.onclick=e=>{e.stopPropagation();duplicateProject(p.id)};const del=document.createElement("button");del.textContent="Delete";del.onclick=e=>{e.stopPropagation();deleteProject(p.id)};actions.append(open,rename,duplicate,del);info.append(n,meta,actions);card.append(th,info);card.onclick=()=>openProject(p.id);grid.appendChild(card)}}const latest=list.slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];const cont=document.getElementById("continueCard");if(latest&&!query){cont.style.display="flex";const st=projectStats(latest);cont.innerHTML='<div class="continueText"><strong>Continue with '+escapeHtml(latest.name||"Untitled")+'</strong><span>'+st.frames+' frame'+(st.frames===1?'':'s')+' · Last saved '+formatProjectDate(latest.updatedAt)+'</span></div><button class="small primary" id="continueBtn">Open Project</button>';document.getElementById("continueBtn").onclick=()=>openProject(latest.id)}else{cont.style.display="none"}}
 function enterEditor(){document.getElementById("homeView").style.display="none";document.getElementById("editorView").style.display="flex";document.getElementById("projectTitle").textContent=projectName;loadPanelLayout();updateAllPanelContentScales();renderAll();syncCameraControls();if(typeof window.__syncProjectStudio==="function")window.__syncProjectStudio();setZoom(zoom);setViewRotation(viewRotation);updateCanvasFitScale()}
 function goHome(){try{saveCurrent()}catch(error){console.error("Project save failed; staying in the editor.",error);const status=document.getElementById("projectSaveStatus");if(status)status.textContent="Save failed: "+(error?.message||"Storage error");return}stopPlaying();document.getElementById("editorView").style.display="none";document.getElementById("homeView").style.display="flex";renderHome()}
 function saveFromButton(){
@@ -1604,13 +1949,42 @@ function cameraForFrame(frameIndex){
   const spin=((after.state.rotation-before.state.rotation+540)%360)-180;
   return{x:before.state.x+(after.state.x-before.state.x)*t,y:before.state.y+(after.state.y-before.state.y)*t,zoom:before.state.zoom+(after.state.zoom-before.state.zoom)*t,rotation:before.state.rotation+spin*t};
 }
+const LAYER_COMPOSITE_MODES=new Set(["source-over","multiply","screen","overlay","darken","lighten","color-dodge","color-burn","difference","exclusion","hue","saturation","color","luminosity"]);
+let layerCompositeCanvas=null,layerCompositeContext=null,layerMaskCanvas=null,layerMaskContext=null;
+function drawCompositedLayers(context,frame,frameIndex,includeGuideLayers=false){
+  const visible=layers.filter(layer=>layer.visible!==false&&(includeGuideLayers||!layer.guide)),matrix=context.getTransform();
+  if(!layerCompositeCanvas){layerCompositeCanvas=document.createElement("canvas");layerCompositeContext=layerCompositeCanvas.getContext("2d");layerMaskCanvas=document.createElement("canvas");layerMaskContext=layerMaskCanvas.getContext("2d")}
+  for(let index=0;index<visible.length;index++){
+    const layer=visible[index],under=visible[index-1],objects=objectsForRender(frameIndex,layer),opacity=Math.max(0,Math.min(1,Number(layer.opacity??1))),mode=LAYER_COMPOSITE_MODES.has(layer.blendMode)?layer.blendMode:"source-over",effect=layer.effect||"none",clip=!!layer.clipToBelow&&!!under;
+    const needsScratch=mode!=="source-over"||opacity<.999||clip||effect!=="none";
+    if(!needsScratch){for(const object of objects)drawObject(context,object);continue}
+    for(const [canvas,scratch] of [[layerCompositeCanvas,layerCompositeContext],[layerMaskCanvas,layerMaskContext]]){
+      if(canvas.width!==context.canvas.width||canvas.height!==context.canvas.height){canvas.width=context.canvas.width;canvas.height=context.canvas.height}
+      scratch.setTransform(1,0,0,1,0,0);scratch.clearRect(0,0,canvas.width,canvas.height);
+    }
+    const setCameraTransform=scratch=>scratch.setTransform(matrix.a,matrix.b,matrix.c,matrix.d,matrix.e,matrix.f);
+    setCameraTransform(layerCompositeContext);layerCompositeContext.save();
+    const amount=Math.max(1,Math.min(20,Number(layer.effectAmount)||5));
+    if(effect==="blur")layerCompositeContext.filter=`blur(${amount/3}px)`;
+    else if(effect==="glow"){layerCompositeContext.shadowColor="#ffd36a";layerCompositeContext.shadowBlur=amount*2}
+    else if(effect==="shadow"){layerCompositeContext.shadowColor="rgba(0,0,0,.65)";layerCompositeContext.shadowBlur=amount;layerCompositeContext.shadowOffsetX=amount*.35;layerCompositeContext.shadowOffsetY=amount*.45}
+    else if(effect==="color-adjust")layerCompositeContext.filter=`contrast(${100+amount*5}%) saturate(${100+amount*8}%)`;
+    for(const object of objects)drawObject(layerCompositeContext,object);
+    layerCompositeContext.restore();
+    if(clip){
+      setCameraTransform(layerMaskContext);for(const object of objectsForRender(frameIndex,under))drawObject(layerMaskContext,object);
+      layerCompositeContext.save();layerCompositeContext.setTransform(1,0,0,1,0,0);layerCompositeContext.globalCompositeOperation="destination-in";layerCompositeContext.drawImage(layerMaskCanvas,0,0);layerCompositeContext.restore();
+    }
+    context.save();context.setTransform(1,0,0,1,0,0);context.globalAlpha*=opacity;context.globalCompositeOperation=mode;context.drawImage(layerCompositeCanvas,0,0);context.restore();
+  }
+}
 function drawFrameThroughCamera(context,frame,frameIndex){
   const view=cameraForFrame(frameIndex);
   context.translate(W/2,H/2);
   context.rotate(-view.rotation*Math.PI/180);
   context.scale(view.zoom,view.zoom);
   context.translate(-view.x,-view.y);
-  for(const layer of layers)if(layer.visible!==false)for(const obj of objectsForRender(frameIndex,layer))drawObject(context,obj);
+  drawCompositedLayers(context,frame,frameIndex);
 }
 function logicalFrameCanvas(frame,scale=1,transparent=false,frameIndex=currentFrame){
   const c=document.createElement("canvas");c.width=Math.max(1,Math.round(W*scale));c.height=Math.max(1,Math.round(H*scale));
@@ -1689,12 +2063,13 @@ function setAutomaticRigPivot(object,parentOverride=null){
 document.getElementById("rigSetRoleBtn")?.addEventListener("click",()=>{
   const objects=selectedObjects(),role=document.getElementById("rigRole").value,status=document.getElementById("rigStatus");
   if(!objects.length||!role){if(status)status.textContent="Select an object and a bone role first.";return}
+  if(!canEditObjects(objects))return;
   pushHistory();for(const object of objects){object.rigRole=role;if(role==="body")setAutomaticRigPivot(object)}
   if(status)status.textContent=`Assigned ${role} to ${objects.length} object${objects.length===1?"":"s"}.`;
   renderAll();
 });
 document.getElementById("rigPivotBtn")?.addEventListener("click",()=>{
-  const objects=selectedObjects(),status=document.getElementById("rigStatus");if(!objects.length){if(status)status.textContent="Select the bone you want to attach.";return}
+  const objects=selectedObjects(),status=document.getElementById("rigStatus");if(!objects.length||!canEditObjects(objects)){if(status&&!objects.length)status.textContent="Select the bone you want to attach.";return}
   pushHistory();let attached=0;
   for(const object of objects){if(setAutomaticRigPivot(object))attached++}
   if(status)status.textContent=attached===objects.length?"Pivot placed; attached parts follow their selected parent.":"Choose a valid parent object, or mark a body, before attaching this part.";
@@ -1702,6 +2077,7 @@ document.getElementById("rigPivotBtn")?.addEventListener("click",()=>{
 });
 document.getElementById("rigUnlinkBtn")?.addEventListener("click",()=>{
   const objects=selectedObjects(),status=document.getElementById("rigStatus");if(!objects.length)return;
+  if(!canEditObjects(objects))return;
   pushHistory();objects.forEach(object=>delete object.rigParentId);
   if(status)status.textContent="Selected bone links removed.";renderAll();
 });
@@ -1715,6 +2091,7 @@ function syncSymbolLibrary(){
 }
 document.getElementById("createSymbolBtn")?.addEventListener("click",()=>{
   const objects=selectedObjects(),bounds=selectionBounds();if(!objects.length||!bounds)return;
+  if(!canEditObjects(objects))return;
   const name=prompt("Name this reusable symbol:","Symbol "+(symbols.length+1));if(!name?.trim())return;
   pushHistory();
   const id=uid("symbol_"),origin={x:(bounds.minX+bounds.maxX)/2,y:(bounds.minY+bounds.maxY)/2};
@@ -1727,6 +2104,7 @@ document.getElementById("createSymbolBtn")?.addEventListener("click",()=>{
 });
 document.getElementById("insertSymbolBtn")?.addEventListener("click",()=>{
   const symbol=symbols.find(item=>item.id===document.getElementById("symbolLibrarySelect")?.value);if(!symbol)return;
+  if(!canEditObjects([],true))return;
   pushHistory();const sourceBounds=symbol.objects.flatMap(object=>objectWorldCorners(object));
   const width=sourceBounds.length?Math.max(...sourceBounds.map(point=>point.x))-Math.min(...sourceBounds.map(point=>point.x)):64;
   const height=sourceBounds.length?Math.max(...sourceBounds.map(point=>point.y))-Math.min(...sourceBounds.map(point=>point.y)):64;
@@ -1758,18 +2136,26 @@ function svgEsc(v){return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").r
 function objectToSvg(o){
   const cap=o.lineCap||"round",join=o.lineJoin||"round",opacity=o.opacity==null?1:o.opacity,dash=Array.isArray(o.dash)&&o.dash.length?` stroke-dasharray="${o.dash.join(" ")}"`:"";
   const stroke=o.composite==="destination-out"?"#ffffff":(o.color||"#111111");
-  const attrs=`fill="none" stroke="${svgEsc(stroke)}" stroke-width="${Number(o.width||1)}" stroke-linecap="${cap}" stroke-linejoin="${join}" opacity="${opacity}"${dash}`;
+  const fill=o.fill&&!o.fillGradient?svgEsc(o.fillColor||o.color||"#fff"):"none";
+  const attrs=`fill="${fill}" stroke="${svgEsc(stroke)}" stroke-width="${Number(o.width||1)}" stroke-linecap="${cap}" stroke-linejoin="${join}" opacity="${opacity}"${dash}`;
   const pivot=objectPivot(o),tr=`transform="translate(${Number(o.x||0)+pivot.x} ${Number(o.y||0)+pivot.y}) rotate(${Number(o.rotation||0)}) scale(${Number(o.scaleX||1)} ${Number(o.scaleY||1)}) translate(${-pivot.x} ${-pivot.y})"`;
   if(o.type==="symbolInstance"){const symbol=symbols.find(item=>item.id===o.symbolId);return symbol?`<g ${tr} opacity="${Number(o.opacity??1)}">${symbol.objects.map(objectToSvg).join("")}</g>`:""}
-  if(o.type==="rectangle"){const a=o.points[0],b=o.points[o.points.length-1],x=Math.min(a.x,b.x),y=Math.min(a.y,b.y),w=Math.abs(b.x-a.x),h=Math.abs(b.y-a.y);return `<rect x="${x}" y="${y}" width="${w}" height="${h}" ${attrs} ${tr}/>`}
+  if(o.type==="rectangle"){const a=o.points[0],b=o.points[o.points.length-1],x=Math.min(a.x,b.x),y=Math.min(a.y,b.y),w=Math.abs(b.x-a.x),h=Math.abs(b.y-a.y),radius=Math.max(0,Math.min(Number(o.cornerRadius)||0,w/2,h/2));return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${radius}" ${attrs} ${tr}/>`}
   if(o.type==="ellipse"){const a=o.points[0],b=o.points[o.points.length-1],x=Math.min(a.x,b.x),y=Math.min(a.y,b.y),w=Math.abs(b.x-a.x),h=Math.abs(b.y-a.y);return `<ellipse cx="${x+w/2}" cy="${y+h/2}" rx="${w/2}" ry="${h/2}" ${attrs} ${tr}/>`}
   const pts=o.points||[];if(!pts.length)return "";let d=`M ${pts[0].x} ${pts[0].y}`;
   if(o.type==="line"&&pts.length>1)d+=` L ${pts[pts.length-1].x} ${pts[pts.length-1].y}`;
+  else if((o.type==="polygon"||o.type==="star")&&pts.length>1)d+=pts.slice(1).map(point=>` L ${point.x} ${point.y}`).join("")+" Z";
   else if(pts.length>1){for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],mx=(a.x+b.x)/2,my=(a.y+b.y)/2;d+=` Q ${a.x} ${a.y} ${mx} ${my}`;if(i===pts.length-1)d+=` L ${b.x} ${b.y}`}}
   return `<path d="${d}" ${attrs} ${tr}/>`;
 }
 function frameToSvg(frame,frameIndex=currentFrame){
-  const paths=[];for(const l of layers){if(l.visible===false)continue;for(const o of(frame.layers[l.id]||[]))paths.push(objectToSvg(o))}
+  const transparent=!!document.getElementById("exportTransparent")?.checked;
+  const requiresRaster=layers.some(layer=>layer.visible!==false&&(layer.effect&&layer.effect!=="none"||layer.clipToBelow||Number(layer.opacity??1)<.999||layer.blendMode&&layer.blendMode!=="normal"||objectsForRender(frameIndex,layer).some(object=>object.composite==="destination-out"||Array.isArray(object.pointWidths)||object.fillGradient||["soft","chalk","watercolor","spray"].includes(object.brushStyle))));
+  if(requiresRaster){
+    const canvas=logicalFrameCanvas(frame,1,transparent,frameIndex),image=canvas.toDataURL("image/png"),background=transparent?"":`<rect width="${W}" height="${H}" fill="${svgEsc(projectBackground||"#ffffff")}"/>`;
+    return `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${background}<image href="${image}" xlink:href="${image}" width="${W}" height="${H}"/></svg>`;
+  }
+  const paths=[];for(const l of layers){if(l.visible===false)continue;for(const o of objectsForRender(frameIndex,l))paths.push(objectToSvg(o))}
   const view=cameraForFrame(frameIndex),bg=document.getElementById("exportTransparent")?.checked?"":`<rect width="${W}" height="${H}" fill="${svgEsc(projectBackground||"#ffffff")}"/>`;
   const transform=`translate(${W/2} ${H/2}) rotate(${-view.rotation}) scale(${view.zoom}) translate(${-view.x} ${-view.y})`;
   return `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${bg}<g transform="${transform}">${paths.join("")}</g></svg>`;
@@ -1777,7 +2163,7 @@ function frameToSvg(frame,frameIndex=currentFrame){
 function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function downloadDataUrl(url,name){const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove()}
 function exportCurrentImage(type,scale,transparent){const c=logicalFrameCanvas(activeFrame(),scale,transparent);const mime=type==="jpeg"?"image/jpeg":"image/png";downloadDataUrl(c.toDataURL(mime,type==="jpeg"?.94:1),`${safeFileName(projectName)}_frame_${String(currentFrame+1).padStart(3,"0")}.${type==="jpeg"?"jpg":"png"}`)}
-function exportSprite(scale,transparent){const out=document.createElement("canvas");out.width=W*scale*frames.length;out.height=H*scale;const o=out.getContext("2d");if(!transparent){o.fillStyle=projectBackground||"#fff";o.fillRect(0,0,out.width,out.height)}for(let i=0;i<frames.length;i++)o.drawImage(logicalFrameCanvas(frames[i],scale,transparent,i),i*W*scale,0);downloadDataUrl(out.toDataURL("image/png"),`${safeFileName(projectName)}_sprite_sheet.png`)}
+function exportSprite(scale,transparent,start=0,end=frames.length-1){const count=end-start+1,out=document.createElement("canvas");out.width=W*scale*count;out.height=H*scale;const o=out.getContext("2d");if(!transparent){o.fillStyle=projectBackground||"#fff";o.fillRect(0,0,out.width,out.height)}for(let index=0;index<count;index++){const frameIndex=start+index;o.drawImage(logicalFrameCanvas(frames[frameIndex],scale,transparent,frameIndex),index*W*scale,0)}downloadDataUrl(out.toDataURL("image/png"),`${safeFileName(projectName)}_frames_${start+1}-${end+1}_sprite_sheet.png`)}
 function canvasToBlob(canvas,type){return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("The browser could not encode an exported frame.")),type))}
 function zipCrc32(bytes){
   let crc=0xffffffff;
@@ -1799,30 +2185,30 @@ function storedZip(entries){
   const end=new Uint8Array(22),ev=new DataView(end.buffer);ev.setUint32(0,0x06054b50,true);ev.setUint16(8,entries.length,true);ev.setUint16(10,entries.length,true);ev.setUint32(12,centralSize,true);ev.setUint32(16,offset,true);parts.push(end);
   return new Blob(parts,{type:"application/zip"});
 }
-async function exportSequence(scale,transparent,onProgress=()=>{}){
-  const estimatedBytes=W*H*scale*scale*4*frames.length;
+async function exportSequence(scale,transparent,onProgress=()=>{},start=0,end=frames.length-1){
+  const count=end-start+1,estimatedBytes=W*H*scale*scale*4*count;
   if(estimatedBytes>300_000_000)throw new Error("This image sequence is too large to package safely. Reduce the scale or export fewer frames.");
   const entries=[];
-  for(let i=0;i<frames.length;i++){
+  for(let i=start;i<=end;i++){
     const canvas=logicalFrameCanvas(frames[i],scale,transparent,i),blob=await canvasToBlob(canvas,"image/png");
     entries.push({name:`${safeFileName(projectName)}_frame_${String(i+1).padStart(4,"0")}.png`,data:new Uint8Array(await blob.arrayBuffer())});
-    onProgress(i+1,frames.length);
+    onProgress(i-start+1,count);
   }
-  downloadBlob(storedZip(entries),`${safeFileName(projectName)}_sequence.zip`);
+  downloadBlob(storedZip(entries),`${safeFileName(projectName)}_frames_${start+1}-${end+1}.zip`);
 }
-async function exportWebm(scale,transparent){
+async function exportWebm(scale,transparent,start=0,end=frames.length-1){
   if(!canvas.captureStream||typeof MediaRecorder==="undefined")throw new Error("WebM recording is not supported by this browser.");
   const fps=Math.max(1,Math.min(100,Number(document.getElementById("playbackFps")?.value||document.getElementById("fps")?.value||8)));
   const out=document.createElement("canvas");out.width=W*scale;out.height=H*scale;const stream=out.captureStream(fps);
   const mime=MediaRecorder.isTypeSupported("video/webm;codecs=vp9")?"video/webm;codecs=vp9":(MediaRecorder.isTypeSupported("video/webm")?"video/webm":"");if(!mime)throw new Error("WebM recording is not supported by this browser.");
   const chunks=[],rec=new MediaRecorder(stream,{mimeType:mime});const stopped=new Promise((resolve,reject)=>{rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};rec.onerror=e=>reject(e.error||new Error("Recording failed"));rec.onstop=resolve});rec.start();const o=out.getContext("2d");
   try{
-    for(let i=0;i<frames.length;i++){
+    for(let i=start;i<=end;i++){
       const f=logicalFrameCanvas(frames[i],scale,transparent,i),hold=Math.max(1,Number(frames[i].duration)||1);
       o.clearRect(0,0,out.width,out.height);if(!transparent){o.fillStyle=projectBackground||"#fff";o.fillRect(0,0,out.width,out.height)}o.drawImage(f,0,0);
       await new Promise(resolve=>setTimeout(resolve,1000/fps*hold));
     }
-    rec.stop();await stopped;downloadBlob(new Blob(chunks,{type:"video/webm"}),`${safeFileName(projectName)}.webm`);
+    rec.stop();await stopped;downloadBlob(new Blob(chunks,{type:"video/webm"}),`${safeFileName(projectName)}_frames_${start+1}-${end+1}.webm`);
   }finally{
     if(rec.state!=="inactive"){rec.stop();try{await stopped}catch(error){console.warn("WebM recorder cleanup reported an error.",error)}}
     stream.getTracks().forEach(track=>track.stop());
@@ -1830,11 +2216,12 @@ async function exportWebm(scale,transparent){
 }
 function currentProjectJson(){return JSON.stringify({format:"Bare Bones Animator Project",version:4,name:projectName,exportedAt:Date.now(),state:projectState()},null,2)}
 async function performExport(root=document){
-  const format=root.querySelector("#exportFormat")?.value,scale=Math.max(1,Math.min(4,Number(root.querySelector("#exportScale")?.value)||1)),transparent=!!root.querySelector("#exportTransparent")?.checked,status=root.querySelector("#exportStatus");
+  const format=root.querySelector("#exportFormat")?.value,scale=Math.max(1,Math.min(4,Number(root.querySelector("#exportScale")?.value)||1)),transparent=!!root.querySelector("#exportTransparent")?.checked,status=root.querySelector("#exportStatus"),startValue=Number(root.querySelector("#exportRangeStart")?.value),endValue=Number(root.querySelector("#exportRangeEnd")?.value),start=startValue-1,end=endValue-1;
   if(!format)throw new Error("Choose an export format.");
+  if(!Number.isInteger(startValue)||!Number.isInteger(endValue)||start<0||end>=frames.length||start>end)throw new Error("Choose a valid frame range from 1 to "+frames.length+".");
   if(status)status.textContent="Exporting…";
   try{
-    if(format==="png")exportCurrentImage("png",scale,transparent);else if(format==="jpeg")exportCurrentImage("jpeg",scale,false);else if(format==="svg")downloadBlob(new Blob([frameToSvg(activeFrame())],{type:"image/svg+xml"}),`${safeFileName(projectName)}_frame_${String(currentFrame+1).padStart(3,"0")}.svg`);else if(format==="sprite")exportSprite(scale,transparent);else if(format==="sequence")await exportSequence(scale,transparent,(done,total)=>{if(status)status.textContent=`Packaging frame ${done} of ${total}…`});else if(format==="json")downloadBlob(new Blob([currentProjectJson()],{type:"application/json"}),`${safeFileName(projectName)}.json`);else if(format==="webm")await exportWebm(scale,transparent);
+    if(format==="png")exportCurrentImage("png",scale,transparent);else if(format==="jpeg")exportCurrentImage("jpeg",scale,false);else if(format==="svg")downloadBlob(new Blob([frameToSvg(activeFrame())],{type:"image/svg+xml"}),`${safeFileName(projectName)}_frame_${String(currentFrame+1).padStart(3,"0")}.svg`);else if(format==="sprite")exportSprite(scale,transparent,start,end);else if(format==="sequence")await exportSequence(scale,transparent,(done,total)=>{if(status)status.textContent=`Packaging frame ${done} of ${total}…`},start,end);else if(format==="json")downloadBlob(new Blob([currentProjectJson()],{type:"application/json"}),`${safeFileName(projectName)}.json`);else if(format==="webm")await exportWebm(scale,transparent,start,end);
     if(status)status.textContent="Export complete.";
   }catch(err){console.error(err);if(status)status.textContent="Export failed: "+(err?.message||"Unknown error")}
 }
@@ -1930,7 +2317,7 @@ document.getElementById("homeSort").addEventListener("change",renderHome)
 document.getElementById("gridViewBtn").onclick=()=>{localStorage.setItem("bba_home_view_v3","grid");document.getElementById("gridViewBtn").classList.add("primary");document.getElementById("listViewBtn").classList.remove("primary");renderHome()}
 document.getElementById("listViewBtn").onclick=()=>{localStorage.setItem("bba_home_view_v3","list");document.getElementById("listViewBtn").classList.add("primary");document.getElementById("gridViewBtn").classList.remove("primary");renderHome()}
 const startupSettings=getHomeSettings();if(startupSettings.theme)setTheme(startupSettings.theme);applyHomeAppearance();const savedView=localStorage.getItem("bba_home_view_v3")||"grid";if(savedView==="list"){document.getElementById("listViewBtn").classList.add("primary");document.getElementById("gridViewBtn").classList.remove("primary")}else{document.getElementById("gridViewBtn").classList.add("primary");document.getElementById("listViewBtn").classList.remove("primary")}
-viewport.style.transform="scale(1)";renderHome();
+viewport.style.transform="scale(1)";renderHome();hydrateProjectStorage().then(()=>renderHome());
 
 /* ========================= FULL APP PASS ========================= */
 (function(){
@@ -2001,19 +2388,34 @@ viewport.style.transform="scale(1)";renderHome();
   };
   renderGrid=function(){
     baseRenderGrid();
-    if(!grid&&!centerGuideEnabled&&!safeGuideEnabled&&!pixelGuideEnabled)return;
+    if(!grid&&!centerGuideEnabled&&!safeGuideEnabled&&!pixelGuideEnabled&&!perspectiveGuideEnabled)return;
     gridCtx.save();gridCtx.lineWidth=1;
     if(centerGuideEnabled){gridCtx.strokeStyle="rgba(74,92,255,.55)";gridCtx.setLineDash([8,5]);gridCtx.beginPath();gridCtx.moveTo(W/2,0);gridCtx.lineTo(W/2,H);gridCtx.moveTo(0,H/2);gridCtx.lineTo(W,H/2);gridCtx.stroke();gridCtx.setLineDash([])}
     if(safeGuideEnabled){const m=Math.max(0,Math.min(Math.min(W,H)/2-1,Number(safeGuideMargin)||40));gridCtx.strokeStyle="rgba(220,90,70,.55)";gridCtx.strokeRect(m,m,W-2*m,H-2*m)}
     if(pixelGuideEnabled){const sx=Math.round(W/2),sy=Math.round(H/2);gridCtx.strokeStyle="rgba(30,30,30,.45)";gridCtx.beginPath();gridCtx.moveTo(sx-12,sy+.5);gridCtx.lineTo(sx+12,sy+.5);gridCtx.moveTo(sx+.5,sy-12);gridCtx.lineTo(sx+.5,sy+12);gridCtx.stroke()}
+    if(perspectiveGuideEnabled){
+      gridCtx.strokeStyle="rgba(45,145,190,.5)";gridCtx.fillStyle="rgba(45,145,190,.82)";gridCtx.setLineDash([5,4]);
+      if(perspectiveGuideMode==="two-point"){
+        const [left,right]=perspectiveVanishingPoints;
+        for(let i=0;i<=12;i++){const t=i/12,edgeY=t*H;gridCtx.beginPath();gridCtx.moveTo(left.x,left.y);gridCtx.lineTo(W,edgeY);gridCtx.moveTo(right.x,right.y);gridCtx.lineTo(0,edgeY);gridCtx.stroke()}
+        gridCtx.setLineDash([2,5]);for(let i=1;i<12;i++){const x=W*i/12;gridCtx.beginPath();gridCtx.moveTo(x,0);gridCtx.lineTo(x,H);gridCtx.stroke()}
+        for(const point of [left,right]){gridCtx.beginPath();gridCtx.arc(point.x,point.y,5,0,Math.PI*2);gridCtx.fill()}
+      }else{
+        const point=perspectiveVanishingPoints[0];gridCtx.beginPath();gridCtx.moveTo(0,point.y);gridCtx.lineTo(W,point.y);gridCtx.stroke();
+        for(let i=0;i<=16;i++){const t=i/16,x=W*t;gridCtx.beginPath();gridCtx.moveTo(point.x,point.y);gridCtx.lineTo(x,0);gridCtx.moveTo(point.x,point.y);gridCtx.lineTo(x,H);gridCtx.stroke()}
+        gridCtx.setLineDash([2,5]);for(let i=1;i<10;i++){const t=i/10,top=point.y*(1-t*t),bottom=point.y+(H-point.y)*t*t;gridCtx.beginPath();gridCtx.moveTo(0,top);gridCtx.lineTo(W,top);gridCtx.moveTo(0,bottom);gridCtx.lineTo(W,bottom);gridCtx.stroke()}
+        gridCtx.setLineDash([]);gridCtx.beginPath();gridCtx.arc(point.x,point.y,5,0,Math.PI*2);gridCtx.fill()
+      }
+      gridCtx.setLineDash([]);
+    }
     gridCtx.restore();
   };
 
   function clampNumber(v,min,max,def){const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):def}
-  function readGuides(){snapEnabled=!!document.getElementById("snapEnabled")?.checked;snapSize=clampNumber(document.getElementById("snapSize")?.value,4,200,20);centerGuideEnabled=!!document.getElementById("centerGuideEnabled")?.checked;safeGuideEnabled=!!document.getElementById("safeGuideEnabled")?.checked;safeGuideMargin=clampNumber(document.getElementById("safeGuideMargin")?.value,0,200,40);pixelGuideEnabled=!!document.getElementById("pixelGuideEnabled")?.checked}
-  function syncGuides(){for(const [id,v] of [["snapEnabled",snapEnabled],["snapSize",snapSize],["centerGuideEnabled",centerGuideEnabled],["safeGuideEnabled",safeGuideEnabled],["safeGuideMargin",safeGuideMargin],["pixelGuideEnabled",pixelGuideEnabled]]){const e=document.getElementById(id);if(e)e.value=v}const r=document.getElementById("guideReadout");if(r)r.textContent=(snapEnabled?"Snap "+snapSize+" px · ":"")+((centerGuideEnabled||safeGuideEnabled||pixelGuideEnabled)?"Guides active":"Guides ready")}
-  for(const id of ["snapEnabled","snapSize","centerGuideEnabled","safeGuideEnabled","safeGuideMargin","pixelGuideEnabled"])document.getElementById(id)?.addEventListener(id==="snapSize"||id==="safeGuideMargin"?"input":"change",()=>{readGuides();syncGuides();renderGrid()});
-  document.getElementById("clearGuidesButton")?.addEventListener("click",()=>{centerGuideEnabled=false;safeGuideEnabled=false;pixelGuideEnabled=false;syncGuides();renderGrid()});
+  function readGuides(){snapEnabled=!!document.getElementById("snapEnabled")?.checked;snapSize=clampNumber(document.getElementById("snapSize")?.value,4,200,20);centerGuideEnabled=!!document.getElementById("centerGuideEnabled")?.checked;safeGuideEnabled=!!document.getElementById("safeGuideEnabled")?.checked;safeGuideMargin=clampNumber(document.getElementById("safeGuideMargin")?.value,0,200,40);pixelGuideEnabled=!!document.getElementById("pixelGuideEnabled")?.checked;perspectiveGuideEnabled=!!document.getElementById("perspectiveGuideEnabled")?.checked;perspectiveGuideMode=document.getElementById("perspectiveGuideMode")?.value||"one-point"}
+  function syncGuides(){for(const [id,v] of [["snapEnabled",snapEnabled],["snapSize",snapSize],["centerGuideEnabled",centerGuideEnabled],["safeGuideEnabled",safeGuideEnabled],["safeGuideMargin",safeGuideMargin],["pixelGuideEnabled",pixelGuideEnabled],["perspectiveGuideEnabled",perspectiveGuideEnabled],["perspectiveGuideMode",perspectiveGuideMode]]){const e=document.getElementById(id);if(!e)continue;if(e.type==="checkbox")e.checked=!!v;else e.value=v}const r=document.getElementById("guideReadout");if(r)r.textContent=(snapEnabled?"Snap "+snapSize+" px · ":"")+((centerGuideEnabled||safeGuideEnabled||pixelGuideEnabled||perspectiveGuideEnabled)?"Guides active":"Guides ready")}
+  for(const id of ["snapEnabled","snapSize","centerGuideEnabled","safeGuideEnabled","safeGuideMargin","pixelGuideEnabled","perspectiveGuideEnabled","perspectiveGuideMode"])document.getElementById(id)?.addEventListener(id==="snapSize"||id==="safeGuideMargin"?"input":"change",()=>{readGuides();syncGuides();renderGrid()});
+  document.getElementById("clearGuidesButton")?.addEventListener("click",()=>{centerGuideEnabled=false;safeGuideEnabled=false;pixelGuideEnabled=false;perspectiveGuideEnabled=false;syncGuides();renderGrid()});
   readGuides();syncGuides();
 
   function appearanceLoad(){try{const s=JSON.parse(localStorage.getItem("bba_editor_appearance_v2")||"{}");if(s.accent)document.documentElement.style.setProperty("--accent",s.accent);if(s.workspace)document.documentElement.style.setProperty("--bg",s.workspace);if(s.panel)document.documentElement.style.setProperty("--panel",s.panel);if(s.canvas)document.documentElement.style.setProperty("--canvas",s.canvas);if(s.roundness&&s.roundness!=="default")document.documentElement.setAttribute("data-roundness",s.roundness);if(s.texture)document.documentElement.setAttribute("data-buttontexture",s.texture);if(s.shadows)document.documentElement.setAttribute("data-shadows",s.shadows);if(Number.isFinite(Number(s.widgetContentScale)))widgetContentBaseScale=Math.max(.45,Math.min(1.10,Number(s.widgetContentScale)));appearanceSync();updateAllPanelContentScales()}catch{}}
@@ -2048,7 +2450,15 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
   document.getElementById("backupProjectButton")?.addEventListener("click",()=>{downloadBlob(new Blob([currentProjectJson()],{type:"application/json"}),safeFileName(projectName)+"_backup.json");const st=document.getElementById("projectSaveStatus");if(st)st.textContent="Backup exported"});
   const importInput=document.createElement("input");importInput.type="file";importInput.accept="application/json,.json";importInput.style.display="none";document.body.appendChild(importInput);
   document.getElementById("importProjectButton")?.addEventListener("click",()=>{importInput.value="";importInput.click()});
-  importInput.addEventListener("change",()=>{const file=importInput.files?.[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);if(!data?.state?.layers||!data?.state?.frames)throw new Error("Invalid project file");layers=deep(data.state.layers);frames=deep(data.state.frames);camera=deep(data.state.camera||{x:W/2,y:H/2,zoom:1,rotation:0});cameraKeys=deep(data.state.cameraKeys||{});symbols=deep(data.state.symbols||[]);projectAudio=deep(data.state.audio||null);nextObjectId=data.state.nextObjectId||1;nextLayerId=data.state.nextLayerId||1;nextFrameId=data.state.nextFrameId||1;projectId=null;projectName=data.name||"Imported Animation";currentFrame=0;currentLayerId=layers[0]?.id||null;const extra=data.state.extra||{};projectBackground=normalizeHex(data.state.background||extra.background)||"#FFFFFF";projectTransparent=!!(data.state.transparent??extra.transparent);projectNotes=String(data.state.notes||extra.notes||"");ensureFrameLayers();history=[];future=[];renderAll();syncProjectStudio();enterEditor()}catch(err){openModal("Import Failed",'<div style="font-size:13px;line-height:1.45">'+escapeHtml(err.message||"Invalid project file")+'</div>',"OK",(m,close)=>close())}};r.readAsText(file)});
+  function importProjectData(data){
+    if(!data?.state?.layers||!data?.state?.frames)throw new Error("Invalid project file");
+    setProjectCanvasSize(data.state.canvasWidth||640,data.state.canvasHeight||480);
+    layers=deep(data.state.layers);frames=deep(data.state.frames);camera=deep(data.state.camera||{x:W/2,y:H/2,zoom:1,rotation:0});cameraKeys=deep(data.state.cameraKeys||{});symbols=deep(data.state.symbols||[]);scenes=deep(data.state.scenes||[]);activeSceneId=data.state.activeSceneId||null;projectAudio=deep(data.state.audio||null);nextObjectId=data.state.nextObjectId||1;nextLayerId=data.state.nextLayerId||1;nextFrameId=data.state.nextFrameId||1;projectId=null;projectName=data.name||"Imported Animation";currentFrame=0;currentLayerId=layers[0]?.id||null;
+    const extra=data.state.extra||{};projectBackground=normalizeHex(data.state.background||extra.background)||"#FFFFFF";projectTransparent=!!(data.state.transparent??extra.transparent);projectNotes=String(data.state.notes||extra.notes||"");
+    ensureFrameLayers();history=[];future=[];selected.clear();selectedTimelineFrames.clear();renderAll();syncProjectStudio();enterEditor();
+  }
+  window.importAnimationProject=importProjectData;
+  importInput.addEventListener("change",()=>{const file=importInput.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{importProjectData(JSON.parse(reader.result))}catch(error){openModal("Import Failed",'<div style="font-size:13px;line-height:1.45">'+escapeHtml(error.message||"Invalid project file")+'</div>',"OK",(modal,close)=>close())}};reader.onerror=()=>openModal("Import Failed",'<div style="font-size:13px;line-height:1.45">Could not read the selected project file.</div>',"OK",(modal,close)=>close());reader.readAsText(file)});
   syncProjectStudio();restartAutosave();
   window.addEventListener("beforeunload",()=>{const editor=document.getElementById("editorView");if(editor&&getComputedStyle(editor).display!=="none")try{saveCurrent()}catch(error){console.error("Closing save failed.",error)}});
 
@@ -2060,9 +2470,9 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
 
   // Arrange helpers.
   function selectedObjs(){return selectedObjects()}
-  function duplicateSelection(){const list=selectedObjs();if(!list.length)return;pushHistory();const created=[];for(const o of list){const c=deep(o);c.id=nextObjectId++;c.x+=18;c.y+=18;currentObjects().push(c);created.push(c)}selected.clear();created.forEach(o=>selected.add(o.id));renderAll()}
-  function centerSelection(){const list=selectedObjs(),b=selectionBounds();if(!list.length||!b)return;pushHistory();const dx=W/2-(b.minX+b.maxX)/2,dy=H/2-(b.minY+b.maxY)/2;list.forEach(o=>{o.x+=dx;o.y+=dy});renderAll()}
-  function zMove(delta){const list=selectedObjs();if(!list.length)return;pushHistory();const arr=currentObjects();for(const o of list){let i=arr.findIndex(v=>v.id===o.id);if(i<0)continue;arr.splice(i,1);i=Math.max(0,Math.min(arr.length,i+delta));arr.splice(i,0,o)}renderAll()}
+  function duplicateSelection(){const list=selectedObjs();if(!list.length||!canEditObjects(list,true))return;pushHistory();const created=[];for(const o of list){const c=deep(o);c.id=nextObjectId++;c.x+=18;c.y+=18;currentObjects().push(c);created.push(c)}selected.clear();created.forEach(o=>selected.add(o.id));renderAll()}
+  function centerSelection(){const list=selectedObjs(),b=selectionBounds();if(!list.length||!b||!canEditObjects(list))return;pushHistory();const dx=W/2-(b.minX+b.maxX)/2,dy=H/2-(b.minY+b.maxY)/2;list.forEach(o=>{o.x+=dx;o.y+=dy});renderAll()}
+  function zMove(delta){const list=selectedObjs();if(!list.length||!canEditObjects(list))return;pushHistory();const arr=currentObjects();for(const o of list){let i=arr.findIndex(v=>v.id===o.id);if(i<0)continue;arr.splice(i,1);i=Math.max(0,Math.min(arr.length,i+delta));arr.splice(i,0,o)}renderAll()}
   function layerMove(delta){const i=layers.findIndex(l=>l.id===currentLayerId),n=i+delta;if(i<0||n<0||n>=layers.length)return;pushHistory();[layers[i],layers[n]]=[layers[n],layers[i]];renderAll()}
   document.getElementById("duplicateSelectionButton")?.addEventListener("click",duplicateSelection);
   document.getElementById("centerSelectionButton")?.addEventListener("click",centerSelection);
@@ -2123,9 +2533,20 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     const slider=document.getElementById("layerOpacity"),text=document.getElementById("layerOpacityText");
     const value=Math.round((current?.opacity==null?1:current.opacity)*100);
     if(slider)slider.value=value;if(text)text.textContent=value+"%";
-    const rows=[...document.querySelectorAll("#layerList .layerRow")],ordered=[...layers].reverse();
-    rows.forEach((row,i)=>{const layer=ordered[i];if(!layer)return;row.ondblclick=e=>{e.preventDefault();e.stopPropagation();openModal("Rename Layer",'<input id="layerNameValue" type="text" maxlength="80">',"Rename",(m,close)=>{const v=m.querySelector("#layerNameValue").value.trim();if(!v)return;pushHistory();layer.name=v;renderAll();close()});const input=document.getElementById("layerNameValue");if(input){input.value=layer.name;setTimeout(()=>{input.focus();input.select()},0)}}});
+    const timing=document.getElementById("layerTimingScale");
+    if(timing){timing.value=String(current?.timingScale||1);timing.onchange=()=>{if(!current)return;pushHistory();current.timingScale=Math.max(.25,Math.min(4,Number(timing.value)||1));renderAll()}}
+    const rows=[...document.querySelectorAll("#layerList .layerRow")];
+    rows.forEach(row=>{const layer=layers.find(item=>String(item.id)===row.dataset.layerId);if(!layer)return;row.ondblclick=e=>{e.preventDefault();e.stopPropagation();openModal("Rename Layer",'<input id="layerNameValue" type="text" maxlength="80">',"Rename",(m,close)=>{const v=m.querySelector("#layerNameValue").value.trim();if(!v)return;pushHistory();layer.name=v;renderAll();close()});const input=document.getElementById("layerNameValue");if(input){input.value=layer.name;setTimeout(()=>{input.focus();input.select()},0)}}});
   };
+  document.getElementById("layerFolderSelect")?.addEventListener("change",event=>{const layer=activeLayer();if(!layer)return;pushHistory();layer.folderName=event.target.value;renderAll()});
+  document.getElementById("addLayerFolderButton")?.addEventListener("click",()=>{
+    openModal("New Layer Folder",'<input id="layerFolderName" type="text" maxlength="60" placeholder="Folder name">',"Create",(modal,close)=>{
+      const name=modal.querySelector("#layerFolderName").value.trim(),layer=activeLayer();
+      if(!name||!layer)return;
+      pushHistory();layer.folderName=name;renderAll();close();
+    });
+    document.getElementById("layerFolderName")?.focus();
+  });
   document.getElementById("layerOpacity")?.addEventListener("input",e=>{const l=activeLayer();if(!l)return;l.opacity=Math.max(0,Math.min(1,(Number(e.target.value)||0)/100));document.getElementById("layerOpacityText").textContent=Math.round(l.opacity*100)+"%";render()});
   const previousDrawObject=drawObject;
   drawObject=function(c,obj){
@@ -2150,7 +2571,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
   const originalCapturePanelLayout=capturePanelLayout;
   capturePanelLayout=function(){
     const out=originalCapturePanelLayout();
-    out.__guides={snap:snapEnabled,size:snapSize,center:centerGuideEnabled,safe:safeGuideEnabled,margin:safeGuideMargin,pixel:pixelGuideEnabled};
+    out.__guides={snap:snapEnabled,size:snapSize,center:centerGuideEnabled,safe:safeGuideEnabled,margin:safeGuideMargin,pixel:pixelGuideEnabled,perspective:perspectiveGuideEnabled,perspectiveMode:perspectiveGuideMode,vanishingPoints:deep(perspectiveVanishingPoints)};
     let appearance={};try{appearance=JSON.parse(localStorage.getItem("bba_editor_appearance_v2")||"{}")}catch{}
     out.__appearance=appearance;
     return out;
@@ -2160,7 +2581,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     const ok=originalApplyWidgetPreset(name);
     const preset=getWidgetPresets().find(p=>p.name===name);if(!preset)return ok;
     const g=preset.layout?.__guides;
-    if(g){snapEnabled=!!g.snap;snapSize=Math.max(4,Math.min(200,Number(g.size)||20));centerGuideEnabled=g.center!==false;safeGuideEnabled=!!g.safe;safeGuideMargin=Math.max(0,Math.min(200,Number(g.margin)||40));pixelGuideEnabled=!!g.pixel;syncGuides();renderGrid()}
+    if(g){snapEnabled=!!g.snap;snapSize=Math.max(4,Math.min(200,Number(g.size)||20));centerGuideEnabled=g.center!==false;safeGuideEnabled=!!g.safe;safeGuideMargin=Math.max(0,Math.min(200,Number(g.margin)||40));pixelGuideEnabled=!!g.pixel;perspectiveGuideEnabled=!!g.perspective;perspectiveGuideMode=g.perspectiveMode==="two-point"?"two-point":"one-point";if(Array.isArray(g.vanishingPoints)&&g.vanishingPoints.length===2)perspectiveVanishingPoints=deep(g.vanishingPoints);syncGuides();renderGrid()}
     const a=preset.layout?.__appearance;
     if(a){try{localStorage.setItem("bba_editor_appearance_v2",JSON.stringify(a))}catch{};document.documentElement.style.setProperty("--accent",a.accent||"#4a5cff");document.documentElement.style.setProperty("--bg",a.workspace||"#f3f3f1");document.documentElement.style.setProperty("--panel",a.panel||"#ffffff");document.documentElement.style.setProperty("--canvas",a.canvas||"#ffffff");if((a.roundness||"default")==="default")document.documentElement.removeAttribute("data-roundness");else document.documentElement.setAttribute("data-roundness",a.roundness);document.documentElement.setAttribute("data-buttontexture",a.texture||"soft");document.documentElement.setAttribute("data-shadows",a.shadows||"high");appearanceSync()}
     return ok;
@@ -2169,7 +2590,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
   resetWorkspaceLayout=function(){
     originalResetWorkspaceLayout();
     for(const [id,d] of Object.entries(extraDefaults)){const p=document.getElementById(id);if(!p)continue;p.classList.remove("is-hidden","collapsed");const body=p.querySelector(".panelBody"),resize=p.querySelector(".panelResizeHandle");if(body)body.style.display="";if(resize)resize.style.display="";p.style.left=d[0]+"px";p.style.top=d[1]+"px";p.style.width=d[2]+"px";p.style.height=d[3]+"px"}
-    snapEnabled=false;snapSize=20;centerGuideEnabled=true;safeGuideEnabled=false;safeGuideMargin=40;pixelGuideEnabled=false;syncGuides();appearanceSync();savePanelLayout();renderAll();
+    snapEnabled=false;snapSize=20;centerGuideEnabled=true;safeGuideEnabled=false;safeGuideMargin=40;pixelGuideEnabled=false;perspectiveGuideEnabled=false;perspectiveGuideMode="one-point";perspectiveVanishingPoints=[{x:W/2,y:H/2},{x:W*.8,y:H/2}];syncGuides();appearanceSync();savePanelLayout();renderAll();
   };
 })();
 
@@ -2848,7 +3269,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
       const b=document.createElement("button");
       b.type="button";
       b.dataset.frameIndex=String(index);
-      b.className="frameBtn timelineFrameCell"+(index===currentFrame?" active":"")+(index===currentFrame?" playhead":"")+(Array.isArray(frame.keyframes)&&frame.keyframes.length?" hasKeyframe":"")+(cameraKeys[frame.id]?" hasCameraKey":"");
+      b.className="frameBtn timelineFrameCell"+(index===currentFrame?" active":"")+(selectedTimelineFrames.has(index)?" multiSelected":"")+(index===currentFrame?" playhead":"")+(Array.isArray(frame.keyframes)&&frame.keyframes.length?" hasKeyframe":"")+(cameraKeys[frame.id]?" hasCameraKey":"");
       b.title=(frame.label?frame.label+" — ":"")+`Frame ${index+1} · Hold ${Math.max(1,Number(frame.duration)||1)}×`;
 
       const top=document.createElement("div");
@@ -2902,11 +3323,20 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
       }
 
       b.append(top,thumb,label,strip);
-      b.addEventListener("click",()=>{
+      b.addEventListener("click",event=>{
         if(timelineJustMoved)return;
         if(playing) return;
+        if(event.shiftKey){
+          const low=Math.min(timelineAnchorFrame,index),high=Math.max(timelineAnchorFrame,index);
+          selectedTimelineFrames=new Set(Array.from({length:high-low+1},(_,offset)=>low+offset));
+        }else if(event.ctrlKey||event.metaKey){
+          if(selectedTimelineFrames.has(index))selectedTimelineFrames.delete(index);else selectedTimelineFrames.add(index);
+          timelineAnchorFrame=index;
+        }else{selectedTimelineFrames=new Set([index]);timelineAnchorFrame=index}
         currentFrame=index;
         selected.clear();
+        const ordered=[...selectedTimelineFrames].sort((a,b)=>a-b),start=document.getElementById("timelineLoopStartInput"),end=document.getElementById("timelineLoopEndInput");
+        if(start)start.value=ordered.length?ordered[0]+1:"";if(end)end.value=ordered.length?ordered[ordered.length-1]+1:"";
         renderAll();
         b.scrollIntoView({block:"nearest",inline:"center"});
       });
@@ -3110,15 +3540,16 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
 (function(){
   "use strict";
   const BLEND_MODE_MAP={normal:"source-over",multiply:"multiply",screen:"screen",overlay:"overlay",darken:"darken",lighten:"lighten","color-dodge":"color-dodge","color-burn":"color-burn",difference:"difference",exclusion:"exclusion",hue:"hue",saturation:"saturation",color:"color",luminosity:"luminosity"};
-  const blendCanvas=document.createElement("canvas");
-  blendCanvas.width=Math.round(W*DPR);blendCanvas.height=Math.round(H*DPR);
-  const blendCtx=blendCanvas.getContext("2d");
-  blendCtx.setTransform(DPR,0,0,DPR,0,0);
 
   const baseEnsureFrameLayers=ensureFrameLayers;
   ensureFrameLayers=function(){
     baseEnsureFrameLayers();
-    for(const l of layers) if(!l.blendMode || !BLEND_MODE_MAP[l.blendMode]) l.blendMode="normal";
+    for(const l of layers){
+      if(!l.blendMode||!BLEND_MODE_MAP[l.blendMode])l.blendMode="normal";
+      if(typeof l.clipToBelow!=="boolean")l.clipToBelow=false;
+      if(!["none","blur","glow","shadow","color-adjust"].includes(l.effect))l.effect="none";
+      if(!Number.isFinite(Number(l.effectAmount)))l.effectAmount=5;
+    }
   };
   ensureFrameLayers();
 
@@ -3129,27 +3560,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     ctx.clearRect(0,0,W,H);
     if(!projectTransparent){ctx.fillStyle=projectBackground||"#FFFFFF";ctx.fillRect(0,0,W,H)}
     const f=activeFrame();
-    if(f){
-      for(const l of layers){
-        if(!l.visible) continue;
-        const objs=f.layers[l.id]||[];
-        const mode=BLEND_MODE_MAP[l.blendMode]||"source-over";
-        const op=Math.max(0,Math.min(1,Number(l.opacity==null?1:l.opacity)));
-        if(mode==="source-over"){
-          ctx.save();ctx.globalAlpha=op;
-          for(const o of objs) drawObject(ctx,o);
-          ctx.restore();
-        }else{
-          blendCtx.clearRect(0,0,W,H);
-          for(const o of objs) drawObject(blendCtx,o);
-          ctx.save();
-          ctx.globalAlpha=op;
-          ctx.globalCompositeOperation=mode;
-          ctx.drawImage(blendCanvas,0,0,W,H);
-          ctx.restore();
-        }
-      }
-    }
+    if(f)drawCompositedLayers(ctx,f,currentFrame,true);
     renderSelection();renderOnion();
   };
 
@@ -3161,6 +3572,17 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     if(select && l){
       if(document.activeElement!==select) select.value=l.blendMode||"normal";
       select.onchange=()=>{pushHistory();l.blendMode=select.value;render()};
+    }
+    const clipping=document.getElementById("layerClipToBelow"),effect=document.getElementById("layerEffect"),amount=document.getElementById("layerEffectAmount"),amountText=document.getElementById("layerEffectAmountText");
+    if(l&&clipping){if(document.activeElement!==clipping)clipping.checked=!!l.clipToBelow;clipping.onchange=()=>{pushHistory();l.clipToBelow=clipping.checked;render()}}
+    if(l&&effect){if(document.activeElement!==effect)effect.value=l.effect||"none";effect.onchange=()=>{pushHistory();l.effect=effect.value;render()}}
+    if(l&&amount){
+      const value=Math.max(1,Math.min(20,Number(l.effectAmount)||5));let historyPushed=false;
+      if(document.activeElement!==amount)amount.value=value;if(amountText)amountText.textContent=String(value);
+      amount.onpointerdown=()=>{if(!historyPushed){pushHistory();historyPushed=true}};
+      amount.onfocus=()=>{historyPushed=false};
+      amount.oninput=()=>{if(!historyPushed){pushHistory();historyPushed=true}l.effectAmount=Math.max(1,Math.min(20,Number(amount.value)||5));if(amountText)amountText.textContent=String(l.effectAmount);render()};
+      amount.onchange=()=>{historyPushed=false};
     }
   };
 
@@ -3212,6 +3634,9 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     c.save();
     applyObjectTransform(c,obj);
     c.globalCompositeOperation=obj.composite||"source-over";
+    if(obj.brushStyle==="spray"){drawRasterSpray(c,obj,widths);c.restore();return}
+    if(obj.brushStyle==="soft"){c.globalAlpha*=.55;c.shadowColor=obj.color||"#111111";c.shadowBlur=Math.max(2,(obj.width||1)*.8)}
+    else if(obj.brushStyle==="watercolor"){c.globalAlpha*=.65;c.globalCompositeOperation="multiply"}
     c.fillStyle=obj.color||"#111111";
     for(let i=0;i<n;i++){
       const w=Math.max(.35,widths[i]||1),r=w/2,a=alphas[i]==null?1:alphas[i];
@@ -3866,7 +4291,7 @@ wirePlaybackWidget();
 
   function addSelectionToAllFrames(){
     const objs=selectedObjects();
-    if(!objs.length)return;
+    if(!objs.length||!canEditObjects(objs))return;
     const sourceFrame=activeFrame(),sourceEntries=[];
     for(const obj of objs){
       const layer=layers.find(candidate=>(sourceFrame.layers[candidate.id]||[]).some(item=>item.id===obj.id));
@@ -3946,7 +4371,7 @@ wirePlaybackWidget();
     return frame.layers[layerId];
   }
   function duplicateSelected(){
-    const objs=selectedObjects();if(!objs.length)return;
+    const objs=selectedObjects();if(!objs.length||!canEditObjects(objs,true))return;
     pushHistory();
     const newGroups=new Map(),copies=[];
     for(const obj of objs){
@@ -3960,22 +4385,50 @@ wirePlaybackWidget();
     selected.clear();copies.forEach(obj=>selected.add(obj.id));renderAll();
   }
   function joinSelection(){
-    const objs=selectedObjects();if(objs.length<2)return;
+    const objs=selectedObjects();if(objs.length<2||!canEditObjects(objs))return;
     const groupId=uid("group");pushHistory();objs.forEach(obj=>obj.groupId=groupId);renderAll();
   }
   function unjoinSelection(){
-    const groups=new Set(selectedObjects().map(obj=>obj.groupId).filter(Boolean));
-    if(!groups.size)return;
+    const objects=selectedObjects(),groups=new Set(objects.map(obj=>obj.groupId).filter(Boolean));
+    if(!groups.size||!canEditObjects(objects))return;
     pushHistory();
     for(const frame of frames)for(const items of Object.values(frame.layers))for(const obj of items)if(groups.has(obj.groupId))delete obj.groupId;
     renderAll();
   }
   function alignSelection(){
+    if(!canEditObjects(selectedObjects()))return;
     const bounds=selectionBounds();if(!bounds)return;
     const dx=W/2-(bounds.minX+bounds.maxX)/2,dy=H/2-(bounds.minY+bounds.maxY)/2;
     pushHistory();selectedObjects().forEach(obj=>{obj.x+=dx;obj.y+=dy});renderAll();
   }
+  function alignSelectionEdges(mode){
+    const objects=selectedObjects();if(objects.length<2||!canEditObjects(objects))return;
+    const bounds=objects.map(object=>({object,b:objectWorldBounds(object)})).filter(item=>item.b);
+    if(bounds.length<2)return;
+    const minX=Math.min(...bounds.map(item=>item.b.minX)),maxX=Math.max(...bounds.map(item=>item.b.maxX)),minY=Math.min(...bounds.map(item=>item.b.minY)),maxY=Math.max(...bounds.map(item=>item.b.maxY));
+    const target={left:minX,right:maxX,top:minY,bottom:maxY,centerX:(minX+maxX)/2,centerY:(minY+maxY)/2}[mode];
+    pushHistory();
+    for(const {object,b} of bounds){
+      const dx=mode==="left"?target-b.minX:mode==="right"?target-b.maxX:mode==="centerX"?target-(b.minX+b.maxX)/2:0;
+      const dy=mode==="top"?target-b.minY:mode==="bottom"?target-b.maxY:mode==="centerY"?target-(b.minY+b.maxY)/2:0;
+      object.x+=dx;object.y+=dy;
+    }
+    renderAll();
+  }
+  function distributeSelection(axis){
+    const objects=selectedObjects();if(objects.length<3||!canEditObjects(objects))return;
+    const items=objects.map(object=>({object,b:objectWorldBounds(object)})).filter(item=>item.b).sort((a,b)=>axis==="x"?(a.b.minX+a.b.maxX)-(b.b.minX+b.b.maxX):(a.b.minY+a.b.maxY)-(b.b.minY+b.b.maxY));
+    if(items.length<3)return;
+    const first=items[0].b,last=items[items.length-1].b,start=axis==="x"?(first.minX+first.maxX)/2:(first.minY+first.maxY)/2,end=axis==="x"?(last.minX+last.maxX)/2:(last.minY+last.maxY)/2;
+    pushHistory();
+    for(let index=1;index<items.length-1;index++){
+      const bounds=items[index].b,target=start+(end-start)*index/(items.length-1),center=axis==="x"?(bounds.minX+bounds.maxX)/2:(bounds.minY+bounds.maxY)/2,delta=target-center;
+      if(axis==="x")items[index].object.x+=delta;else items[index].object.y+=delta;
+    }
+    renderAll();
+  }
   function rotateSelection(degrees){
+    if(!canEditObjects(selectedObjects()))return;
     const bounds=selectionBounds();if(!bounds)return;
     const cx=(bounds.minX+bounds.maxX)/2,cy=(bounds.minY+bounds.maxY)/2,rad=degrees*Math.PI/180,c=Math.cos(rad),s=Math.sin(rad);
     pushHistory();
@@ -4014,7 +4467,7 @@ wirePlaybackWidget();
     ];
     for(const [label,action] of actions){
       const button=document.createElement("button");button.type="button";button.textContent=label;
-      button.onclick=()=>{closeObjectMenu();action()};menu.appendChild(button);
+      button.onclick=()=>{closeObjectMenu();if(canEditObjects(selectedObjects(),true))action()};menu.appendChild(button);
     }
     menu.style.left=Math.min(event.clientX,window.innerWidth-220)+"px";
     menu.style.top=Math.min(event.clientY,window.innerHeight-360)+"px";
@@ -4080,9 +4533,23 @@ wirePlaybackWidget();
   },true);
 
   function openFileMenu(){
-    const body='<div class="fileMenuActions"><button type="button" class="small" id="fileSaveProject">Save Project</button><button type="button" class="small" id="fileImportProject">Import Project</button></div><div class="exportFormats"><label class="propertyLine"><span>Format</span><select id="exportFormat"><option value="png">PNG — Current Frame</option><option value="jpeg">JPEG — Current Frame</option><option value="svg">SVG — Current Frame</option><option value="sprite">PNG — Sprite Sheet</option><option value="sequence">PNG — Frame Sequence (ZIP)</option><option value="webm">WebM — Animation</option><option value="json">JSON — Project Data</option></select></label><label class="propertyLine"><span>Scale</span><select id="exportScale"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option></select></label><label class="checkRow"><input id="exportTransparent" type="checkbox"> Transparent background</label><button class="primary" id="fileExportNow" type="button">Export</button><div class="exportStatus" id="exportStatus"></div><div class="exportHint">Configure current-frame, ZIP image-sequence, sprite-sheet, WebM, or project-data exports.</div></div>';
+    const selectedRange=[...selectedTimelineFrames].sort((a,b)=>a-b),defaultStart=selectedRange.length?selectedRange[0]+1:1,defaultEnd=selectedRange.length?selectedRange[selectedRange.length-1]+1:frames.length;
+    const body='<div class="fileMenuActions"><button type="button" class="small" id="fileSaveProject">Save Project</button><button type="button" class="small" id="fileSaveProjectFile">Save Project File</button><button type="button" class="small" id="fileImportProject">Import JSON</button><button type="button" class="small" id="fileOpenProjectFile">Open Project File</button><button type="button" class="small" id="fileVersionHistory">Version History</button></div><div class="exportFormats"><label class="propertyLine"><span>Format</span><select id="exportFormat"><option value="png">PNG — Current Frame</option><option value="jpeg">JPEG — Current Frame</option><option value="svg">SVG — Current Frame</option><option value="sprite">PNG — Sprite Sheet</option><option value="sequence">PNG — Frame Sequence (ZIP)</option><option value="webm">WebM — Animation</option><option value="json">JSON — Project Data</option></select></label><div class="propertyLine"><span>Frame range</span><input id="exportRangeStart" type="number" min="1" max="'+frames.length+'" value="'+defaultStart+'" aria-label="Export first frame"><span>to</span><input id="exportRangeEnd" type="number" min="1" max="'+frames.length+'" value="'+defaultEnd+'" aria-label="Export last frame"></div><label class="propertyLine"><span>Scale</span><select id="exportScale"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option></select></label><label class="checkRow"><input id="exportTransparent" type="checkbox"> Transparent background</label><button class="primary" id="fileExportNow" type="button">Export</button><div class="exportStatus" id="exportStatus"></div><div class="exportHint">Frame range applies to sprite sheets, ZIP image sequences, and WebM; current-frame formats stay on the active frame.</div></div>';
     const modal=openModal("File",body,"Close",(m,close)=>close());
     modal.querySelector("#fileSaveProject").onclick=()=>{try{saveCurrent();modal.querySelector("#exportStatus").textContent="Project saved."+(window.__recoveryWarning||"")}catch(error){console.error("Project save failed.",error);modal.querySelector("#exportStatus").textContent="Save failed: "+(error?.message||"Storage error")}};
+    modal.querySelector("#fileSaveProjectFile").onclick=async()=>{
+      const status=modal.querySelector("#exportStatus"),bridge=window.animationProjectFiles;
+      if(!bridge?.save){status.textContent="File-based project storage is available in the desktop app only.";return}
+      try{const result=await bridge.save({name:projectName,content:currentProjectJson()});status.textContent=result.canceled?"Save canceled.":"Project file saved to "+result.filePath}
+      catch(error){console.error("Native project file save failed.",error);status.textContent="File save failed: "+(error?.message||"Unknown error")}
+    };
+    modal.querySelector("#fileOpenProjectFile").onclick=async()=>{
+      const status=modal.querySelector("#exportStatus"),bridge=window.animationProjectFiles;
+      if(!bridge?.open){status.textContent="File-based project storage is available in the desktop app only.";return}
+      try{const result=await bridge.open();if(result.canceled){status.textContent="Open canceled.";return}const data=JSON.parse(result.content);if(!data?.state?.layers||!data?.state?.frames)throw new Error("Invalid project file");closeModalRoot();window.importAnimationProject(data)}
+      catch(error){console.error("Native project file open failed.",error);const message="File open failed: "+(error?.message||"Invalid project file");if(status?.isConnected)status.textContent=message;else openModal("Project File Error",'<div style="font-size:13px;line-height:1.45">'+escapeHtml(message)+'</div>',"OK",(element,close)=>close())}
+    };
+    modal.querySelector("#fileVersionHistory").onclick=()=>{closeModalRoot();window.openProjectVersionHistory?.()};
     modal.querySelector("#fileImportProject").onclick=()=>{closeModalRoot();document.getElementById("importProjectButton")?.click()};
     modal.querySelector("#fileExportNow").onclick=async event=>{
       const button=event.currentTarget;button.disabled=true;
@@ -4090,9 +4557,9 @@ wirePlaybackWidget();
     };
   }
   fileButton?.addEventListener("click",openFileMenu);
-  window.animationEditorActions={duplicate:duplicateSelected,join:joinSelection,ungroup:unjoinSelection,center:alignSelection,bringToFront:()=>{pushHistory();changeLayerOrder(1);renderAll()},sendToBack:()=>{pushHistory();changeLayerOrder(-1);renderAll()},delete:()=>{pushHistory();for(const layer of layers)for(const obj of [...layerObjects(layer.id)])if(selected.has(obj.id))layerObjects(layer.id).splice(layerObjects(layer.id).indexOf(obj),1);selected.clear();renderAll()},deselect:()=>{selected.clear();renderAll()}};
+  window.animationEditorActions={duplicate:duplicateSelected,join:joinSelection,ungroup:unjoinSelection,center:alignSelection,alignLeft:()=>alignSelectionEdges("left"),alignRight:()=>alignSelectionEdges("right"),alignTop:()=>alignSelectionEdges("top"),alignBottom:()=>alignSelectionEdges("bottom"),alignCenterX:()=>alignSelectionEdges("centerX"),alignCenterY:()=>alignSelectionEdges("centerY"),distributeX:()=>distributeSelection("x"),distributeY:()=>distributeSelection("y"),bringToFront:()=>{pushHistory();changeLayerOrder(1);renderAll()},sendToBack:()=>{pushHistory();changeLayerOrder(-1);renderAll()},delete:()=>{pushHistory();for(const layer of layers)for(const obj of [...layerObjects(layer.id)])if(selected.has(obj.id))layerObjects(layer.id).splice(layerObjects(layer.id).indexOf(obj),1);selected.clear();renderAll()},deselect:()=>{selected.clear();renderAll()}};
   document.getElementById("editMenuBtn")?.addEventListener("click",()=>{
-    const body='<div class="widgetButtonGrid"><button type="button" data-edit-action="duplicate">Duplicate</button><button type="button" data-edit-action="center">Center</button><button type="button" data-edit-action="bringToFront">Bring to front</button><button type="button" data-edit-action="sendToBack">Send to back</button><button type="button" data-edit-action="join">Join selection</button><button type="button" data-edit-action="ungroup">Ungroup</button><button type="button" data-edit-action="delete">Delete</button><button type="button" data-edit-action="deselect">Deselect</button></div>';
+    const body='<div class="widgetSectionTitle">Arrange</div><div class="widgetButtonGrid"><button type="button" data-edit-action="duplicate">Duplicate</button><button type="button" data-edit-action="center">Center on canvas</button><button type="button" data-edit-action="alignLeft">Align left</button><button type="button" data-edit-action="alignRight">Align right</button><button type="button" data-edit-action="alignTop">Align top</button><button type="button" data-edit-action="alignBottom">Align bottom</button><button type="button" data-edit-action="alignCenterX">Center horizontally</button><button type="button" data-edit-action="alignCenterY">Center vertically</button><button type="button" data-edit-action="distributeX">Distribute horizontally</button><button type="button" data-edit-action="distributeY">Distribute vertically</button></div><div class="widgetSectionTitle">Objects</div><div class="widgetButtonGrid"><button type="button" data-edit-action="bringToFront">Bring to front</button><button type="button" data-edit-action="sendToBack">Send to back</button><button type="button" data-edit-action="join">Join selection</button><button type="button" data-edit-action="ungroup">Ungroup</button><button type="button" data-edit-action="delete">Delete</button><button type="button" data-edit-action="deselect">Deselect</button></div>';
     const modal=openModal("Edit",body,"Close",(m,close)=>close());
     modal.querySelectorAll("[data-edit-action]").forEach(button=>button.addEventListener("click",()=>{const action=window.animationEditorActions[button.dataset.editAction];closeModalRoot();action?.()}));
   });
@@ -4246,7 +4713,8 @@ wirePlaybackWidget();
     const point=getCanvasPoint(event),hit=topObjectAt(point.x,point.y),status=document.getElementById("rigStatus");
     if(!hit){if(status)status.textContent="Click a rig part on the stage to select and pose it.";return}
     if(!selected.has(hit.id)){selected.clear();selected.add(hit.id)}
-    const pivot=objectLocalToWorld(hit,objectPivot(hit)),objects=rigAffectedObjects([hit]);
+    const pivot=objectLocalToWorld(hit,objectPivot(hit)),objects=rigAffectedObjects([hit]),locked=objects.map(layerForObject).find(layer=>layer?.locked);
+    if(locked){const status=document.getElementById("rigStatus");if(status)status.textContent=`"${locked.name}" is locked. Unlock it before posing this rig.`;return}
     pushHistory();
     pointerAction={
       kind:"rigPose",pointerId:event.pointerId,rootId:hit.id,pivot,
@@ -4281,6 +4749,128 @@ wirePlaybackWidget();
   canvas.addEventListener("pointercancel",finishRigPose,true);
   canvas.addEventListener("lostpointercapture",finishRigPose,true);
 
+  function layerForObject(object){
+    const frame=activeFrame();if(!frame)return null;
+    return layers.find(layer=>(frame.layers[layer.id]||[]).some(item=>item.id===object.id))||null;
+  }
+  document.addEventListener("pointerdown",event=>{
+    if(event.target!==canvas&&!canvas.contains(event.target))return;
+    if(event.button===1||event.altKey||panToolActive||tool==="camera"||tool==="eyedropper")return;
+    const drawingTools=new Set(["brush","line","rectangle","ellipse","bucket"]);
+    const lockedLayer=drawingTools.has(tool)&&activeLayer()?.locked?activeLayer():selectedObjects().map(layerForObject).find(layer=>layer?.locked);
+    if(!lockedLayer)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    const status=document.getElementById("rigStatus");
+    if(status)status.textContent=`"${lockedLayer.name}" is locked. Unlock it in the Layers panel before editing.`;
+  },true);
+
+  function rigChainForEnd(end){
+    const objects=allVisibleObjects(),parent=object=>objects.find(candidate=>String(candidate.id)===String(object.rigParentId));
+    const middle=parent(end),root=middle&&parent(middle);
+    return root&&middle?{root,middle,end}:null;
+  }
+  function keyRigPose(objects,saveHistory=true){
+    if(!canEditObjects(objects))return false;
+    const frame=activeFrame();if(!frame||!objects.length)return false;
+    const keys=new Set(Array.isArray(frame.keyframes)?frame.keyframes:[]);
+    const ids=objects.map(object=>object.id),missing=ids.filter(id=>!keys.has(id));
+    if(!missing.length)return false;
+    if(saveHistory)pushHistory();frame.keyframes=[...keys,...missing];renderAll();return true;
+  }
+  document.getElementById("rigIKBtn")?.addEventListener("click",()=>setTool("rig-ik"));
+  document.getElementById("rigKeyPoseBtn")?.addEventListener("click",()=>{
+    const objects=selectedObjects(),status=document.getElementById("rigStatus");
+    if(objects.length!==1){if(status)status.textContent="Select one rig bone before setting a pose key.";return}
+    const chain=rigAffectedObjects(objects),changed=keyRigPose(chain);
+    if(status)status.textContent=changed?`Keyed ${chain.length} connected rig part${chain.length===1?"":"s"} on frame ${currentFrame+1}.`:"This rig pose is already keyed on the current frame.";
+  });
+  function solveRigPose(action,target){
+    const {root,middle,end,original,shoulder,elbow,wrist,upperLength,lowerLength,bendDirection}=action;
+    for(const item of original){
+      const object=allVisibleObjects().find(candidate=>candidate.id===item.id);if(!object)continue;
+      object.x=item.x;object.y=item.y;object.rotation=item.rotation;object.scaleX=item.scaleX;object.scaleY=item.scaleY;
+    }
+    let dx=target.x-shoulder.x,dy=target.y-shoulder.y,distance=Math.hypot(dx,dy);
+    const minDistance=Math.abs(upperLength-lowerLength)+.001,maxDistance=Math.max(minDistance,upperLength+lowerLength-.001);
+    distance=Math.max(minDistance,Math.min(maxDistance,distance));
+    const targetAngle=Math.atan2(dy,dx);
+    const cosElbow=Math.max(-1,Math.min(1,(upperLength*upperLength+distance*distance-lowerLength*lowerLength)/(2*upperLength*distance)));
+    const elbowAngle=targetAngle+bendDirection*Math.acos(cosElbow);
+    const desiredElbow={x:shoulder.x+Math.cos(elbowAngle)*upperLength,y:shoulder.y+Math.sin(elbowAngle)*upperLength};
+    const rootDelta=Math.atan2(desiredElbow.y-shoulder.y,desiredElbow.x-shoulder.x)-Math.atan2(elbow.y-shoulder.y,elbow.x-shoulder.x);
+    updateRigPose({delta:rootDelta,pivot:shoulder,original});
+    const currentMiddle=objectLocalToWorld(middle,objectPivot(middle)),currentEnd=objectLocalToWorld(end,objectPivot(end));
+    const forearmDelta=Math.atan2(target.y-currentMiddle.y,target.x-currentMiddle.x)-Math.atan2(currentEnd.y-currentMiddle.y,currentEnd.x-currentMiddle.x);
+    const forearmOriginal=rigAffectedObjects([middle]).map(object=>({id:object.id,x:object.x,y:object.y,rotation:Number(object.rotation)||0,scaleX:object.scaleX||1,scaleY:object.scaleY||1}));
+    updateRigPose({delta:forearmDelta,pivot:currentMiddle,original:forearmOriginal});
+  }
+  canvas.addEventListener("pointerdown",event=>{
+    if(tool!=="rig-ik"||event.button!==0)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    if(playing)return;
+    const selectedRig=selectedObjects(),point=getCanvasPoint(event),end=selectedRig.length===1?selectedRig[0]:topObjectAt(point.x,point.y),chain=end&&rigChainForEnd(end),status=document.getElementById("rigStatus");
+    if(!chain){if(status)status.textContent="Select a hand/end part with two linked parent bones to use IK Pose.";return}
+    const objects=rigAffectedObjects([chain.root]),locked=objects.map(layerForObject).find(layer=>layer?.locked);
+    if(locked){if(status)status.textContent=`"${locked.name}" is locked. Unlock it before posing this rig.`;return}
+    if(!selectedRig.length){selected.clear();selected.add(end.id)}
+    const shoulder=objectLocalToWorld(chain.root,objectPivot(chain.root)),elbow=objectLocalToWorld(chain.middle,objectPivot(chain.middle)),wrist=objectLocalToWorld(chain.end,objectPivot(chain.end));
+    const cross=(elbow.x-shoulder.x)*(wrist.y-shoulder.y)-(elbow.y-shoulder.y)*(wrist.x-shoulder.x);
+    const action={
+      kind:"rigIK",pointerId:event.pointerId,root:chain.root,middle:chain.middle,end:chain.end,
+      shoulder,elbow,wrist,upperLength:Math.max(.001,Math.hypot(elbow.x-shoulder.x,elbow.y-shoulder.y)),
+      lowerLength:Math.max(.001,Math.hypot(wrist.x-elbow.x,wrist.y-elbow.y)),bendDirection:cross<0?-1:1,
+      original:objects.map(object=>({id:object.id,x:object.x,y:object.y,rotation:Number(object.rotation)||0,scaleX:object.scaleX||1,scaleY:object.scaleY||1}))
+    };
+    pushHistory();pointerAction=action;
+    if(status)status.textContent=`IK posing ${end.rigRole||"end part"}; drag to move the end joint.`;
+    try{canvas.setPointerCapture(event.pointerId)}catch(error){if(event.isTrusted)console.warn("Could not capture IK pointer.",error)}
+    solveRigPose(action,point);
+  },true);
+  canvas.addEventListener("pointermove",event=>{
+    const action=pointerAction;if(!action||action.kind!=="rigIK"||action.pointerId!==event.pointerId)return;
+    event.preventDefault();event.stopImmediatePropagation();solveRigPose(action,getCanvasPoint(event));
+  },true);
+  function finishRigIK(event){
+    const action=pointerAction;if(!action||action.kind!=="rigIK"||action.pointerId!==event.pointerId)return;
+    event.preventDefault();event.stopImmediatePropagation();pointerAction=null;
+    const status=document.getElementById("rigStatus");
+    if(event.type==="pointerup"){
+      const keyed=keyRigPose(rigAffectedObjects([action.root]),false);
+      if(status)status.textContent=keyed?`IK pose set and keyed on frame ${currentFrame+1}.`:`IK pose set on frame ${currentFrame+1}; the rig already had keys here.`;
+    }else{
+      for(const item of action.original){
+        const object=allVisibleObjects().find(candidate=>candidate.id===item.id);if(!object)continue;
+        object.x=item.x;object.y=item.y;object.rotation=item.rotation;object.scaleX=item.scaleX;object.scaleY=item.scaleY;
+      }
+    }
+    renderAll();
+  }
+  canvas.addEventListener("pointerup",finishRigIK,true);
+  canvas.addEventListener("pointercancel",finishRigIK,true);
+  canvas.addEventListener("lostpointercapture",finishRigIK,true);
+
+  let perspectivePlacementIndex=0;
+  document.getElementById("setPerspectiveGuideBtn")?.addEventListener("click",()=>{
+    perspectiveGuideMode=document.getElementById("perspectiveGuideMode")?.value||"one-point";perspectiveGuideEnabled=true;perspectivePlacementIndex=0;
+    const status=document.getElementById("guideReadout");if(status)status.textContent=perspectiveGuideMode==="two-point"?"Click to place the left vanishing point.":"Click to place the vanishing point.";
+    setTool("perspective");renderGrid();
+  });
+  canvas.addEventListener("pointerdown",event=>{
+    if(tool!=="perspective"||event.button!==0)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    const point=getCanvasPoint(event);
+    if(perspectiveGuideMode==="two-point"&&perspectivePlacementIndex===0){
+      perspectiveVanishingPoints[0]=point;perspectivePlacementIndex=1;
+      const status=document.getElementById("guideReadout");if(status)status.textContent="Click to place the right vanishing point.";
+    }else{
+      const index=perspectiveGuideMode==="two-point"?1:0;perspectiveVanishingPoints[index]=point;
+      perspectivePlacementIndex=0;setTool("transform");
+      const status=document.getElementById("guideReadout");if(status)status.textContent=perspectiveGuideMode==="two-point"?"Two-point perspective grid ready.":"One-point perspective grid ready.";
+      savePanelLayout();
+    }
+    perspectiveGuideEnabled=true;renderGrid();
+  },true);
+
   function updateRecoveryButton(){
     const button=document.getElementById("restoreProjectBackupButton");
     if(button){button.disabled=!projectId||!localStorage.getItem(RECOVERY_PREFIX+projectId);button.title=button.disabled?"A previous saved version will appear after the next save.":"Open the previous saved version as a separate recovered project."}
@@ -4306,6 +4896,299 @@ wirePlaybackWidget();
   const previousRenderAll=renderAll;
   renderAll=function(){previousRenderAll();syncRigParentChoices();updateRecoveryButton()};
   setTimeout(()=>{syncRigParentChoices();updateRecoveryButton()},0);
+})();
+
+/* Linked palette colors and an interactive exposure-sheet view */
+(function(){
+  document.addEventListener("click",event=>{
+    const target=event.target instanceof Element?event.target:null;
+    if(!target||!activeLayer()?.locked)return;
+    const lockedEntry=target.closest("#importImageButton,#createTextButton");
+    const textConfirm=target.closest(".modalActions .primary")&&target.closest(".modal")?.querySelector("h2")?.textContent==="Add Text";
+    if(!lockedEntry&&!textConfirm)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    const status=document.getElementById("rigStatus");if(status)status.textContent=`"${activeLayer().name}" is locked. Unlock it in the Layers panel before adding artwork.`;
+  },true);
+  document.addEventListener("change",event=>{
+    const input=event.target;
+    if(!(input instanceof HTMLInputElement)||input.type!=="file"||!input.accept.includes("image")||!activeLayer()?.locked)return;
+    event.preventDefault();event.stopImmediatePropagation();input.value="";
+    const status=document.getElementById("rigStatus");if(status)status.textContent=`"${activeLayer().name}" is locked. Unlock it before importing artwork.`;
+  },true);
+  function symbolContents(roots=symbols.map(symbol=>symbol.objects)){
+    const found=[],visited=new Set(),visit=objects=>{for(const object of objects||[]){if(visited.has(object))continue;visited.add(object);found.push(object);if(object.type==="symbolInstance"){const symbol=symbols.find(item=>item.id===object.symbolId);if(symbol)visit(symbol.objects)}}};
+    for(const objects of roots)visit(objects);return found;
+  }
+  document.getElementById("linkSelectionColor")?.addEventListener("click",()=>{
+    const objects=selectedObjects(),slot=normalizeHex(document.getElementById("paletteLinkSource")?.value),status=document.getElementById("paletteLinkStatus");
+    if(!objects.length||!slot){if(status)status.textContent="Select artwork and a valid source color first.";return}
+    if(!canEditObjects(objects))return;
+    const ids=new Set(objects.map(object=>object.id)),symbolIds=new Set(objects.filter(object=>object.type==="symbolInstance").map(object=>object.symbolId)),linked=[];
+    for(const frame of frames)for(const layer of layers)for(const object of frame.layers[layer.id]||[])if(ids.has(object.id))linked.push(object);
+    for(const object of symbolContents())if(ids.has(object.id))linked.push(object);
+    for(const symbol of symbols)if(symbolIds.has(symbol.id))linked.push(...symbolContents([symbol.objects]));
+    pushHistory();for(const object of linked)object.paletteLinkColor=slot;
+    if(status)status.textContent=`Linked ${objects.length} selected object${objects.length===1?"":"s"} across ${linked.length} frame and symbol instance${linked.length===1?"":"s"} to ${slot}.`;renderAll();
+  });
+  document.getElementById("recolorLinkedColor")?.addEventListener("click",()=>{
+    const source=normalizeHex(document.getElementById("paletteLinkSource")?.value),target=normalizeHex(color),status=document.getElementById("paletteLinkStatus");
+    if(!source||!target){if(status)status.textContent="Choose valid source and target colors.";return}
+    const linked=[];
+    for(const frame of frames)for(const layer of layers)for(const object of frame.layers[layer.id]||[])if(object.paletteLinkColor===source)linked.push({object,layer});
+    for(const object of symbolContents())if(object.paletteLinkColor===source)linked.push({object,layer:null});
+    if(!linked.length){if(status)status.textContent=`No objects are linked to ${source}.`;return}
+    const locked=linked.find(item=>item.layer?.locked)?.layer;if(locked){if(status)status.textContent=`"${locked.name}" is locked. Unlock it before recoloring linked objects.`;return}
+    pushHistory();for(const {object} of linked){object.color=target;if(object.fill||object.fillColor===source)object.fillColor=target}
+    if(status)status.textContent=`Recolored ${linked.length} linked object${linked.length===1?"":"s"} to ${target} across the project.`;renderAll();
+  });
+  document.getElementById("replaceProjectColor")?.addEventListener("click",()=>{
+    const source=normalizeHex(document.getElementById("paletteLinkSource")?.value),target=normalizeHex(document.getElementById("colorStudioPicker")?.value),status=document.getElementById("paletteLinkStatus");
+    if(!source||!target){if(status)status.textContent="Choose valid source and replacement colors.";return}
+    const matches=[];
+    for(const frame of frames)for(const layer of layers)for(const object of frame.layers[layer.id]||[])if(normalizeHex(object.color)===source||normalizeHex(object.fillColor)===source)matches.push({object,layer});
+    for(const object of symbolContents())if(normalizeHex(object.color)===source||normalizeHex(object.fillColor)===source)matches.push({object,layer:null});
+    if(!matches.length){if(status)status.textContent=`No project colors match ${source}.`;return}
+    const locked=matches.find(item=>item.layer?.locked)?.layer;
+    if(locked){if(status)status.textContent=`"${locked.name}" is locked. Unlock it before replacing colors.`;return}
+    pushHistory();
+    for(const {object} of matches){if(normalizeHex(object.color)===source)object.color=target;if(normalizeHex(object.fillColor)===source)object.fillColor=target}
+    if(status)status.textContent=`Replaced ${matches.length} matching color use${matches.length===1?"":"s"} with ${target} throughout the project.`;renderAll();
+  });
+
+  document.getElementById("exposureSheetBtn")?.addEventListener("click",()=>{
+    const modal=openModal("Exposure Sheet (X-sheet)",'<div id="exposureSheetMount" style="max-width:90vw;max-height:65vh;overflow:auto"></div>',"Done",(_,close)=>close());
+    const mount=modal.querySelector("#exposureSheetMount"),table=document.createElement("table");
+    table.style.borderCollapse="collapse";table.style.minWidth="max-content";table.style.fontSize="11px";
+    const head=document.createElement("tr"),corner=document.createElement("th");corner.textContent="Layer / Frame";corner.style.position="sticky";corner.style.left="0";corner.style.background="var(--panel)";corner.style.zIndex="2";head.appendChild(corner);
+    for(let index=0;index<frames.length;index++){const cell=document.createElement("th");cell.textContent=`${index+1} · ${Math.max(1,Number(frames[index].duration)||1)}×`;cell.style.padding="5px";cell.style.border="1px solid var(--border)";head.appendChild(cell)}
+    const thead=document.createElement("thead");thead.appendChild(head);table.appendChild(thead);
+    const body=document.createElement("tbody");
+    for(const layer of [...layers].reverse()){
+      const row=document.createElement("tr"),label=document.createElement("th");label.textContent=layer.name;label.style.position="sticky";label.style.left="0";label.style.background="var(--panel)";label.style.padding="5px";label.style.textAlign="left";label.style.border="1px solid var(--border)";row.appendChild(label);
+      for(let index=0;index<frames.length;index++){
+        const frame=frames[index],objects=frame.layers[layer.id]||[],keys=new Set(frame.keyframes||[]),marked=objects.some(object=>keys.has(object.id)),cell=document.createElement("td"),button=document.createElement("button");
+        button.type="button";button.className="small";button.dataset.sheetFrame=String(index);button.dataset.sheetLayer=String(layer.id);button.textContent=`${objects.length}${marked?" ◆":""}`;button.title=`Frame ${index+1}: ${objects.length} object${objects.length===1?"":"s"}${marked?", key pose":""}`;button.style.minWidth="46px";button.style.borderRadius="0";button.setAttribute("aria-label",button.title);
+        if(index===currentFrame&&layer.id===currentLayerId)button.classList.add("primary");
+        cell.style.padding="2px";cell.style.border="1px solid var(--border)";cell.appendChild(button);row.appendChild(cell);
+      }
+      body.appendChild(row);
+    }
+    table.appendChild(body);mount.appendChild(table);
+    mount.addEventListener("click",event=>{
+      const button=event.target.closest("[data-sheet-frame]");if(!button)return;
+      const frameIndex=Number(button.dataset.sheetFrame),layer=layers.find(item=>String(item.id)===button.dataset.sheetLayer);
+      if(!layer||!Number.isInteger(frameIndex)||!frames[frameIndex]||playing)return;
+      currentFrame=frameIndex;currentLayerId=layer.id;selected.clear();renderAll();
+      mount.querySelectorAll("[data-sheet-frame]").forEach(cell=>cell.classList.toggle("primary",Number(cell.dataset.sheetFrame)===currentFrame&&cell.dataset.sheetLayer===String(currentLayerId)));
+    });
+  });
+})();
+
+/* Audio waveform in the exposure timeline */
+(function(){
+  const track=document.getElementById("audioWaveformTrack"),canvas=document.getElementById("audioWaveformCanvas"),label=document.getElementById("audioWaveformLabel"),viewport=document.querySelector(".audioWaveformViewport"),framesEl=document.getElementById("frames"),player=document.getElementById("projectAudioPlayer");
+  if(!track||!canvas||!viewport||!framesEl||!player)return;
+  let peaks=[],decodedDuration=0,decodedSource="",decodeVersion=0,waveformError="";
+  function renderWaveform(){
+    track.hidden=!projectAudio;track.classList.toggle("active",!!projectAudio);
+    if(!projectAudio)return;
+    const contentWidth=Math.max(framesEl.clientWidth,framesEl.scrollWidth,100),ratio=Math.min(3,Math.max(1,window.devicePixelRatio||1));
+    canvas.width=Math.ceil(contentWidth*ratio);canvas.height=Math.ceil(34*ratio);canvas.style.width=contentWidth+"px";canvas.style.height="34px";canvas.style.transform=`translateX(${-framesEl.scrollLeft}px)`;
+    const context=canvas.getContext("2d");context.setTransform(ratio,0,0,ratio,0,0);context.clearRect(0,0,contentWidth,34);
+    if(label)label.textContent=peaks.length?`${projectAudio.name} · ${decodedDuration.toFixed(1)} s`:waveformError?`${projectAudio.name} · waveform unavailable: ${waveformError}`:`${projectAudio.name} · decoding waveform`;
+    if(!peaks.length)return;
+    const accent=getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()||"#4a5cff",mid=18,plotWidth=Math.max(1,contentWidth-14);
+    context.strokeStyle=accent;context.globalAlpha=.72;context.lineWidth=1;
+    const step=Math.max(1,plotWidth/peaks.length);
+    context.beginPath();
+    for(let i=0;i<peaks.length;i++){const x=7+(i+.5)*step,height=Math.max(1,peaks[i]*13);context.moveTo(x,mid-height);context.lineTo(x,mid+height)}
+    context.stroke();context.globalAlpha=1;
+    const cellWidth=Number.parseFloat(getComputedStyle(framesEl).getPropertyValue("--timeline-cell-width"))||76,playheadX=7+(currentFrame+.5)*(cellWidth+4);
+    context.strokeStyle="rgba(220,70,70,.9)";context.lineWidth=1.5;context.beginPath();context.moveTo(playheadX,2);context.lineTo(playheadX,33);context.stroke();
+  }
+  async function decodeWaveform(){
+    const source=projectAudio?.src;    if(!source){decodeVersion++;decodedSource="";peaks=[];decodedDuration=0;waveformError="";renderWaveform();return}
+    if(source===decodedSource)return;
+    decodedSource=source;waveformError="";peaks=[];const version=++decodeVersion;
+    const AudioContextConstructor=window.AudioContext||window.webkitAudioContext;
+    if(!AudioContextConstructor){waveformError="not supported by this browser";renderWaveform();return}
+    let audioContext;
+    try{
+      const response=await fetch(source);if(!response.ok)throw new Error(`Audio data request failed (${response.status}).`);
+      const data=await response.arrayBuffer();audioContext=new AudioContextConstructor();
+      const buffer=await audioContext.decodeAudioData(data),channel=buffer.getChannelData(0),count=Math.min(1400,Math.max(160,Math.floor(channel.length/256))),binSize=Math.ceil(channel.length/count),result=[];
+      for(let i=0;i<count;i++){let peak=0;for(let j=i*binSize;j<Math.min(channel.length,(i+1)*binSize);j++)peak=Math.max(peak,Math.abs(channel[j]));result.push(peak)}
+      if(version!==decodeVersion)return;
+      peaks=result;decodedDuration=buffer.duration;renderWaveform();
+    }catch(error){
+      if(version!==decodeVersion)return;
+      console.error("Could not decode the project audio waveform.",error);
+      waveformError=error?.message||"unsupported audio format";
+      renderWaveform();
+    }finally{if(audioContext)try{await audioContext.close()}catch(error){console.warn("Could not close waveform audio context.",error)}}
+  }
+  player.addEventListener("loadedmetadata",decodeWaveform);
+  framesEl.addEventListener("scroll",renderWaveform,{passive:true});
+  let scrubPointerId=null;
+  function scrubAudio(event){
+    if(!projectAudio||!decodedDuration)return;
+    const bounds=viewport.getBoundingClientRect(),contentWidth=Math.max(framesEl.clientWidth,framesEl.scrollWidth,100),x=event.clientX-bounds.left+framesEl.scrollLeft,progress=Math.max(0,Math.min(1,(x-7)/Math.max(1,contentWidth-14)));
+    player.currentTime=progress*decodedDuration;
+    const targetTicks=progress*frames.reduce((sum,frame)=>sum+Math.max(1,Number(frame.duration)||1),0);
+    let elapsed=0;
+    for(let index=0;index<frames.length;index++){const duration=Math.max(1,Number(frames[index].duration)||1);if(targetTicks<elapsed+duration||index===frames.length-1){currentFrame=index;break}elapsed+=duration}
+    selected.clear();renderAll();
+  }
+  viewport.addEventListener("pointerdown",event=>{if(event.button!==0||!projectAudio)return;scrubPointerId=event.pointerId;try{viewport.setPointerCapture(event.pointerId)}catch{}scrubAudio(event)});
+  viewport.addEventListener("pointermove",event=>{if(scrubPointerId===event.pointerId&&event.buttons)scrubAudio(event)});
+  const finishScrub=event=>{if(scrubPointerId===event.pointerId)scrubPointerId=null};
+  viewport.addEventListener("pointerup",finishScrub);viewport.addEventListener("pointercancel",finishScrub);viewport.addEventListener("lostpointercapture",finishScrub);
+  window.addEventListener("resize",renderWaveform);
+  if(typeof ResizeObserver!=="undefined")new ResizeObserver(renderWaveform).observe(framesEl);
+  const baseRenderAll=renderAll;
+  renderAll=function(){baseRenderAll();renderWaveform()};
+  window.__refreshAudioWaveform=decodeWaveform;
+  if(projectAudio)decodeWaveform();else renderWaveform();
+})();
+
+/* Project canvas dimensions and named scene ranges */
+(function(){
+  document.getElementById("canvasSettingsBtn")?.addEventListener("click",()=>{
+    const ratio=W/H;
+    const body=`<label class="propertyLine"><span>Width (px)</span><input id="canvasWidthInput" type="number" min="64" max="8192" value="${W}"></label><label class="propertyLine"><span>Height (px)</span><input id="canvasHeightInput" type="number" min="64" max="8192" value="${H}"></label><label class="checkRow"><input id="canvasAspectLock" type="checkbox" checked> Lock aspect ratio (${ratio.toFixed(3)}:1)</label><div class="projectSaveStatus" id="canvasSizeStatus">Canvas area limit: 12 million pixels.</div>`;
+    const modal=openModal("Canvas Size",body,"Apply",(element,close)=>{
+      const width=Number(element.querySelector("#canvasWidthInput").value),height=Number(element.querySelector("#canvasHeightInput").value),status=element.querySelector("#canvasSizeStatus");
+      if(!Number.isInteger(width)||!Number.isInteger(height)||width<64||height<64||width>8192||height>8192||width*height>12_000_000){status.textContent="Use whole-pixel dimensions from 64 to 8192, with a total area no greater than 12 million pixels.";return}
+      if(width===W&&height===H){close();return}
+      pushHistory();
+      try{setProjectCanvasSize(width,height,true);close()}
+      catch(error){status.textContent=error.message||"Could not resize the canvas."}
+    });
+    const widthInput=modal.querySelector("#canvasWidthInput"),heightInput=modal.querySelector("#canvasHeightInput"),lock=modal.querySelector("#canvasAspectLock");
+    widthInput.addEventListener("input",()=>{if(lock.checked)heightInput.value=Math.max(64,Math.round(Number(widthInput.value)/ratio))});
+    heightInput.addEventListener("input",()=>{if(lock.checked)widthInput.value=Math.max(64,Math.round(Number(heightInput.value)*ratio))});
+  });
+  function frameRangeForScene(scene){
+    const start=frames.findIndex(frame=>frame.id===scene.startFrameId),end=frames.findIndex(frame=>frame.id===scene.endFrameId);
+    if(start<0||end<0)return null;
+    return{start:Math.min(start,end),end:Math.max(start,end)};
+  }
+  function applyScene(scene){
+    const range=frameRangeForScene(scene);if(!range)return false;
+    activeSceneId=scene.id;currentFrame=range.start;selectedTimelineFrames=new Set(Array.from({length:range.end-range.start+1},(_,offset)=>range.start+offset));
+    const start=document.getElementById("timelineLoopStartInput"),end=document.getElementById("timelineLoopEndInput");
+    if(start)start.value=range.start+1;if(end)end.value=range.end+1;
+    selected.clear();renderAll();return true;
+  }
+  function openSceneManager(){
+    const range=[...selectedTimelineFrames].filter(index=>index>=0&&index<frames.length).sort((a,b)=>a-b);
+    const start=range.length?range[0]:currentFrame,end=range.length?range[range.length-1]:currentFrame;
+    const rows=scenes.map(scene=>{
+      const frameRange=frameRangeForScene(scene),selected=scene.id===activeSceneId;
+      const label=frameRange?`${scene.name} · frames ${frameRange.start+1}–${frameRange.end+1}`:`${scene.name} · missing endpoint`;
+      return `<div class="propertyLine"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${escapeHtml(label)}</span><button class="small" type="button" data-activate-scene="${escapeHtml(scene.id)}">${selected?"Active":"Open"}</button><button class="small" type="button" data-delete-scene="${escapeHtml(scene.id)}">Delete</button></div>`;
+    }).join("");
+    const modal=openModal("Scenes / Sequences",`<div id="sceneRows">${rows||'<div class="hint">No scenes yet. Add one to name a frame range in this project.</div>'}</div><div class="widgetSectionTitle">Create scene from selected frames</div><label class="propertyLine"><span>Name</span><input id="sceneNameInput" type="text" maxlength="60" value="Scene ${scenes.length+1}"></label><div class="propertyLine"><span>Frames</span><input id="sceneStartInput" type="number" min="1" max="${frames.length}" value="${start+1}"><span>to</span><input id="sceneEndInput" type="number" min="1" max="${frames.length}" value="${end+1}"></div><div class="projectSaveStatus" id="sceneManagerStatus">Scenes name and navigate ranges in the shared project timeline.</div>`,"Create Scene",(element,close)=>{
+      const name=element.querySelector("#sceneNameInput").value.trim(),first=Number(element.querySelector("#sceneStartInput").value),last=Number(element.querySelector("#sceneEndInput").value);
+      if(!name||!Number.isInteger(first)||!Number.isInteger(last)||first<1||last<first||last>frames.length){element.querySelector("#sceneManagerStatus").textContent="Enter a scene name and valid frame range within this project.";return}
+      pushHistory();const scene={id:uid("scene_"),name,startFrameId:frames[first-1].id,endFrameId:frames[last-1].id};scenes.push(scene);applyScene(scene);close();
+    });
+    modal.querySelectorAll("[data-activate-scene]").forEach(button=>button.addEventListener("click",()=>{
+      const scene=scenes.find(item=>item.id===button.dataset.activateScene);if(scene){pushHistory();applyScene(scene);closeModalRoot()}
+    }));
+    modal.querySelectorAll("[data-delete-scene]").forEach(button=>button.addEventListener("click",()=>{
+      pushHistory();scenes=scenes.filter(scene=>scene.id!==button.dataset.deleteScene);
+      if(activeSceneId===button.dataset.deleteScene){activeSceneId=null;document.getElementById("timelineLoopStartInput").value="";document.getElementById("timelineLoopEndInput").value=""}
+      closeModalRoot();renderAll();openSceneManager();
+    }));
+  }
+  document.getElementById("sceneManagerBtn")?.addEventListener("click",openSceneManager);
+})();
+</script>
+<script>
+(function(){
+  const categoryForPanel=id=>id==="toolsPanel"||id==="brushesPanel"||id==="createPanel"||id==="colorPanel"?"Drawing":id==="timelinePanel"||id==="playbackPanel"||id==="onionPanel"?"Animation":id==="canvasPanel"||id==="navigatorPanel"?"Canvas":id==="objectsPanel"||id==="layersPanel"||id==="propertiesPanel"||id==="appearancePanel"?"Editing":id==="guidesPanel"||id==="symmetryPanel"?"Guides":"Workspace";
+  const showPanel=panel=>{
+    if(!panel)return;
+    panel.classList.remove("is-hidden","collapsed","tab-hidden");
+    const tabs=panel.closest(".panelTabGroup");
+    if(tabs)tabs.querySelectorAll(".panel").forEach(item=>item.classList.toggle("tab-hidden",item!==panel));
+    if(typeof frontPanel==="function")frontPanel(panel);
+    panel.scrollIntoView({block:"nearest"});
+  };
+  function addProjectCopy(version){
+    const now=Date.now(),copy={id:uid("p_"),name:(version.name||"Untitled")+" — recovered",createdAt:now,updatedAt:now,state:deep(version.state)};
+    saveProjects([...loadProjects(),copy]);closeModalRoot();openProject(copy.id);
+  }
+  window.openProjectVersionHistory=async function(){
+    if(!projectId){openModal("Version History",'<p>Save this animation first to start a local version history.</p>',"Close",(_,close)=>close());return}
+    let versions;
+    try{versions=await getProjectVersions(projectId)}
+    catch(error){console.error("Could not load local project history.",error);openModal("Version History",'<p>Could not load local history: '+escapeHtml(error?.message||"Storage unavailable")+'</p>',"Close",(_,close)=>close());return}
+    const content=versions.length?versions.map((version,index)=>'<div class="propertyLine"><span>'+escapeHtml(new Date(version.createdAt).toLocaleString())+' — '+escapeHtml(version.name||"Untitled")+'</span><button type="button" class="small" data-recover-version="'+index+'">Open as copy</button></div>').join(""):'<p>No saved versions yet. Older project states are captured as the project is saved.</p>';
+    const modal=openModal("Local Version History",'<p>Snapshots stay on this device. Recover a snapshot as a separate project; the current animation will not be overwritten.</p><div class="featureExplorerResults">'+content+'</div>',"Close",(_,close)=>close());
+    modal.style.width="min(700px,94vw)";
+    modal.querySelectorAll("[data-recover-version]").forEach(button=>button.addEventListener("click",()=>addProjectCopy(versions[Number(button.dataset.recoverVersion)])));
+  };
+  function featureEntries(){
+    const entries=[],seen=new Set();
+    const add=(label,detail,category,terms,run)=>{const key=label.toLowerCase()+"|"+category;if(!label||seen.has(key))return;seen.add(key);entries.push({label,detail,category,terms:(terms||"").toLowerCase(),run})};
+    for(const id of (typeof workspacePanelIds==="undefined"?[]:workspacePanelIds)){
+      const panel=document.getElementById(id);if(!panel)continue;
+      const title=panel.querySelector(".panelTitle")?.textContent.trim()||id.replace(/Panel$/,"");
+      add("Open "+title+" panel","Show and focus this workspace panel",categoryForPanel(id),id+" "+title,()=>showPanel(panel));
+      panel.querySelectorAll("button").forEach(button=>{
+        const label=(button.getAttribute("aria-label")||button.title||button.textContent||"").trim().replace(/\s+/g," ");
+        if(!label||button.classList.contains("panelClose")||button.closest(".panelHeader"))return;
+        const terms=button.title+" "+button.id+" "+title;
+        add(label,title+" panel",categoryForPanel(id),terms,()=>{showPanel(panel);button.click()});
+      });
+      panel.querySelectorAll("input,select,textarea").forEach(control=>{
+        if(control.type==="hidden"||control.type==="checkbox"&&!control.closest("label"))return;
+        const label=control.getAttribute("aria-label")||control.closest("label")?.innerText||control.closest(".propertyLine")?.querySelector("span")?.textContent||control.id;
+        if(!label)return;
+        add(label.trim(),title+" · setting",categoryForPanel(id),control.id+" "+title,()=>{showPanel(panel);control.focus();control.scrollIntoView({block:"center"})});
+      });
+    }
+    document.querySelectorAll("#editorView .topbar button,#editorView .topbar input,#editorView .topbar select").forEach(control=>{
+      const label=(control.getAttribute("aria-label")||control.title||control.textContent||control.closest("label")?.innerText||"").trim().replace(/\s+/g," ");
+      if(!label||control.id==="exploreFeaturesBtn")return;
+      add(label,"Top toolbar", "Workflow",control.id+" "+label,()=>{control.focus();if(control.tagName==="BUTTON")control.click()});
+    });
+    add("Open File & Export","Save, import, configure format and export a frame range","Import / Export","file export save png webm",()=>document.getElementById("fileMenuBtn")?.click());
+    add("Open Scenes / Sequences","Name and navigate frame ranges","Animation","scenes sequence",()=>document.getElementById("sceneManagerBtn")?.click());
+    add("Open Version History","Browse local snapshots and recover one as a new project","Workflow","local history restore recovery",()=>window.openProjectVersionHistory());
+    return entries;
+  }
+  let currentCategory="All";
+  window.openFeatureExplorer=function(){
+    const categories=["All","Drawing","Animation","Editing","Canvas","Guides","Workspace","Workflow","Import / Export"],entries=featureEntries();
+    const body='<input class="featureExplorerSearch" id="featureExplorerQuery" type="search" placeholder="Search tools, panels, settings and commands…" autocomplete="off" aria-label="Search features"><div class="featureExplorerCategories">'+categories.map(category=>'<button type="button" data-feature-category="'+category+'" class="'+(category===currentCategory?"active":"")+'">'+category+'</button>').join("")+'</div><div class="featureExplorerResults" id="featureExplorerResults" role="listbox" aria-label="Feature results"></div><div class="hint">Tip: press Ctrl+K from anywhere in the editor. Use ↑ and ↓ to move; Enter to open.</div>';
+    const modal=openModal("Explore tools and features",body,"Close",(_,close)=>close());
+    modal.style.width="min(760px,94vw)";
+    const input=modal.querySelector("#featureExplorerQuery"),results=modal.querySelector("#featureExplorerResults");
+    let active=-1,filtered=[];
+    const paint=()=>{
+      const query=input.value.trim().toLowerCase();
+      filtered=entries.filter(entry=>(currentCategory==="All"||entry.category===currentCategory)&&(!query||(entry.label+" "+entry.detail+" "+entry.terms+" "+entry.category).toLowerCase().includes(query)));
+      active=filtered.length?0:-1;
+      results.innerHTML="";
+      for(const [index,entry] of filtered.entries()){
+        const button=document.createElement("button");button.type="button";button.className="featureExplorerResult";button.setAttribute("role","option");button.setAttribute("aria-selected",String(index===active));
+        const label=document.createElement("span");label.textContent=entry.label;const detail=document.createElement("small");detail.textContent=entry.detail+" · "+entry.category;button.append(label,detail);button.addEventListener("click",()=>{closeModalRoot();entry.run()});results.appendChild(button);
+      }
+      if(!filtered.length)results.innerHTML='<div class="hint">No matching features. Try a tool name, panel, or related task.</div>';
+    };
+    modal.querySelectorAll("[data-feature-category]").forEach(button=>button.addEventListener("click",()=>{currentCategory=button.dataset.featureCategory;modal.querySelectorAll("[data-feature-category]").forEach(item=>item.classList.toggle("active",item===button));paint();input.focus()}));
+    input.addEventListener("input",paint);
+    input.addEventListener("keydown",event=>{
+      if(event.key==="Escape"){event.preventDefault();closeModalRoot();return}
+      if(event.key==="ArrowDown"||event.key==="ArrowUp"){event.preventDefault();if(filtered.length)active=(active+(event.key==="ArrowDown"?1:-1)+filtered.length)%filtered.length;[...results.querySelectorAll(".featureExplorerResult")].forEach((button,index)=>{button.setAttribute("aria-selected",String(index===active));if(index===active)button.scrollIntoView({block:"nearest"})})}
+      if(event.key==="Enter"&&active>=0){event.preventDefault();closeModalRoot();filtered[active].run()}
+    });
+    paint();setTimeout(()=>input.focus(),0);
+  };
+  document.getElementById("exploreFeaturesBtn")?.addEventListener("click",window.openFeatureExplorer);
 })();
 </script>
 </body>
