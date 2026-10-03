@@ -113,7 +113,7 @@ button.primary{background-image:linear-gradient(180deg,color-mix(in srgb,var(--a
 .objectContextMenu{position:fixed;z-index:99999;display:flex;flex-direction:column;gap:3px;width:210px;max-height:calc(100vh - 16px);overflow:auto;padding:6px;background:var(--panel);border:1px solid var(--border);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.24)}
 .objectContextMenu button{text-align:left}
 .fileMenuActions{display:flex;gap:7px;margin-bottom:12px}
-.timelineKeyframeMarker{display:none;color:#f0a020;font-size:13px;line-height:1}
+.timelineKeyframeMarker{display:none;color:#f0a020;font-size:13px;line-height:1;cursor:grab;touch-action:none}
 .frameBtn.hasKeyframe .timelineKeyframeMarker{display:inline}
 .timelineCameraKeyMarker{display:none;color:#27a9ff;font-size:8px;font-weight:700;line-height:1}
 .frameBtn.hasCameraKey .timelineCameraKeyMarker{display:inline}
@@ -256,7 +256,9 @@ input[type="range"]{accent-color:var(--accent)}
 .timelineTrackHeader{height:24px;display:flex;align-items:center;justify-content:space-between;padding:0 8px;background:color-mix(in srgb,var(--panel) 90%,var(--bg));border-bottom:1px solid var(--border);font-size:9px;color:var(--muted)}
 .timelineTrackTitle{text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--text)}
 .timelineFrames{display:flex;align-items:stretch;gap:4px;overflow:auto;padding:7px;min-height:84px;scroll-behavior:smooth}
-.timelineFrameCell{width:var(--timeline-cell-width,78px);min-width:var(--timeline-cell-width,78px);height:92px;display:flex;flex-direction:column;gap:3px;padding:4px;border:1px solid var(--border);border-radius:7px;background:var(--panel);cursor:pointer;position:relative;flex:0 0 var(--timeline-cell-width,78px);overflow:hidden}
+.timelineFrameCell{width:var(--timeline-cell-width,78px);min-width:var(--timeline-cell-width,78px);height:92px;display:flex;flex-direction:column;gap:3px;padding:4px;border:1px solid var(--border);border-radius:7px;background:var(--panel);cursor:grab;position:relative;flex:0 0 var(--timeline-cell-width,78px);overflow:hidden}
+.timelineFrameCell.dragging{opacity:.45;cursor:grabbing}
+.timelineFrameCell.dropTarget{outline:2px solid var(--accent);outline-offset:1px}
 .timelineFrameCell:hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--border));background:color-mix(in srgb,var(--accent) 4%,var(--panel))}
 .timelineFrameCell.active{border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
 .timelineFrameCell.playhead::after{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:3px;background:var(--accent);border-radius:7px 7px 0 0}
@@ -416,6 +418,7 @@ input[type="range"]{accent-color:var(--accent)}
         <div class="propertyLine"><span>Opacity</span><input id="strokeOpacity" type="range" min="5" max="100" value="100"><span id="strokeOpacityText">100%</span></div>
         <label class="checkRow"><input id="shapeFill" type="checkbox"> Fill shapes</label>
         <div class="propertyLine"><span>Fill color</span><input id="fillColor" type="color" value="#ffffff"></div>
+        <div class="propertyLine"><span>Bucket gap close</span><input id="bucketGapClose" type="range" min="0" max="12" value="0" title="Expand line barriers by this many pixels to stop small fill leaks"><span id="bucketGapCloseText">0 px</span></div>
         <div class="propertyLine"><span>Rotation</span><input id="objectRotation" type="number" step="1" value="0"></div>
         <div class="propertyLine"><span>Scale</span><input id="objectScale" type="number" step=".05" min=".05" value="1"></div>
         <div class="panelButtons"><button class="small" id="deleteSelected">Delete Selected</button><button class="small" id="deselect">Deselect</button></div>
@@ -436,7 +439,10 @@ input[type="range"]{accent-color:var(--accent)}
           <button class="small toolChoice" data-tool="node">Edit Points</button>
           <button class="small toolChoice" data-tool="eyedropper">Eyedropper</button>
           <button class="small toolChoice" data-tool="bucket">Paint Bucket</button>
+          <button class="small toolChoice" data-tool="camera">Edit Camera</button>
+          <button class="small toolChoice" data-tool="rig">Pose Rig</button>
         </div>
+        <div class="hint">Edit Points: click a stroke segment to add a node. Edit Camera: drag inside the frame to pan, a corner to zoom, or the handle above it to rotate. Pose Rig: drag a bone to rotate it and its descendants around its joint pivot.</div>
         <div class="widgetSectionTitle">Quick actions</div>
         <div class="widgetButtonGrid">
           <button class="small" id="quickUndo">Undo</button>
@@ -624,8 +630,10 @@ input[type="range"]{accent-color:var(--accent)}
         <div class="panelButtons"><button class="small" id="cameraKeyBtn">Set Camera Key</button><button class="small" id="cameraResetBtn">Reset Camera</button></div>
         <div class="widgetSectionTitle" style="margin-top:9px">Skeleton</div>
         <div class="propertyLine"><span>Selected part</span><select id="rigRole"><option value="">Choose role</option><option value="body">Body</option><option value="head">Head</option><option value="upper-arm">Upper arm</option><option value="forearm">Forearm</option><option value="hand">Hand</option><option value="thigh">Thigh</option><option value="shin">Shin</option><option value="foot">Foot</option><option value="custom">Custom</option></select></div>
-        <div class="panelButtons"><button class="small" id="rigSetRoleBtn">Set Role</button><button class="small" id="rigPivotBtn">Auto Pivot</button><button class="small" id="rigUnlinkBtn">Unlink</button></div>
-        <div class="hint" id="rigStatus">Select a drawn object to assign a bone role and pivot.</div>
+        <div class="propertyLine"><span>Parent object</span><select id="rigParentSelect"><option value="">Choose parent</option></select></div>
+        <div class="panelButtons"><button class="small" id="rigSetRoleBtn">Set Role</button><button class="small" id="rigPivotBtn">Auto Pivot</button><button class="small" id="rigPlaceJointBtn">Place Joint</button><button class="small" id="rigUnlinkBtn">Unlink</button></div>
+        <button class="small" id="rigPoseBtn" style="width:100%;margin-top:5px">Pose Selected Bone</button>
+        <div class="hint" id="rigStatus">Assign roles and parents, then use Pose Rig to rotate a bone and its descendants at the visible pivot. Use Place Joint, then click the exact joint location to refine the pivot.</div>
         <div class="widgetSectionTitle" style="margin-top:9px">Reusable Symbols</div>
         <div class="propertyLine"><span>Library</span><select id="symbolLibrarySelect"><option value="">No symbols yet</option></select></div>
         <div class="panelButtons"><button class="small" id="createSymbolBtn">Create from Selection</button><button class="small" id="insertSymbolBtn">Insert</button></div>
@@ -634,6 +642,7 @@ input[type="range"]{accent-color:var(--accent)}
         <audio id="projectAudioPlayer" controls style="display:block;width:100%;margin-top:6px"></audio>
         <div class="projectSaveStatus" id="audioTrackStatus">Import an audio clip (up to 1.5 MB) to sync sound with playback.</div>
         <div class="panelButtons"><button class="small" id="backupProjectButton">Backup JSON</button><button class="small" id="importProjectButton">Import JSON</button></div>
+        <button class="small" id="restoreProjectBackupButton" style="width:100%;margin-top:5px">Restore Previous Version as Copy</button>
         <div class="projectSaveStatus" id="projectSaveStatus">Ready</div>
       </div>
       <div class="panelResizeHandle" data-resize-panel="projectPanel"></div>
@@ -681,7 +690,7 @@ input[type="range"]{accent-color:var(--accent)}
         </div>
 
         <div class="timelineTrackShell">
-          <div class="timelineTrackHeader"><span class="timelineTrackTitle">Frames</span><span id="timelineTrackHint">Click to select · drag across to scrub · double-click to rename</span></div>
+          <div class="timelineTrackHeader"><span class="timelineTrackTitle">Frames</span><span id="timelineTrackHint">Click to select · drag frames to reorder · drag ◆ to move keys</span></div>
           <div id="frames" class="timelineFrames"></div>
         </div>
 
@@ -705,8 +714,8 @@ input[type="range"]{accent-color:var(--accent)}
             <button class="small" id="dupRangeBtn">Duplicate Range</button>
             <button class="small" id="delRangeBtn">Delete Range</button>
             <button class="small" id="revRangeBtn">Reverse Range</button>
-            <button class="small" id="copyFrameBtn">Copy Frame</button>
-            <button class="small" id="pasteFrameBtn">Paste Frame</button>
+            <button class="small" id="copyFrameBtn" title="Copy the selected objects' current poses as keyframes">Copy Keys</button>
+            <button class="small" id="pasteFrameBtn" title="Paste copied object poses as keyframes on this frame">Paste Keys</button>
           </div>
         </div>
 
@@ -734,7 +743,7 @@ const viewport=document.getElementById("canvasViewport");
 let nextObjectId=1,nextLayerId=1,nextFrameId=1;
 let layers=[],frames=[],currentLayerId=null,currentFrame=0;
 let tool="brush",color="#111111",brushSize=4,penOpacity=1,penCap="round",penJoin="round",penComposite="source-over",penDash=[],currentPen="Basic Round";
-let fillEnabled=false,fillColor="#ffffff";
+let fillEnabled=false,fillColor="#ffffff",bucketGapClose=0;
 let strokeSmoothing=.35,strokeStabilizer=.18,strokeSpacing=2,ultraCrisp=true,widgetContentBaseScale=.95;
 let symmetryEnabled=false,symmetryHorizontal=false,symmetryVertical=false,symmetryRadial=1;
 const COLOR_STORE_KEY="bba_color_studio_v2";
@@ -747,7 +756,7 @@ let projectBackground="#FFFFFF",projectTransparent=false,projectNotes="";
 let autoSaveEnabled=true,autoSaveMinutes=2,autoSaveTimer=null;
 let snapEnabled=false,snapSize=20,centerGuideEnabled=true,safeGuideEnabled=false,safeGuideMargin=40,pixelGuideEnabled=false;
 const IMAGE_CACHE=new Map();
-const PROJECTS="bba_projects_v3",SETTINGS="bba_settings_v3",HISTORY_LIMIT=60;
+const PROJECTS="bba_projects_v3",SETTINGS="bba_settings_v3",RECOVERY_PREFIX="bba_recovery_v1_",HISTORY_LIMIT=60;
 function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function deep(v){return JSON.parse(JSON.stringify(v))}
 function activeFrame(){return frames[currentFrame]}
@@ -857,7 +866,7 @@ function objectLocalToWorld(o,point){const p=objectPivot(o),sx=o.scaleX||1,sy=o.
 function objectWorldCorners(o){const b=objectLocalBounds(o);if(!b)return[];return[[b.minX,b.minY],[b.maxX,b.minY],[b.maxX,b.maxY],[b.minX,b.maxY]].map(p=>objectLocalToWorld(o,{x:p[0],y:p[1]}))}
 function objectWorldBounds(o){const pts=objectWorldCorners(o);if(!pts.length)return null;return{minX:Math.min(...pts.map(p=>p.x)),minY:Math.min(...pts.map(p=>p.y)),maxX:Math.max(...pts.map(p=>p.x)),maxY:Math.max(...pts.map(p=>p.y))}}
 function selectionBounds(){const objs=allVisibleObjects().filter(o=>selected.has(o.id));if(!objs.length)return null;const pts=objs.flatMap(objectWorldCorners),minX=Math.min(...pts.map(p=>p.x)),minY=Math.min(...pts.map(p=>p.y)),maxX=Math.max(...pts.map(p=>p.x)),maxY=Math.max(...pts.map(p=>p.y));return{minX,minY,maxX,maxY,width:maxX-minX,height:maxY-minY}}
-function easeKeyframeProgress(t){if(keyframeEasing==="ease-in")return t*t;if(keyframeEasing==="ease-out")return 1-(1-t)*(1-t);if(keyframeEasing==="ease-in-out")return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;return t}
+function easeKeyframeProgress(t,easing="linear"){if(easing==="ease-in")return t*t;if(easing==="ease-out")return 1-(1-t)*(1-t);if(easing==="ease-in-out")return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;return t}
 function objectsForRender(frameIndex,layer){
   const frame=frames[frameIndex];if(!frame)return[];
   const output=(frame.layers[layer.id]||[]).slice(),ids=new Set(frames.flatMap(item=>Array.isArray(item.keyframes)?item.keyframes:[]));
@@ -866,11 +875,11 @@ function objectsForRender(frameIndex,layer){
     for(let index=0;index<frames.length;index++){
       if(!(frames[index].keyframes||[]).includes(id))continue;
       const object=(frames[index].layers[layer.id]||[]).find(item=>item.id===id);
-      if(object)keys.push({index,object});
+      if(object)keys.push({index,object,frame:frames[index]});
     }
     for(let i=0;i<keys.length-1;i++){
       const a=keys[i],b=keys[i+1];if(frameIndex<=a.index||frameIndex>=b.index)continue;
-      const t=easeKeyframeProgress((frameIndex-a.index)/(b.index-a.index)),source=output.find(item=>item.id===id)||a.object,animated=deep(source);
+      const t=easeKeyframeProgress((frameIndex-a.index)/(b.index-a.index),a.frame.easing||"linear"),source=output.find(item=>item.id===id)||a.object,animated=deep(source);
       const mix=(left,right)=>Number(left||0)+(Number(right||0)-Number(left||0))*t;
       for(const key of ["x","y","scaleX","scaleY","opacity"]){const defaultValue=key.startsWith("scale")?1:key==="opacity"?1:0;animated[key]=mix(a.object[key]??defaultValue,b.object[key]??defaultValue)}
       const rotationA=Number(a.object.rotation)||0,rotationDelta=((Number(b.object.rotation)||0)-rotationA+540)%360-180;animated.rotation=rotationA+rotationDelta*t;
@@ -881,7 +890,7 @@ function objectsForRender(frameIndex,layer){
   return output;
 }
 let keyframeEasing="linear";
-document.getElementById("keyframeEasing")?.addEventListener("change",event=>{keyframeEasing=event.target.value;renderAll()});
+document.getElementById("keyframeEasing")?.addEventListener("change",event=>{keyframeEasing=event.target.value;const frame=activeFrame();if(frame){pushHistory();frame.easing=keyframeEasing}renderAll()});
 function render(){ctx.clearRect(0,0,W,H);const f=activeFrame();if(f)for(const l of layers)if(l.visible)for(const o of objectsForRender(currentFrame,l))drawObject(ctx,o);renderSelection();renderOnion()}
 function renderSelection(){selCtx.clearRect(0,0,W,H);if(tool!=="transform"||!selected.size)return;const b=selectionBounds();if(!b)return;selCtx.save();selCtx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()||"#4a5cff";selCtx.fillStyle="#fff";selCtx.lineWidth=1.5;selCtx.setLineDash([5,4]);selCtx.strokeRect(b.minX,b.minY,b.width,b.height);selCtx.setLineDash([]);for(const h of["nw","n","ne","e","se","s","sw","w"]){const p=handlePoint(b,h);selCtx.fillRect(p.x-4,p.y-4,8,8);selCtx.strokeRect(p.x-4,p.y-4,8,8)}const top={x:(b.minX+b.maxX)/2,y:b.minY};selCtx.beginPath();selCtx.moveTo(top.x,top.y);selCtx.lineTo(top.x,top.y-30);selCtx.stroke();selCtx.beginPath();selCtx.arc(top.x,top.y-35,5,0,Math.PI*2);selCtx.fill();selCtx.stroke();if(selected.size===1){const o=selectedObjects()[0],p=objectPivot(o),pivot={x:o.x+p.x,y:o.y+p.y};selCtx.setLineDash([]);selCtx.beginPath();selCtx.arc(pivot.x,pivot.y,4,0,Math.PI*2);selCtx.fillStyle="#ffb020";selCtx.fill();selCtx.stroke()}selCtx.restore()}
 function handlePoint(b,h){const cx=(b.minX+b.maxX)/2,cy=(b.minY+b.maxY)/2;return{nw:{x:b.minX,y:b.minY},n:{x:cx,y:b.minY},ne:{x:b.maxX,y:b.minY},e:{x:b.maxX,y:cy},se:{x:b.maxX,y:b.maxY},s:{x:cx,y:b.maxY},sw:{x:b.minX,y:b.maxY},w:{x:b.minX,y:cy}}[h]}
@@ -956,8 +965,21 @@ canvas.addEventListener("pointerdown",e=>{
     const scale=Math.max(.05,(zoom/100)*canvasFitScale),radius=14/scale;
     let pointIndex=-1,distance=radius;
     hit.points.forEach((point,index)=>{const world=objectLocalToWorld(hit,point),nextDistance=Math.hypot(world.x-p.x,world.y-p.y);if(nextDistance<distance){distance=nextDistance;pointIndex=index}});
-    if(pointIndex<0){renderAll();return}
-    pushHistory();pointerAction={kind:"node",pointerId:e.pointerId,objectId:hit.id,pointIndex};
+    let insertPoint=null,insertAfter=-1;
+    if(pointIndex<0){
+      let segmentDistance=radius;
+      for(let i=0;i<hit.points.length-1;i++){
+        const a=objectLocalToWorld(hit,hit.points[i]),b=objectLocalToWorld(hit,hit.points[i+1]),dx=b.x-a.x,dy=b.y-a.y,len=dx*dx+dy*dy;
+        const t=len?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/len)):0;
+        const q={x:a.x+dx*t,y:a.y+dy*t},d=Math.hypot(q.x-p.x,q.y-p.y);
+        if(d<segmentDistance){segmentDistance=d;insertPoint=q;insertAfter=i}
+      }
+      if(!insertPoint){renderAll();return}
+      const pivot=objectPivot(hit),r=-(hit.rotation||0)*Math.PI/180,c=Math.cos(r),s=Math.sin(r),dx=insertPoint.x-(hit.x||0)-pivot.x,dy=insertPoint.y-(hit.y||0)-pivot.y;
+      const local={x:(dx*c-dy*s)/(hit.scaleX||1)+pivot.x,y:(dx*s+dy*c)/(hit.scaleY||1)+pivot.y};
+      pushHistory();hit.points.splice(insertAfter+1,0,local);pointIndex=insertAfter+1;
+    }else pushHistory();
+    pointerAction={kind:"node",pointerId:e.pointerId,objectId:hit.id,pointIndex};
     try{canvas.setPointerCapture(e.pointerId)}catch{}
     renderAll();return;
   }
@@ -1015,6 +1037,15 @@ function beginTransform(e,kind,handle){const p=getCanvasPoint(e),roots=selectedO
 function originalFor(id){return pointerAction.original.find(x=>x.id===id)}
 function updateMove(p){const dx=p.x-pointerAction.start.x,dy=p.y-pointerAction.start.y;for(const o of rigAffectedObjects(selectedObjects())){const q=originalFor(o.id);if(q){o.x=q.x+dx;o.y=q.y+dy}}renderAll()}
 function updateRotate(p){const b=pointerAction.bounds,cx=(b.minX+b.maxX)/2,cy=(b.minY+b.maxY)/2,a0=Math.atan2(pointerAction.start.y-cy,pointerAction.start.x-cx),a1=Math.atan2(p.y-cy,p.x-cx),delta=(a1-a0)*180/Math.PI,rad=delta*Math.PI/180;for(const o of rigAffectedObjects(selectedObjects())){const q=originalFor(o.id);if(!q)continue;const pivot=objectPivot(o),px=q.x+pivot.x,py=q.y+pivot.y,dx=px-cx,dy=py-cy;o.x=cx+dx*Math.cos(rad)-dy*Math.sin(rad)-pivot.x;o.y=cy+dx*Math.sin(rad)+dy*Math.cos(rad)-pivot.y;o.rotation=q.rotation+delta}renderAll()}
+function updateRigPose(action){
+  const delta=action.delta*180/Math.PI,rad=action.delta,c=Math.cos(rad),s=Math.sin(rad);
+  for(const original of action.original){
+    const object=allVisibleObjects().find(item=>item.id===original.id);if(!object)continue;
+    const pivot=objectPivot(object),px=original.x+pivot.x-action.pivot.x,py=original.y+pivot.y-action.pivot.y;
+    object.x=action.pivot.x+px*c-py*s-pivot.x;object.y=action.pivot.y+px*s+py*c-pivot.y;object.rotation=original.rotation+delta;
+  }
+  renderAll();
+}
 function updateScale(p,handle){const b=pointerAction.bounds,start=pointerAction.start;let anchor,sx=1,sy=1;if(handle==="nw")anchor={x:b.maxX,y:b.maxY};else if(handle==="n")anchor={x:(b.minX+b.maxX)/2,y:b.maxY};else if(handle==="ne")anchor={x:b.minX,y:b.maxY};else if(handle==="e")anchor={x:b.minX,y:(b.minY+b.maxY)/2};else if(handle==="se")anchor={x:b.minX,y:b.minY};else if(handle==="s")anchor={x:(b.minX+b.maxX)/2,y:b.minY};else if(handle==="sw")anchor={x:b.maxX,y:b.minY};else anchor={x:b.maxX,y:(b.minY+b.maxY)/2};if(handle==="n"||handle==="s"){sy=Math.max(.05,Math.abs(p.y-anchor.y)/Math.max(1,b.height))}else if(handle==="e"||handle==="w"){sx=Math.max(.05,Math.abs(p.x-anchor.x)/Math.max(1,b.width))}else{const x=Math.max(8,Math.abs(p.x-anchor.x))/Math.max(1,b.width),y=Math.max(8,Math.abs(p.y-anchor.y))/Math.max(1,b.height),s=Math.max(.05,Math.max(x,y));sx=s;sy=s}for(const o of selectedObjects()){const q=originalFor(o.id),pivot=objectPivot(o),px=q.x+pivot.x,py=q.y+pivot.y;o.x=anchor.x+(px-anchor.x)*sx-pivot.x;o.y=anchor.y+(py-anchor.y)*sy-pivot.y;o.scaleX=Math.max(.05,q.scaleX*sx);o.scaleY=Math.max(.05,q.scaleY*sy)}renderAll()}
 function renderGrid(){gridCtx.clearRect(0,0,W,H);if(!grid)return;gridCtx.strokeStyle="rgba(120,120,120,.35)";gridCtx.lineWidth=1;for(let x=20;x<W;x+=20){gridCtx.beginPath();gridCtx.moveTo(x+.5,0);gridCtx.lineTo(x+.5,H);gridCtx.stroke()}for(let y=20;y<H;y+=20){gridCtx.beginPath();gridCtx.moveTo(0,y+.5);gridCtx.lineTo(W,y+.5);gridCtx.stroke()}}
 const onionLayerCanvas=document.createElement("canvas"),onionLayerCtx=onionLayerCanvas.getContext("2d");
@@ -1160,7 +1191,7 @@ function setTool(t){
   document.getElementById("lineTool").classList.toggle("primary",t==="line");
   document.getElementById("transformTool").classList.toggle("primary",t==="transform");
   document.getElementById("pointTool").classList.toggle("primary",t==="node");
-  selected.clear();renderAll();
+  if(t!=="rig"&&t!=="rig-pivot")selected.clear();renderAll();
 }
 for(const b of document.querySelectorAll(".toolChoice"))b.onclick=()=>setTool(b.dataset.tool);
 document.getElementById("brushTool").onclick=()=>setTool("brush");document.getElementById("lineTool").onclick=()=>setTool("line");document.getElementById("transformTool").onclick=()=>setTool("transform");
@@ -1229,7 +1260,7 @@ document.addEventListener("keydown",e=>{
   if(e.shiftKey&&e.key==="ArrowRight"){e.preventDefault();goFrame(1);return}
   if(ctrl&&key==="z"){e.preventDefault();e.shiftKey?redo():undo();return}
   if(ctrl&&key==="y"){e.preventDefault();redo();return}
-  if(ctrl&&key==="s"){e.preventDefault();saveCurrent();const status=document.getElementById("projectSaveStatus");if(status)status.textContent="Saved";return}
+  if(ctrl&&key==="s"){e.preventDefault();const status=document.getElementById("projectSaveStatus");try{saveCurrent();if(status)status.textContent="Saved"+(window.__recoveryWarning||"")}catch(error){console.error("Project save failed.",error);if(status)status.textContent="Save failed: "+(error?.message||"Storage error")}return}
   if(ctrl&&key==="d"){e.preventDefault();duplicateSelection();return}
   if(ctrl&&key==="c"){e.preventDefault();objectClipboard=selectedObjects().map(deep);return}
   if(ctrl&&key==="x"){e.preventDefault();objectClipboard=selectedObjects().map(deep);deleteSelected();return}
@@ -1295,7 +1326,27 @@ document.getElementById("newBtn").onclick=newProject;
 function loadProjects(){try{return JSON.parse(localStorage.getItem(PROJECTS)||"[]")}catch{return[]}}
 function saveProjects(p){localStorage.setItem(PROJECTS,JSON.stringify(p))}
 function projectState(){return{layers:deep(layers),frames:deep(frames),camera:deep(camera),cameraKeys:deep(cameraKeys),symbols:deep(symbols),audio:deep(projectAudio),background:projectBackground,transparent:projectTransparent,notes:projectNotes,nextObjectId,nextLayerId,nextFrameId}}
-function saveCurrent(){const list=loadProjects();const now=Date.now();if(!projectId)projectId=uid("p_");const old=list.find(x=>x.id===projectId);const p={id:projectId,name:projectName,createdAt:old?.createdAt||now,updatedAt:now,state:projectState()};const i=list.findIndex(x=>x.id===projectId);if(i>=0)list[i]=p;else list.push(p);saveProjects(list)}
+function saveCurrent(){
+  const list=loadProjects(),now=Date.now();
+  if(!projectId)projectId=uid("p_");
+  const recoveryKey=RECOVERY_PREFIX+projectId,old=list.find(x=>x.id===projectId);
+  let previous=null,previousRecovery=null,warning="";
+  if(old){
+    try{const serialized=JSON.stringify(old);if(serialized.length<=900_000)previous=serialized;else warning=" · previous-version recovery skipped (project exceeds 900 KB)"}
+    catch(error){warning=" · previous-version recovery unavailable";console.warn("Could not serialize the previous project version.",error)}
+  }
+  try{previousRecovery=localStorage.getItem(recoveryKey);localStorage.removeItem(recoveryKey)}
+  catch(error){console.warn("Could not free space for the project save.",error)}
+  const p={id:projectId,name:projectName,createdAt:old?.createdAt||now,updatedAt:now,state:projectState()};
+  const i=list.findIndex(x=>x.id===projectId);if(i>=0)list[i]=p;else list.push(p);
+  try{saveProjects(list)}
+  catch(error){if(previousRecovery)try{localStorage.setItem(recoveryKey,previousRecovery)}catch(restoreError){console.warn("Could not restore the prior recovery copy after a failed save.",restoreError)}throw error}
+  if(previous){
+    try{localStorage.setItem(recoveryKey,previous)}
+    catch(error){warning=" · saved, but recovery copy could not be stored";console.warn("Could not store the previous project version.",error);if(previousRecovery)try{localStorage.setItem(recoveryKey,previousRecovery)}catch(restoreError){console.warn("Could not restore the older recovery copy.",restoreError)}}
+  }else if(previousRecovery)try{localStorage.setItem(recoveryKey,previousRecovery)}catch(error){console.warn("Could not restore the older recovery copy.",error)}
+  window.__recoveryWarning=warning;window.__updateRecoveryButton?.();
+}
 function projectStats(p){const st=p.state||{};const ls=Array.isArray(st.layers)?st.layers:[];const fs=Array.isArray(st.frames)?st.frames:[];let objectCount=0;for(const f of fs){for(const l of ls){objectCount+=(Array.isArray(f.layers?.[l.id])?f.layers[l.id].length:0)}}return{frames:fs.length,layers:ls.length,objects:objectCount}}
 function formatProjectDate(ts){if(!ts)return"Not saved yet";try{return new Date(ts).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}catch{return"Saved project"}}
 function projectThumbCanvas(p){const c=document.createElement("canvas");c.width=320;c.height=240;const tc=c.getContext("2d"),st=p.state||{},previousSymbols=symbols;tc.fillStyle=st.background||"#fff";tc.fillRect(0,0,320,240);try{symbols=deep(st.symbols||[]);tc.save();tc.scale(.5,.5);const ls=Array.isArray(st.layers)?st.layers:[],f=Array.isArray(st.frames)?st.frames[0]:null;if(f)for(const l of ls){if(l.visible===false)continue;for(const o of(f.layers?.[l.id]||[]))drawObject(tc,o)}tc.restore()}finally{symbols=previousSymbols}return c}
@@ -1306,9 +1357,10 @@ function deleteProject(id){const p=loadProjects().find(x=>x.id===id);if(!p)retur
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]))}
 function renderHome(){const grid=document.getElementById("projectGrid");const query=(document.getElementById("homeSearch")?.value||"").trim().toLowerCase();const sort=document.getElementById("homeSort")?.value||"updated";const view=localStorage.getItem("bba_home_view_v3")||"grid";const list=loadProjects();const stats=list.reduce((a,p)=>{const s=projectStats(p);a.projects++;a.frames+=s.frames;a.objects+=s.objects;return a},{projects:0,frames:0,objects:0});document.getElementById("homeStats").innerHTML='<div class="homeStat"><div class="homeStatValue">'+stats.projects+'</div><div class="homeStatLabel">Animations</div></div><div class="homeStat"><div class="homeStatValue">'+stats.frames+'</div><div class="homeStatLabel">Total Frames</div></div><div class="homeStat"><div class="homeStatValue">'+stats.objects+'</div><div class="homeStatLabel">Drawn Objects</div></div>';let filtered=list.filter(p=>(p.name||"").toLowerCase().includes(query));filtered.sort((a,b)=>{if(sort==="nameAsc")return String(a.name).localeCompare(String(b.name));if(sort==="nameDesc")return String(b.name).localeCompare(String(a.name));if(sort==="frames")return projectStats(b).frames-projectStats(a).frames;if(sort==="created")return (b.createdAt||0)-(a.createdAt||0);return (b.updatedAt||0)-(a.updatedAt||0)});grid.className="projectGrid "+view;if(!filtered.length){grid.innerHTML='<div class="homeEmpty"><strong>'+(list.length?'No matching animations':'No animations yet')+'</strong><span>'+(list.length?'Try a different search or sort option.':'Create your first animation to get started.')+'</span></div>'}else{grid.innerHTML="";for(const p of filtered){const st=projectStats(p);const card=document.createElement("div");card.className="projectCard";const th=document.createElement("div");th.className="projectThumb";th.appendChild(projectThumbCanvas(p));const info=document.createElement("div");info.className="projectInfo";const n=document.createElement("div");n.className="projectName";n.textContent=p.name||"Untitled";const meta=document.createElement("div");meta.className="projectMeta";meta.innerHTML='<span>'+st.frames+' frame'+(st.frames===1?'':'s')+'</span><span>'+st.layers+' layer'+(st.layers===1?'':'s')+'</span><span>'+formatProjectDate(p.updatedAt)+'</span>';const actions=document.createElement("div");actions.className="projectActions";const open=document.createElement("button");open.textContent="Open";open.onclick=e=>{e.stopPropagation();openProject(p.id)};const rename=document.createElement("button");rename.textContent="Rename";rename.onclick=e=>{e.stopPropagation();renameProject(p.id)};const duplicate=document.createElement("button");duplicate.textContent="Duplicate";duplicate.onclick=e=>{e.stopPropagation();duplicateProject(p.id)};const del=document.createElement("button");del.textContent="Delete";del.onclick=e=>{e.stopPropagation();deleteProject(p.id)};actions.append(open,rename,duplicate,del);info.append(n,meta,actions);card.append(th,info);card.onclick=()=>openProject(p.id);grid.appendChild(card)}}const latest=list.slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];const cont=document.getElementById("continueCard");if(latest&&!query){cont.style.display="flex";const st=projectStats(latest);cont.innerHTML='<div class="continueText"><strong>Continue with '+escapeHtml(latest.name||"Untitled")+'</strong><span>'+st.frames+' frame'+(st.frames===1?'':'s')+' · Last saved '+formatProjectDate(latest.updatedAt)+'</span></div><button class="small primary" id="continueBtn">Open Project</button>';document.getElementById("continueBtn").onclick=()=>openProject(latest.id)}else{cont.style.display="none"}}
 function enterEditor(){document.getElementById("homeView").style.display="none";document.getElementById("editorView").style.display="flex";document.getElementById("projectTitle").textContent=projectName;loadPanelLayout();updateAllPanelContentScales();renderAll();syncCameraControls();if(typeof window.__syncProjectStudio==="function")window.__syncProjectStudio();setZoom(zoom);setViewRotation(viewRotation);updateCanvasFitScale()}
-function goHome(){saveCurrent();stopPlaying();document.getElementById("editorView").style.display="none";document.getElementById("homeView").style.display="flex";renderHome()}
+function goHome(){try{saveCurrent()}catch(error){console.error("Project save failed; staying in the editor.",error);const status=document.getElementById("projectSaveStatus");if(status)status.textContent="Save failed: "+(error?.message||"Storage error");return}stopPlaying();document.getElementById("editorView").style.display="none";document.getElementById("homeView").style.display="flex";renderHome()}
 function saveFromButton(){
-  saveCurrent();
+  try{saveCurrent()}catch(error){console.error("Project save failed.",error);const status=document.getElementById("projectSaveStatus");if(status)status.textContent="Save failed: "+(error?.message||"Storage error");return}
+  const status=document.getElementById("projectSaveStatus");if(status)status.textContent="Saved"+(window.__recoveryWarning||"");
   openModal("Save Widget Presets?",'<div style="font-size:13px;line-height:1.5">Do you want to save your widget presets too?</div>',"Yes",(m,close)=>{close();openSaveWidgetPresetModal()},"No");
 }
 document.getElementById("saveBtn").onclick=saveFromButton;document.getElementById("homeBtn").onclick=goHome;
@@ -1616,22 +1668,23 @@ function setRigPivotAtWorldPoint(object,worldPoint){
   const local={x:(dx*c-dy*s)/(object.scaleX||1)+pivot.x,y:(dx*s+dy*c)/(object.scaleY||1)+pivot.y};
   object.x=worldPoint.x-local.x;object.y=worldPoint.y-local.y;object.pivotX=local.x;object.pivotY=local.y;
 }
-function setAutomaticRigPivot(object){
+function setAutomaticRigPivot(object,parentOverride=null){
   const bounds=objectLocalBounds(object);if(!bounds)return false;
   const center={x:(bounds.minX+bounds.maxX)/2,y:(bounds.minY+bounds.maxY)/2};
   const role=document.getElementById("rigRole")?.value||object.rigRole||"custom";
   if(role==="body"){
     setRigPivotAtWorldPoint(object,objectLocalToWorld(object,center));delete object.rigParentId;return true;
   }
-  const body=allVisibleObjects().find(candidate=>candidate.rigRole==="body"&&candidate.id!==object.id);
-  if(!body)return false;
-  const bodyBounds=objectLocalBounds(body),bodyCenter=bodyBounds?objectLocalToWorld(body,{x:(bodyBounds.minX+bodyBounds.maxX)/2,y:(bodyBounds.minY+bodyBounds.maxY)/2}):{x:body.x,y:body.y};
+  const chosenId=document.getElementById("rigParentSelect")?.value;
+  const parent=parentOverride||allVisibleObjects().find(candidate=>String(candidate.id)===String(chosenId))||allVisibleObjects().find(candidate=>candidate.rigRole==="body"&&candidate.id!==object.id);
+  if(!parent||parent.id===object.id||rigAffectedObjects([object]).some(candidate=>candidate.id===parent.id))return false;
+  const parentBounds=objectLocalBounds(parent),parentCenter=parentBounds?objectLocalToWorld(parent,{x:(parentBounds.minX+parentBounds.maxX)/2,y:(parentBounds.minY+parentBounds.maxY)/2}):{x:parent.x,y:parent.y};
   const candidates=[
     {x:bounds.minX,y:center.y},{x:bounds.maxX,y:center.y},
     {x:center.x,y:bounds.minY},{x:center.x,y:bounds.maxY}
   ];
-  candidates.sort((a,b)=>{const pa=objectLocalToWorld(object,a),pb=objectLocalToWorld(object,b);return Math.hypot(pa.x-bodyCenter.x,pa.y-bodyCenter.y)-Math.hypot(pb.x-bodyCenter.x,pb.y-bodyCenter.y)});
-  setRigPivotAtWorldPoint(object,objectLocalToWorld(object,candidates[0]));object.rigParentId=body.id;return true;
+  candidates.sort((a,b)=>{const pa=objectLocalToWorld(object,a),pb=objectLocalToWorld(object,b);return Math.hypot(pa.x-parentCenter.x,pa.y-parentCenter.y)-Math.hypot(pb.x-parentCenter.x,pb.y-parentCenter.y)});
+  setRigPivotAtWorldPoint(object,objectLocalToWorld(object,candidates[0]));object.rigParentId=parent.id;return true;
 }
 document.getElementById("rigSetRoleBtn")?.addEventListener("click",()=>{
   const objects=selectedObjects(),role=document.getElementById("rigRole").value,status=document.getElementById("rigStatus");
@@ -1644,7 +1697,7 @@ document.getElementById("rigPivotBtn")?.addEventListener("click",()=>{
   const objects=selectedObjects(),status=document.getElementById("rigStatus");if(!objects.length){if(status)status.textContent="Select the bone you want to attach.";return}
   pushHistory();let attached=0;
   for(const object of objects){if(setAutomaticRigPivot(object))attached++}
-  if(status)status.textContent=attached===objects.length?"Pivot placed; attached bones follow their parent when moved or rotated.":"Mark a body object first, then select a limb to attach it.";
+  if(status)status.textContent=attached===objects.length?"Pivot placed; attached parts follow their selected parent.":"Choose a valid parent object, or mark a body, before attaching this part.";
   renderAll();
 });
 document.getElementById("rigUnlinkBtn")?.addEventListener("click",()=>{
@@ -1725,15 +1778,55 @@ function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.
 function downloadDataUrl(url,name){const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove()}
 function exportCurrentImage(type,scale,transparent){const c=logicalFrameCanvas(activeFrame(),scale,transparent);const mime=type==="jpeg"?"image/jpeg":"image/png";downloadDataUrl(c.toDataURL(mime,type==="jpeg"?.94:1),`${safeFileName(projectName)}_frame_${String(currentFrame+1).padStart(3,"0")}.${type==="jpeg"?"jpg":"png"}`)}
 function exportSprite(scale,transparent){const out=document.createElement("canvas");out.width=W*scale*frames.length;out.height=H*scale;const o=out.getContext("2d");if(!transparent){o.fillStyle=projectBackground||"#fff";o.fillRect(0,0,out.width,out.height)}for(let i=0;i<frames.length;i++)o.drawImage(logicalFrameCanvas(frames[i],scale,transparent,i),i*W*scale,0);downloadDataUrl(out.toDataURL("image/png"),`${safeFileName(projectName)}_sprite_sheet.png`)}
-function exportSequence(scale,transparent){frames.forEach((frame,i)=>{const c=logicalFrameCanvas(frame,scale,transparent,i);setTimeout(()=>downloadDataUrl(c.toDataURL("image/png"),`${safeFileName(projectName)}_frame_${String(i+1).padStart(3,"0")}.png`),i*150)})}
+function canvasToBlob(canvas,type){return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("The browser could not encode an exported frame.")),type))}
+function zipCrc32(bytes){
+  let crc=0xffffffff;
+  for(const byte of bytes){crc^=byte;for(let bit=0;bit<8;bit++)crc=(crc>>>1)^((crc&1)?0xedb88320:0)}
+  return(crc^0xffffffff)>>>0;
+}
+function storedZip(entries){
+  if(entries.length>65535)throw new Error("The image sequence has too many frames for a standard ZIP archive.");
+  const encoder=new TextEncoder(),parts=[],central=[];let offset=0,centralSize=0;
+  for(const entry of entries){
+    const name=encoder.encode(entry.name),data=entry.data,crc=zipCrc32(data),local=new Uint8Array(30+name.length),lv=new DataView(local.buffer);
+    lv.setUint32(0,0x04034b50,true);lv.setUint16(4,20,true);lv.setUint16(6,0x0800,true);lv.setUint16(8,0,true);lv.setUint32(14,crc,true);lv.setUint32(18,data.length,true);lv.setUint32(22,data.length,true);lv.setUint16(26,name.length,true);local.set(name,30);
+    parts.push(local,data);
+    const header=new Uint8Array(46+name.length),hv=new DataView(header.buffer);
+    hv.setUint32(0,0x02014b50,true);hv.setUint16(4,20,true);hv.setUint16(6,20,true);hv.setUint16(8,0x0800,true);hv.setUint16(10,0,true);hv.setUint32(16,crc,true);hv.setUint32(20,data.length,true);hv.setUint32(24,data.length,true);hv.setUint16(28,name.length,true);hv.setUint32(42,offset,true);header.set(name,46);
+    central.push(header);centralSize+=header.length;offset+=local.length+data.length;
+  }
+  for(const part of central)parts.push(part);
+  const end=new Uint8Array(22),ev=new DataView(end.buffer);ev.setUint32(0,0x06054b50,true);ev.setUint16(8,entries.length,true);ev.setUint16(10,entries.length,true);ev.setUint32(12,centralSize,true);ev.setUint32(16,offset,true);parts.push(end);
+  return new Blob(parts,{type:"application/zip"});
+}
+async function exportSequence(scale,transparent,onProgress=()=>{}){
+  const estimatedBytes=W*H*scale*scale*4*frames.length;
+  if(estimatedBytes>300_000_000)throw new Error("This image sequence is too large to package safely. Reduce the scale or export fewer frames.");
+  const entries=[];
+  for(let i=0;i<frames.length;i++){
+    const canvas=logicalFrameCanvas(frames[i],scale,transparent,i),blob=await canvasToBlob(canvas,"image/png");
+    entries.push({name:`${safeFileName(projectName)}_frame_${String(i+1).padStart(4,"0")}.png`,data:new Uint8Array(await blob.arrayBuffer())});
+    onProgress(i+1,frames.length);
+  }
+  downloadBlob(storedZip(entries),`${safeFileName(projectName)}_sequence.zip`);
+}
 async function exportWebm(scale,transparent){
   if(!canvas.captureStream||typeof MediaRecorder==="undefined")throw new Error("WebM recording is not supported by this browser.");
   const fps=Math.max(1,Math.min(100,Number(document.getElementById("playbackFps")?.value||document.getElementById("fps")?.value||8)));
   const out=document.createElement("canvas");out.width=W*scale;out.height=H*scale;const stream=out.captureStream(fps);
   const mime=MediaRecorder.isTypeSupported("video/webm;codecs=vp9")?"video/webm;codecs=vp9":(MediaRecorder.isTypeSupported("video/webm")?"video/webm":"");if(!mime)throw new Error("WebM recording is not supported by this browser.");
   const chunks=[],rec=new MediaRecorder(stream,{mimeType:mime});const stopped=new Promise((resolve,reject)=>{rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};rec.onerror=e=>reject(e.error||new Error("Recording failed"));rec.onstop=resolve});rec.start();const o=out.getContext("2d");
-  for(let i=0;i<frames.length;i++){const f=logicalFrameCanvas(frames[i],scale,transparent,i);o.clearRect(0,0,out.width,out.height);if(!transparent){o.fillStyle=projectBackground||"#fff";o.fillRect(0,0,out.width,out.height)}o.drawImage(f,0,0);await new Promise(r=>setTimeout(r,1000/fps))}
-  rec.stop();await stopped;downloadBlob(new Blob(chunks,{type:"video/webm"}),`${safeFileName(projectName)}.webm`)
+  try{
+    for(let i=0;i<frames.length;i++){
+      const f=logicalFrameCanvas(frames[i],scale,transparent,i),hold=Math.max(1,Number(frames[i].duration)||1);
+      o.clearRect(0,0,out.width,out.height);if(!transparent){o.fillStyle=projectBackground||"#fff";o.fillRect(0,0,out.width,out.height)}o.drawImage(f,0,0);
+      await new Promise(resolve=>setTimeout(resolve,1000/fps*hold));
+    }
+    rec.stop();await stopped;downloadBlob(new Blob(chunks,{type:"video/webm"}),`${safeFileName(projectName)}.webm`);
+  }finally{
+    if(rec.state!=="inactive"){rec.stop();try{await stopped}catch(error){console.warn("WebM recorder cleanup reported an error.",error)}}
+    stream.getTracks().forEach(track=>track.stop());
+  }
 }
 function currentProjectJson(){return JSON.stringify({format:"Bare Bones Animator Project",version:4,name:projectName,exportedAt:Date.now(),state:projectState()},null,2)}
 async function performExport(root=document){
@@ -1741,7 +1834,7 @@ async function performExport(root=document){
   if(!format)throw new Error("Choose an export format.");
   if(status)status.textContent="Exporting…";
   try{
-    if(format==="png")exportCurrentImage("png",scale,transparent);else if(format==="jpeg")exportCurrentImage("jpeg",scale,false);else if(format==="svg")downloadBlob(new Blob([frameToSvg(activeFrame())],{type:"image/svg+xml"}),`${safeFileName(projectName)}_frame_${String(currentFrame+1).padStart(3,"0")}.svg`);else if(format==="sprite")exportSprite(scale,transparent);else if(format==="sequence")exportSequence(scale,transparent);else if(format==="json")downloadBlob(new Blob([currentProjectJson()],{type:"application/json"}),`${safeFileName(projectName)}.json`);else if(format==="webm")await exportWebm(scale,transparent);
+    if(format==="png")exportCurrentImage("png",scale,transparent);else if(format==="jpeg")exportCurrentImage("jpeg",scale,false);else if(format==="svg")downloadBlob(new Blob([frameToSvg(activeFrame())],{type:"image/svg+xml"}),`${safeFileName(projectName)}_frame_${String(currentFrame+1).padStart(3,"0")}.svg`);else if(format==="sprite")exportSprite(scale,transparent);else if(format==="sequence")await exportSequence(scale,transparent,(done,total)=>{if(status)status.textContent=`Packaging frame ${done} of ${total}…`});else if(format==="json")downloadBlob(new Blob([currentProjectJson()],{type:"application/json"}),`${safeFileName(projectName)}.json`);else if(format==="webm")await exportWebm(scale,transparent);
     if(status)status.textContent="Export complete.";
   }catch(err){console.error(err);if(status)status.textContent="Export failed: "+(err?.message||"Unknown error")}
 }
@@ -1937,7 +2030,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
   function syncAudioTrack(){const player=document.getElementById("projectAudioPlayer"),status=document.getElementById("audioTrackStatus");if(player){player.pause();player.src=projectAudio?.src||"";player.load()}if(status)status.textContent=projectAudio?"Audio: "+projectAudio.name:"Import an audio clip (up to 1.5 MB) to sync sound with playback."}
   function syncProjectStudio(){const bg=document.getElementById("projectBgColor");if(bg)bg.value=projectBackground;const tr=document.getElementById("projectTransparent");if(tr)tr.checked=projectTransparent;const notes=document.getElementById("projectNotes");if(notes)notes.value=projectNotes;const as=document.getElementById("autoSaveEnabled");if(as)as.checked=autoSaveEnabled;const am=document.getElementById("autoSaveMinutes");if(am)am.value=autoSaveMinutes;const st=document.getElementById("projectSaveStatus");if(st)st.textContent=projectId?"Project loaded":"Ready";syncAudioTrack();syncSymbolLibrary();syncCameraControls()}
   window.__syncProjectStudio=syncProjectStudio;
-  function restartAutosave(){clearInterval(autoSaveTimer);if(!autoSaveEnabled)return;autoSaveTimer=setInterval(()=>{const editor=document.getElementById("editorView");if(!editor||getComputedStyle(editor).display==="none")return;const st=document.getElementById("projectSaveStatus");try{saveCurrent();if(st)st.textContent="Auto-saved "+new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}catch(error){console.error("Auto-save failed.",error);if(st)st.textContent="Auto-save failed: "+(error?.message||"Storage error")}},Math.max(1,autoSaveMinutes)*60000)}
+  function restartAutosave(){clearInterval(autoSaveTimer);if(!autoSaveEnabled)return;autoSaveTimer=setInterval(()=>{const editor=document.getElementById("editorView");if(!editor||getComputedStyle(editor).display==="none")return;const st=document.getElementById("projectSaveStatus");try{saveCurrent();if(st)st.textContent="Auto-saved "+new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})+(window.__recoveryWarning||"")}catch(error){console.error("Auto-save failed.",error);if(st)st.textContent="Auto-save failed: "+(error?.message||"Storage error")}},Math.max(1,autoSaveMinutes)*60000)}
   document.getElementById("projectBgColor")?.addEventListener("input",e=>{projectBackground=e.target.value;projectTransparent=false;document.getElementById("projectTransparent").checked=false;renderAll()});
   document.getElementById("projectTransparent")?.addEventListener("change",e=>{projectTransparent=e.target.checked;renderAll()});
   document.getElementById("projectNotes")?.addEventListener("input",e=>projectNotes=e.target.value);
@@ -2213,8 +2306,9 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
 /* Built-in workspace preset chooser */
 (function(){
   const BUILTIN_WIDGET_PRESETS=[
-    {name:"Animation Pro Studio",description:"A spacious, movable production workspace with canvas, timeline, objects, layers, tools, and properties arranged for animation."},
-    {name:"Studio",description:"Balanced layout for everyday animation work."},
+    {name:"Animation Pro Studio",description:"A spacious production workspace with canvas, timeline, layers, objects, brush tools, and playback ready; Camera and rig controls remain one click away."},
+    {name:"Character Rigging",description:"Focuses the canvas, object/layer controls, timeline, and full Project Studio rig and camera controls for character posing."},
+    {name:"Studio",description:"Balanced layout for drawing and animation, with camera and project settings available from the top toolbar."},
     {name:"Animation Focus",description:"Large canvas with a prominent timeline."},
     {name:"Illustration",description:"Brushes, colors, symmetry, and canvas up front."},
     {name:"Timeline Focus",description:"Frames, playback, onion skin, and layers emphasized."},
@@ -2228,7 +2322,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
       toolsPanel:[10,510,250,270],brushesPanel:[1170,200,260,220],playbackPanel:[1170,10,260,180],
       onionPanel:[1170,430,260,180],navigatorPanel:[1170,620,260,160],
       colorPanel:[1170,660,260,180],symmetryPanel:[1440,10,240,350],createPanel:[1440,370,240,300],
-      guidesPanel:[485,10,255,325],appearancePanel:[1030,10,205,325],projectPanel:[250,540,220,230],
+      guidesPanel:[485,10,255,325],appearancePanel:[1030,10,205,325],projectPanel:[1170,10,290,760],
       timelinePanel:[10,Math.max(10,(document.getElementById("workspace")?.clientHeight||900)-280),Math.max(700,(document.getElementById("workspace")?.clientWidth||1440)-20),270]
     };
   }
@@ -2249,6 +2343,12 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
         show("canvasPanel","layersPanel","objectsPanel","toolsPanel","brushesPanel","colorPanel","playbackPanel","onionPanel","navigatorPanel","timelinePanel");
         layout.canvasPanel={left:255,top:10,width:710,height:510,hidden:false,collapsed:false,zIndex:25};
         layout.timelinePanel={left:255,top:535,width:710,height:150,hidden:false,collapsed:false,zIndex:25};
+        break;
+      case "Character Rigging":
+        show("canvasPanel","layersPanel","objectsPanel","toolsPanel","projectPanel","timelinePanel");
+        layout.canvasPanel={left:210,top:0,width:Math.max(320,(document.getElementById("workspace")?.clientWidth||1200)-540),height:Math.max(320,(document.getElementById("workspace")?.clientHeight||800)-230),hidden:false,collapsed:false,zIndex:35};
+        layout.projectPanel={left:Math.max(530,(document.getElementById("workspace")?.clientWidth||1200)-320),top:0,width:310,height:Math.max(400,(document.getElementById("workspace")?.clientHeight||800)-230),hidden:false,collapsed:false,zIndex:38};
+        layout.timelinePanel={left:0,top:Math.max(10,(document.getElementById("workspace")?.clientHeight||800)-220),width:Math.max(700,(document.getElementById("workspace")?.clientWidth||1200)-10),height:210,hidden:false,collapsed:false,zIndex:36};
         break;
       case "Animation Focus":
         show("canvasPanel","layersPanel","propertiesPanel","playbackPanel","onionPanel","navigatorPanel","timelinePanel");
@@ -2292,7 +2392,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     if(name==="Animation Pro Studio"){
       const timelineH=Math.max(190,Math.min(310,Math.round(h*.30))),mainH=h-timelineH-gap;
       if(w<1020){
-        const left=Math.max(170,Math.min(220,Math.round(w*.32))),layersH=Math.round(mainH*.46);
+        const left=Math.max(170,Math.min(220,Math.round(w*.32))),layersH=Math.round(mainH*.42);
         put("layersPanel",0,0,left,layersH,false,31);
         put("toolsPanel",0,layersH+gap,left,mainH-layersH-gap,false,31);
         put("canvasPanel",left+gap,0,Math.max(220,w-left-gap),mainH,false,35);
@@ -2349,6 +2449,23 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
       put("brushesPanel",w-right,0,right,Math.max(250,Math.round(topH*.43)),false,37);
       put("colorPanel",w-right,Math.max(250,Math.round(topH*.43))+gap,right,Math.max(180,topH-Math.max(250,Math.round(topH*.43))-gap),false,37);
       put("timelinePanel",0,h-bottom,w,bottom,false,36);
+    } else if(name==="Character Rigging") {
+      // The rig preset keeps the Project Studio together as a dedicated right-side rigging station.
+      const timelineH=Math.max(220,Math.round(h*.27)),mainH=h-timelineH-gap;
+      if(w<720){
+        const canvasH=Math.round(mainH*.52);
+        put("canvasPanel",0,0,w,canvasH,false,35);
+        put("projectPanel",0,canvasH+gap,w,mainH-canvasH-gap,false,38);
+      }else{
+        const left=Math.max(190,Math.min(245,Math.round(w*.17))),right=Math.max(280,Math.min(340,Math.round(w*.25))),canvasW=Math.max(300,w-left-right-gap*2);
+        const layersH=Math.round(mainH*.42),objectsH=Math.round(mainH*.26);
+        put("layersPanel",0,0,left,layersH,false,31);
+        put("objectsPanel",0,layersH+gap,left,objectsH,false,32);
+        put("toolsPanel",0,layersH+objectsH+gap*2,left,mainH-layersH-objectsH-gap*2,false,31);
+        put("canvasPanel",left+gap,0,canvasW,mainH,false,35);
+        put("projectPanel",left+gap+canvasW+gap,0,right,mainH,false,38);
+      }
+      put("timelinePanel",0,h-timelineH,w,timelineH,false,36);
     } else {
       // Full Studio: use full viewport with a practical production layout.
       const bottom=Math.max(150,Math.round(h*.20)),left=Math.max(210,Math.round(w*.16)),right=Math.max(260,Math.round(w*.22)),midH=h-bottom;
@@ -2363,6 +2480,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
       put("playbackPanel",left+gap+10,10,230,150,false,38);
       put("navigatorPanel",left+gap+250,10,230,150,false,38);
       put("guidesPanel",left+gap+490,10,230,180,false,38);
+      put("projectPanel",w-right,midH*.68+gap*2,right,Math.max(120,midH*.32-gap*2),false,37);
     }
     return layout;
   }
@@ -2651,7 +2769,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
   let timelineZoom = 100;
   let timelinePingPong = false;
   let playbackDirection = 1;
-  let timelineWired = false;
+  let timelineWired = false,timelineDragSource=-1,timelineJustMoved=false,timelineKeyClipboard=null,timelineDragState=null,timelineKeyDragState=null;
 
   function ensureFrameMeta(){
     if(!Array.isArray(window.frames) && typeof frames === "undefined") return;
@@ -2684,6 +2802,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     const layer=document.getElementById("timelineLayerCount");
     const currentLayer=document.getElementById("timelineCurrentLayer");
     const durInput=document.getElementById("timelineDuration");
+    const easing=document.getElementById("keyframeEasing");
     if(head) head.textContent=`Frame ${frames.length ? currentFrame+1 : 0} / ${frames.length}`;
     if(read) read.textContent=`Frame ${frames.length ? currentFrame+1 : 0}`;
     if(label) label.textContent=f?.label || "Untitled frame";
@@ -2695,6 +2814,27 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     if(layer) layer.textContent=layers.length+" layer"+(layers.length===1?"":"s");
     if(currentLayer) currentLayer.textContent=activeLayer()?.name||"Layer";
     if(durInput && document.activeElement!==durInput) durInput.value=Math.max(1,Number(f?.duration)||1);
+    if(easing&&document.activeElement!==easing){easing.value=f?.easing||"linear";keyframeEasing=easing.value}
+  }
+
+  function moveObjectKeyframes(sourceIndex,targetIndex,items){
+    if(sourceIndex===targetIndex||!items.length)return false;
+    const source=frames[sourceIndex],target=frames[targetIndex];if(!source||!target)return false;
+    const valid=items.filter(item=>(source.layers[item.layerId]||[]).some(object=>object.id===item.id));
+    if(!valid.length)return false;
+    pushHistory();const targetKeys=Array.isArray(target.keyframes)?target.keyframes:[];
+    for(const item of valid){
+      const layer=layers.find(candidate=>String(candidate.id)===String(item.layerId));if(!layer)continue;
+      const sourceObjects=source.layers[layer.id]||[],targetObjects=target.layers[layer.id]||(target.layers[layer.id]=[]);
+      const sourceIndexInLayer=sourceObjects.findIndex(object=>object.id===item.id),targetIndexInLayer=targetObjects.findIndex(object=>object.id===item.id);
+      const pose=sourceIndexInLayer>=0?sourceObjects[sourceIndexInLayer]:deep(item.object);
+      if(targetIndexInLayer>=0)targetObjects.splice(targetIndexInLayer,1,deep(pose));else targetObjects.push(deep(pose));
+      source.layers[layer.id]=sourceObjects.filter(object=>object.id!==item.id);
+      if(!targetKeys.includes(item.id))targetKeys.push(item.id);
+    }
+    source.keyframes=(source.keyframes||[]).filter(id=>!valid.some(item=>item.id===id));
+    target.keyframes=targetKeys;currentFrame=targetIndex;selected.clear();valid.forEach(item=>selected.add(item.id));renderAll();
+    return true;
   }
 
   function renderTimeline(){
@@ -2707,6 +2847,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     frames.forEach((frame,index)=>{
       const b=document.createElement("button");
       b.type="button";
+      b.dataset.frameIndex=String(index);
       b.className="frameBtn timelineFrameCell"+(index===currentFrame?" active":"")+(index===currentFrame?" playhead":"")+(Array.isArray(frame.keyframes)&&frame.keyframes.length?" hasKeyframe":"")+(cameraKeys[frame.id]?" hasCameraKey":"");
       b.title=(frame.label?frame.label+" — ":"")+`Frame ${index+1} · Hold ${Math.max(1,Number(frame.duration)||1)}×`;
 
@@ -2714,7 +2855,37 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
       top.className="timelineFrameTop";
       const num=document.createElement("span");num.className="timelineFrameNumber";num.textContent=index+1;
       const hold=document.createElement("span");hold.className="timelineFrameDuration";hold.textContent=(Math.max(1,Number(frame.duration)||1))+"×";
-      const keyframe=document.createElement("span");keyframe.className="timelineKeyframeMarker";keyframe.textContent="◆";keyframe.title="Contains object keyframes";
+      const keyframe=document.createElement("span");keyframe.className="timelineKeyframeMarker";keyframe.textContent="◆";keyframe.title="Drag this marker to move the selected object's key pose to another frame";
+      keyframe.addEventListener("pointerdown",event=>{
+        if(event.button!==0||playing)return;
+        const ids=Array.isArray(frame.keyframes)?frame.keyframes:[],movingIds=selected.size?ids.filter(id=>selected.has(id)):ids;
+        const items=[];
+        for(const id of movingIds)for(const layer of layers){const object=(frame.layers[layer.id]||[]).find(item=>item.id===id);if(object){items.push({id,layerId:layer.id,object:deep(object)});break}}
+        if(!items.length)return;
+        event.preventDefault();event.stopPropagation();
+        timelineKeyDragState={pointerId:event.pointerId,index,items,startX:event.clientX,startY:event.clientY,dragging:false};
+        try{keyframe.setPointerCapture(event.pointerId)}catch(error){if(event.isTrusted)console.warn("Could not capture keyframe pointer.",error)}
+      });
+      keyframe.addEventListener("pointermove",event=>{
+        const state=timelineKeyDragState;if(!state||state.pointerId!==event.pointerId)return;
+        if(!state.dragging&&Math.hypot(event.clientX-state.startX,event.clientY-state.startY)<6)return;
+        state.dragging=true;timelineJustMoved=true;event.preventDefault();keyframe.classList.add("dragging");
+        document.querySelectorAll(".timelineFrameCell.dropTarget").forEach(cell=>cell.classList.remove("dropTarget"));
+        const target=timelineCellAtPoint(event.clientX,event.clientY);
+        if(target&&Number(target.dataset.frameIndex)!==state.index)target.classList.add("dropTarget");
+      });
+      const finishKeyframeDrag=event=>{
+        const state=timelineKeyDragState;if(!state||state.pointerId!==event.pointerId)return;
+        event.stopPropagation();
+        if(state.dragging){
+          const target=timelineCellAtPoint(event.clientX,event.clientY),targetIndex=Number(target?.dataset.frameIndex);
+          if(Number.isInteger(targetIndex)&&targetIndex>=0)moveObjectKeyframes(state.index,targetIndex,state.items);
+          setTimeout(()=>{timelineJustMoved=false},0);
+        }
+        timelineKeyDragState=null;keyframe.classList.remove("dragging");document.querySelectorAll(".timelineFrameCell.dropTarget").forEach(cell=>cell.classList.remove("dropTarget"));
+      };
+      keyframe.addEventListener("pointerup",finishKeyframeDrag);
+      keyframe.addEventListener("pointercancel",finishKeyframeDrag);
       const cameraKey=document.createElement("span");cameraKey.className="timelineCameraKeyMarker";cameraKey.textContent="CAM";cameraKey.title="Camera keyframe";
       top.append(num,hold,keyframe,cameraKey);
 
@@ -2732,6 +2903,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
 
       b.append(top,thumb,label,strip);
       b.addEventListener("click",()=>{
+        if(timelineJustMoved)return;
         if(playing) return;
         currentFrame=index;
         selected.clear();
@@ -2747,12 +2919,56 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
         const input=document.getElementById("timelineRenameFrameInput");
         if(input){input.value=frame.label||"";setTimeout(()=>{input.focus();input.select()},0)}
       });
+      b.addEventListener("pointerdown",event=>{
+        if(event.button!==0||playing)return;
+        timelineDragState={pointerId:event.pointerId,index,startX:event.clientX,startY:event.clientY,dragging:false};
+        try{b.setPointerCapture(event.pointerId)}catch(error){if(event.isTrusted)console.warn("Could not capture timeline pointer.",error)}
+      });
+      b.addEventListener("pointermove",event=>{
+        const state=timelineDragState;if(!state||state.pointerId!==event.pointerId)return;
+        if(!state.dragging&&Math.hypot(event.clientX-state.startX,event.clientY-state.startY)<8)return;
+        if(!state.dragging){state.dragging=true;timelineDragSource=state.index;timelineJustMoved=false;b.classList.add("dragging")}
+        event.preventDefault();
+        document.querySelectorAll(".timelineFrameCell.dropTarget").forEach(cell=>cell.classList.remove("dropTarget"));
+        const target=timelineCellAtPoint(event.clientX,event.clientY);
+        if(target&&Number(target.dataset.frameIndex)!==state.index)target.classList.add("dropTarget");
+      });
+      const finishTimelineDrag=event=>{
+        const state=timelineDragState;if(!state||state.pointerId!==event.pointerId)return;
+        if(state.dragging){
+          const target=timelineCellAtPoint(event.clientX,event.clientY),targetIndex=Number(target?.dataset.frameIndex);
+          if(Number.isInteger(targetIndex)&&targetIndex>=0)reorderTimelineFrame(state.index,targetIndex);
+          else timelineDragSource=-1;
+          timelineJustMoved=true;setTimeout(()=>{timelineJustMoved=false},0);
+        }
+        timelineDragState=null;
+        document.querySelectorAll(".timelineFrameCell").forEach(cell=>cell.classList.remove("dragging","dropTarget"));
+      };
+      b.addEventListener("pointerup",finishTimelineDrag);
+      b.addEventListener("pointercancel",finishTimelineDrag);
       el.appendChild(b);
     });
     timelineReadout();
   }
 
   function refreshTimeline(){renderTimeline();timelineReadout();}
+
+  function reorderTimelineFrame(source,target){
+    const targetIndex=target-(source<target?1:0),selectedFrame=frames[currentFrame];
+    if(targetIndex===source)return false;
+    pushHistory();
+    const [moved]=frames.splice(source,1);frames.splice(targetIndex,0,moved);
+    currentFrame=Math.max(0,frames.indexOf(selectedFrame));
+    timelineJustMoved=true;timelineDragSource=-1;renderAll();
+    setTimeout(()=>{timelineJustMoved=false},0);
+    return true;
+  }
+
+  function timelineCellAtPoint(x,y){
+    const cells=[...document.querySelectorAll("#frames .timelineFrameCell")];
+    return cells.find(cell=>{const bounds=cell.getBoundingClientRect();return x>=bounds.left&&x<=bounds.right&&y>=bounds.top&&y<=bounds.bottom})
+      ||document.elementFromPoint(x,y)?.closest(".timelineFrameCell")||null;
+  }
 
   function replacePlaybackScheduler(){
     const scheduler=function(){
@@ -2825,6 +3041,33 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
       frames.splice(start+1,0,...blanks);ensureFrameLayers();currentFrame=start+1;
       if(status)status.textContent=`Inserted ${count} interpolated frame${count===1?"":"s"}.`;
       selected.clear();for(const id of ids)selected.add(id);renderAll();
+    });
+    document.getElementById("copyFrameBtn")?.addEventListener("click",()=>{
+      const objects=selectedObjects(),status=document.getElementById("timelineStatusText");
+      if(!objects.length){if(status)status.textContent="Select one or more objects to copy their key poses.";return}
+      timelineKeyClipboard=[];
+      for(const object of objects){
+        const layer=layers.find(candidate=>(activeFrame().layers[candidate.id]||[]).some(item=>item.id===object.id));
+        if(layer)timelineKeyClipboard.push({id:object.id,layerId:layer.id,object:deep(object)});
+      }
+      if(status)status.textContent=`Copied ${timelineKeyClipboard.length} object key pose${timelineKeyClipboard.length===1?"":"s"}.`;
+    });
+    document.getElementById("pasteFrameBtn")?.addEventListener("click",()=>{
+      const status=document.getElementById("timelineStatusText"),frame=activeFrame();
+      if(!timelineKeyClipboard?.length){if(status)status.textContent="Copy object key poses before pasting.";return}
+      const valid=timelineKeyClipboard.filter(item=>layers.some(layer=>String(layer.id)===String(item.layerId)));
+      if(!valid.length){if(status)status.textContent="The copied key poses belong to layers that no longer exist.";return}
+      pushHistory();const keys=Array.isArray(frame.keyframes)?frame.keyframes:[];
+      for(const item of valid){
+        const layerId=layers.find(layer=>String(layer.id)===String(item.layerId)).id;
+        const objects=frame.layers[layerId]||(frame.layers[layerId]=[]),existing=objects.findIndex(object=>object.id===item.id);
+        const copy=deep(item.object);copy.id=item.id;
+        if(existing>=0)objects.splice(existing,1,copy);else objects.push(copy);
+        if(!keys.includes(copy.id))keys.push(copy.id);
+      }
+      frame.keyframes=keys;selected.clear();valid.forEach(item=>selected.add(item.id));
+      if(status)status.textContent=`Pasted ${valid.length} object key pose${valid.length===1?"":"s"} as keyframes.`;
+      renderAll();
     });
 
     // Enhance existing Add Blank so it is guaranteed blank.
@@ -3787,16 +4030,31 @@ wirePlaybackWidget();
 
   const bucketButton=document.querySelector('[data-tool="bucket"]');
   if(bucketButton)bucketButton.title="Fill a contiguous area on the current frame";
+  document.getElementById("bucketGapClose")?.addEventListener("input",event=>{
+    bucketGapClose=Math.max(0,Math.min(12,Number(event.target.value)||0));
+    const readout=document.getElementById("bucketGapCloseText");if(readout)readout.textContent=bucketGapClose+" px";
+  });
   function fillBucket(point){
     const x=Math.max(0,Math.min(W-1,Math.floor(point.x))),y=Math.max(0,Math.min(H-1,Math.floor(point.y)));
     const source=logicalFrameCanvas(activeFrame(),1,true),sourceCtx=source.getContext("2d"),input=sourceCtx.getImageData(0,0,W,H);
     const output=sourceCtx.createImageData(W,H),pixels=input.data,filled=output.data,start=(y*W+x)*4;
     const target=[pixels[start],pixels[start+1],pixels[start+2],pixels[start+3]],fill=rgbFromHex(color);
     if(target[3]&&Math.abs(target[0]-fill.r)<2&&Math.abs(target[1]-fill.g)<2&&Math.abs(target[2]-fill.b)<2)return;
-    const visited=new Uint8Array(W*H),stack=new Uint32Array(W*H);let stackSize=0,matched=0;
+    const pixelCount=W*H,barrier=new Uint8Array(pixelCount),visited=new Uint8Array(pixelCount),stack=new Uint32Array(pixelCount);let stackSize=0,matched=0;
+    if(target[3]<12&&bucketGapClose>0){
+      const radius=bucketGapClose,stride=W+1,prefix=new Uint32Array(stride*(H+1));
+      for(let py=0;py<H;py++){
+        let rowSum=0;
+        for(let px=0;px<W;px++){if(pixels[(py*W+px)*4+3]>=48)rowSum++;prefix[(py+1)*stride+px+1]=prefix[py*stride+px+1]+rowSum}
+      }
+      for(let py=0;py<H;py++)for(let px=0;px<W;px++){
+        const x0=Math.max(0,px-radius),x1=Math.min(W,px+radius+1),y0=Math.max(0,py-radius),y1=Math.min(H,py+radius+1);
+        barrier[py*W+px]=prefix[y1*stride+x1]-prefix[y0*stride+x1]-prefix[y1*stride+x0]+prefix[y0*stride+x0]?1:0;
+      }
+    }
     const matches=index=>{
       const offset=index*4;
-      if(target[3]<12)return pixels[offset+3]<24;
+      if(target[3]<12)return pixels[offset+3]<24&&!barrier[index];
       const delta=(pixels[offset]-target[0])**2+(pixels[offset+1]-target[1])**2+(pixels[offset+2]-target[2])**2;
       return pixels[offset+3]>=12&&delta<=32*32*3&&Math.abs(pixels[offset+3]-target[3])<=40;
     };
@@ -3822,9 +4080,9 @@ wirePlaybackWidget();
   },true);
 
   function openFileMenu(){
-    const body='<div class="fileMenuActions"><button type="button" class="small" id="fileSaveProject">Save Project</button><button type="button" class="small" id="fileImportProject">Import Project</button></div><div class="exportFormats"><label class="propertyLine"><span>Format</span><select id="exportFormat"><option value="png">PNG — Current Frame</option><option value="jpeg">JPEG — Current Frame</option><option value="svg">SVG — Current Frame</option><option value="sprite">PNG — Sprite Sheet</option><option value="sequence">PNG — Frame Sequence</option><option value="webm">WebM — Animation</option><option value="json">JSON — Project Data</option></select></label><label class="propertyLine"><span>Scale</span><select id="exportScale"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option></select></label><label class="checkRow"><input id="exportTransparent" type="checkbox"> Transparent background</label><button class="primary" id="fileExportNow" type="button">Export</button><div class="exportStatus" id="exportStatus"></div><div class="exportHint">Configure and export the current frame, animation, sprite sheet, or project data.</div></div>';
+    const body='<div class="fileMenuActions"><button type="button" class="small" id="fileSaveProject">Save Project</button><button type="button" class="small" id="fileImportProject">Import Project</button></div><div class="exportFormats"><label class="propertyLine"><span>Format</span><select id="exportFormat"><option value="png">PNG — Current Frame</option><option value="jpeg">JPEG — Current Frame</option><option value="svg">SVG — Current Frame</option><option value="sprite">PNG — Sprite Sheet</option><option value="sequence">PNG — Frame Sequence (ZIP)</option><option value="webm">WebM — Animation</option><option value="json">JSON — Project Data</option></select></label><label class="propertyLine"><span>Scale</span><select id="exportScale"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option></select></label><label class="checkRow"><input id="exportTransparent" type="checkbox"> Transparent background</label><button class="primary" id="fileExportNow" type="button">Export</button><div class="exportStatus" id="exportStatus"></div><div class="exportHint">Configure current-frame, ZIP image-sequence, sprite-sheet, WebM, or project-data exports.</div></div>';
     const modal=openModal("File",body,"Close",(m,close)=>close());
-    modal.querySelector("#fileSaveProject").onclick=()=>{saveCurrent();modal.querySelector("#exportStatus").textContent="Project saved."};
+    modal.querySelector("#fileSaveProject").onclick=()=>{try{saveCurrent();modal.querySelector("#exportStatus").textContent="Project saved."+(window.__recoveryWarning||"")}catch(error){console.error("Project save failed.",error);modal.querySelector("#exportStatus").textContent="Save failed: "+(error?.message||"Storage error")}};
     modal.querySelector("#fileImportProject").onclick=()=>{closeModalRoot();document.getElementById("importProjectButton")?.click()};
     modal.querySelector("#fileExportNow").onclick=async event=>{
       const button=event.currentTarget;button.disabled=true;
@@ -3841,6 +4099,213 @@ wirePlaybackWidget();
 
   const previousRenderAll=renderAll;
   renderAll=function(){previousRenderAll();refreshObjects()};
+})();
+
+/* Rig visualization, interactive camera framing, and recovery access */
+(function(){
+  function syncRigParentChoices(){
+    const select=document.getElementById("rigParentSelect");if(!select)return;
+    const previous=select.value,selectedObject=selectedObjects().length===1?selectedObjects()[0]:null;
+    select.replaceChildren(new Option("Auto: nearest body",""));
+    for(const object of allVisibleObjects()){
+      const role=object.rigRole?object.rigRole.replaceAll("-"," "):object.type||"object";
+      select.add(new Option(`${role} · #${object.id}`,String(object.id)));
+    }
+    const selectedParent=selectedObject?.rigParentId;
+    if(selectedParent!=null&&[...select.options].some(option=>option.value===String(selectedParent)))select.value=String(selectedParent);
+    else if([...select.options].some(option=>option.value===previous))select.value=previous;
+  }
+
+  function drawRigOverlay(){
+    const objects=allVisibleObjects(),byId=new Map(objects.map(object=>[String(object.id),object]));
+    const scale=Math.max(.05,(zoom/100)*canvasFitScale);
+    selCtx.save();selCtx.lineWidth=1.5/scale;selCtx.setLineDash([7/scale,5/scale]);
+    selCtx.strokeStyle="rgba(235,144,35,.8)";
+    for(const child of objects){
+      if(child.rigParentId==null)continue;
+      const parent=byId.get(String(child.rigParentId));if(!parent)continue;
+      const childPivot=objectLocalToWorld(child,objectPivot(child)),parentPivot=objectLocalToWorld(parent,objectPivot(parent));
+      selCtx.beginPath();selCtx.moveTo(parentPivot.x,parentPivot.y);selCtx.lineTo(childPivot.x,childPivot.y);selCtx.stroke();
+    }
+    selCtx.setLineDash([]);
+    for(const object of objects){
+      if(!object.rigRole&&object.rigParentId==null)continue;
+      const pivot=objectLocalToWorld(object,objectPivot(object));
+      selCtx.beginPath();selCtx.arc(pivot.x,pivot.y,4/scale,0,Math.PI*2);
+      selCtx.fillStyle=object.rigParentId==null?"#f59e0b":"#f8fafc";
+      selCtx.fill();selCtx.strokeStyle="#9a5c08";selCtx.stroke();
+    }
+    selCtx.restore();
+  }
+
+  function cameraCorners(view){
+    const halfWidth=W/(2*view.zoom),halfHeight=H/(2*view.zoom),c=Math.cos(view.rotation*Math.PI/180),s=Math.sin(view.rotation*Math.PI/180);
+    return[[-halfWidth,-halfHeight],[halfWidth,-halfHeight],[halfWidth,halfHeight],[-halfWidth,halfHeight]].map(([x,y])=>({x:view.x+x*c-y*s,y:view.y+x*s+y*c}));
+  }
+  function cameraLocalPoint(view,point){
+    const dx=point.x-view.x,dy=point.y-view.y,r=-view.rotation*Math.PI/180,c=Math.cos(r),s=Math.sin(r);
+    return{x:dx*c-dy*s,y:dx*s+dy*c};
+  }
+  function addCameraKey(state){
+    camera={...state};const frame=activeFrame();if(frame)cameraKeys[frame.id]={...camera};
+  }
+
+  const previousSelectionRender=renderSelection;
+  renderSelection=function(){
+    previousSelectionRender();
+    drawRigOverlay();
+    if(tool!=="camera")return;
+    const view=cameraForFrame(currentFrame),corners=cameraCorners(view),scale=Math.max(.05,(zoom/100)*canvasFitScale);
+    const halfHeight=H/(2*view.zoom),rotation=view.rotation*Math.PI/180,rotateOffset=-halfHeight+28/view.zoom,rotateHandle={x:view.x-Math.sin(rotation)*rotateOffset,y:view.y+Math.cos(rotation)*rotateOffset},rotateStem={x:view.x+Math.sin(rotation)*halfHeight,y:view.y-Math.cos(rotation)*halfHeight};
+    selCtx.save();selCtx.setLineDash([]);selCtx.lineWidth=1.5/scale;selCtx.fillStyle="#ffffff";selCtx.strokeStyle="#138bd2";
+    for(const point of corners){selCtx.fillRect(point.x-5/scale,point.y-5/scale,10/scale,10/scale);selCtx.strokeRect(point.x-5/scale,point.y-5/scale,10/scale,10/scale)}
+    selCtx.beginPath();selCtx.moveTo(rotateStem.x,rotateStem.y);selCtx.lineTo(rotateHandle.x,rotateHandle.y);selCtx.stroke();
+    selCtx.beginPath();selCtx.arc(rotateHandle.x,rotateHandle.y,6/scale,0,Math.PI*2);selCtx.fill();selCtx.stroke();selCtx.restore();
+  };
+
+  canvas.addEventListener("pointerdown",event=>{
+    if(tool!=="camera"||event.button!==0)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    if(playing)return;
+    const point=getCanvasPoint(event),view=cameraForFrame(currentFrame),local=cameraLocalPoint(view,point),halfWidth=W/(2*view.zoom),halfHeight=H/(2*view.zoom);
+    const rotateHandle={x:0,y:-halfHeight+28/view.zoom},handleRadius=14/Math.max(.05,(zoom/100)*canvasFitScale);
+    let kind=null;
+    if(Math.hypot(local.x-rotateHandle.x,local.y-rotateHandle.y)<=handleRadius)kind="camera-rotate";
+    else if(Math.abs(Math.abs(local.x)-halfWidth)<=handleRadius&&Math.abs(Math.abs(local.y)-halfHeight)<=handleRadius)kind="camera-zoom";
+    else if(Math.abs(local.x)<=halfWidth&&Math.abs(local.y)<=halfHeight)kind="camera-pan";
+    if(!kind)return;
+    pushHistory();
+    const distance=Math.max(1,Math.hypot(point.x-view.x,point.y-view.y));
+    const frame=activeFrame();
+    pointerAction={kind,pointerId:event.pointerId,start:point,startCamera:{...view},baseCamera:{...camera},frameId:frame?.id,hadCameraKey:!!frame&&!!cameraKeys[frame.id],startAngle:Math.atan2(point.y-view.y,point.x-view.x),startDistance:distance};
+    try{canvas.setPointerCapture(event.pointerId)}catch(error){if(event.isTrusted)console.warn("Could not capture camera pointer.",error)}
+  },true);
+
+  canvas.addEventListener("pointermove",event=>{
+    const action=pointerAction;if(!action||action.pointerId!==event.pointerId||!action.kind.startsWith("camera-"))return;
+    event.preventDefault();event.stopImmediatePropagation();
+    const point=getCanvasPoint(event),state={...action.startCamera};
+    if(action.kind==="camera-pan"){state.x+=point.x-action.start.x;state.y+=point.y-action.start.y}
+    else if(action.kind==="camera-zoom"){
+      const nextDistance=Math.max(1,Math.hypot(point.x-state.x,point.y-state.y));
+      state.zoom=Math.max(.1,Math.min(8,action.startCamera.zoom*action.startDistance/nextDistance));
+    }else if(action.kind==="camera-rotate"){
+      const angle=Math.atan2(point.y-state.y,point.x-state.x);
+      state.rotation=action.startCamera.rotation+(angle-action.startAngle)*180/Math.PI;
+    }
+    addCameraKey(state);renderAll();
+  },true);
+
+  function finishCameraPointer(event){
+    if(!pointerAction||pointerAction.pointerId!==event.pointerId||!pointerAction.kind.startsWith("camera-"))return;
+    event.preventDefault();event.stopImmediatePropagation();
+    const action=pointerAction;pointerAction=null;
+    if(event.type==="pointercancel"){
+      camera={...action.baseCamera};
+      if(action.hadCameraKey)cameraKeys[action.frameId]={...action.startCamera};else delete cameraKeys[action.frameId];
+    }
+    renderAll();
+  }
+  canvas.addEventListener("pointerup",finishCameraPointer,true);
+  canvas.addEventListener("pointercancel",finishCameraPointer,true);
+  canvas.addEventListener("lostpointercapture",finishCameraPointer,true);
+
+  document.getElementById("rigPoseBtn")?.addEventListener("click",()=>setTool("rig"));
+  document.getElementById("rigPlaceJointBtn")?.addEventListener("click",()=>setTool("rig-pivot"));
+  function rigParentForPlacement(object){
+    const selectedId=document.getElementById("rigParentSelect")?.value;
+    const parent=selectedId
+      ?allVisibleObjects().find(candidate=>String(candidate.id)===String(selectedId))
+      :allVisibleObjects().find(candidate=>candidate.rigRole==="body"&&candidate.id!==object.id);
+    if(parent&&(parent.id===object.id||rigAffectedObjects([object]).some(candidate=>candidate.id===parent.id)))return null;
+    return parent||null;
+  }
+  function finishRigJointPlacement(event){
+    if(tool!=="rig-pivot"||event.button!==0)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    const objects=selectedObjects(),status=document.getElementById("rigStatus");
+    if(objects.length!==1){if(status)status.textContent="Select exactly one object before placing its joint.";return}
+    const object=objects[0],parent=rigParentForPlacement(object),point=getCanvasPoint(event);
+    if(document.getElementById("rigParentSelect")?.value&&!parent){
+      if(status)status.textContent="That parent would create a rig cycle. Choose a different parent.";return;
+    }
+    pushHistory();setRigPivotAtWorldPoint(object,point);
+    if(parent)object.rigParentId=parent.id;
+    else if(document.getElementById("rigParentSelect")?.value==="")delete object.rigParentId;
+    if(status)status.textContent=parent
+      ?`Joint placed and attached to ${parent.rigRole||"object"} #${parent.id}.`
+      :"Joint pivot placed. Choose a parent object to link this part into the rig.";
+    setTool("transform");selected.clear();selected.add(object.id);renderAll();
+  }
+  canvas.addEventListener("pointerdown",finishRigJointPlacement,true);
+
+  canvas.addEventListener("pointerdown",event=>{
+    if(tool!=="rig"||event.button!==0)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    if(playing)return;
+    const point=getCanvasPoint(event),hit=topObjectAt(point.x,point.y),status=document.getElementById("rigStatus");
+    if(!hit){if(status)status.textContent="Click a rig part on the stage to select and pose it.";return}
+    if(!selected.has(hit.id)){selected.clear();selected.add(hit.id)}
+    const pivot=objectLocalToWorld(hit,objectPivot(hit)),objects=rigAffectedObjects([hit]);
+    pushHistory();
+    pointerAction={
+      kind:"rigPose",pointerId:event.pointerId,rootId:hit.id,pivot,
+      startAngle:Math.atan2(point.y-pivot.y,point.x-pivot.x),
+      lastAngle:Math.atan2(point.y-pivot.y,point.x-pivot.x),delta:0,
+      original:objects.map(object=>({id:object.id,x:object.x,y:object.y,rotation:Number(object.rotation)||0,scaleX:object.scaleX||1,scaleY:object.scaleY||1}))
+    };
+    if(status)status.textContent=`Posing ${hit.rigRole||"object"} #${hit.id}; drag around its pivot to rotate the connected chain.`;
+    try{canvas.setPointerCapture(event.pointerId)}catch(error){if(event.isTrusted)console.warn("Could not capture rig pose pointer.",error)}
+    renderAll();
+  },true);
+  canvas.addEventListener("pointermove",event=>{
+    const action=pointerAction;if(!action||action.kind!=="rigPose"||action.pointerId!==event.pointerId)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    const angle=Math.atan2(getCanvasPoint(event).y-action.pivot.y,getCanvasPoint(event).x-action.pivot.x);
+    let change=angle-action.lastAngle;while(change>Math.PI)change-=Math.PI*2;while(change< -Math.PI)change+=Math.PI*2;
+    action.delta+=change;action.lastAngle=angle;updateRigPose(action);
+  },true);
+  function finishRigPose(event){
+    if(!pointerAction||pointerAction.kind!=="rigPose"||pointerAction.pointerId!==event.pointerId)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    const action=pointerAction;pointerAction=null;
+    if(event.type!=="pointerup"){
+      for(const original of action.original){
+        const object=allVisibleObjects().find(item=>item.id===original.id);if(!object)continue;
+        object.x=original.x;object.y=original.y;object.rotation=original.rotation;object.scaleX=original.scaleX;object.scaleY=original.scaleY;
+      }
+    }
+    renderAll();
+  }
+  canvas.addEventListener("pointerup",finishRigPose,true);
+  canvas.addEventListener("pointercancel",finishRigPose,true);
+  canvas.addEventListener("lostpointercapture",finishRigPose,true);
+
+  function updateRecoveryButton(){
+    const button=document.getElementById("restoreProjectBackupButton");
+    if(button){button.disabled=!projectId||!localStorage.getItem(RECOVERY_PREFIX+projectId);button.title=button.disabled?"A previous saved version will appear after the next save.":"Open the previous saved version as a separate recovered project."}
+  }
+  window.__updateRecoveryButton=updateRecoveryButton;
+  document.getElementById("restoreProjectBackupButton")?.addEventListener("click",()=>{
+    const status=document.getElementById("projectSaveStatus");
+    if(!projectId)return;
+    const backupText=localStorage.getItem(RECOVERY_PREFIX+projectId);if(!backupText){if(status)status.textContent="No previous saved version is available.";return}
+    try{
+      const previous=JSON.parse(backupText);
+      if(!previous?.state?.layers||!previous?.state?.frames)throw new Error("The recovery copy is not a valid project.");
+      const now=Date.now(),recovered={...previous,id:uid("p_"),name:(previous.name||projectName)+" (Recovered)",createdAt:now,updatedAt:now,state:deep(previous.state)};
+      const projects=loadProjects();projects.push(recovered);saveProjects(projects);openProject(recovered.id);
+      if(status)status.textContent="Previous saved version opened as a separate recovered project.";
+      renderHome();
+    }catch(error){
+      console.error("Could not open the previous saved version.",error);
+      if(status)status.textContent="Recovery failed: "+(error?.message||"Invalid recovery copy");
+    }
+  });
+
+  const previousRenderAll=renderAll;
+  renderAll=function(){previousRenderAll();syncRigParentChoices();updateRecoveryButton()};
+  setTimeout(()=>{syncRigParentChoices();updateRecoveryButton()},0);
 })();
 </script>
 </body>
