@@ -399,6 +399,7 @@ input[type="range"]{accent-color:var(--accent)}
         <button class="small" id="addLayerFolderButton" type="button">New Layer Folder</button>
         <div class="propertyLine"><span>Layer timing</span><select id="layerTimingScale" title="Retimes this layer independently relative to the project timeline"><option value="0.25">¼×</option><option value="0.5">½×</option><option value="0.75">¾×</option><option value="1">1×</option><option value="1.25">1¼×</option><option value="1.5">1½×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option></select></div>
         <div class="propertyLine"><span>Layer opacity</span><input id="layerOpacity" type="range" min="0" max="100" value="100"><span id="layerOpacityText">100%</span></div>
+        <div class="propertyLine"><span>Depth / parallax</span><input id="layerDepth" type="range" min="0" max="100" value="50"><span id="layerDepthText">50</span></div>
         <div class="propertyLine"><span>Blend mode</span><select id="layerBlendMode" style="max-width:140px">
           <option value="normal">Normal</option>
           <option value="multiply">Multiply</option>
@@ -416,7 +417,7 @@ input[type="range"]{accent-color:var(--accent)}
           <option value="luminosity">Luminosity</option>
         </select></div>
         <label class="checkRow"><input id="layerClipToBelow" type="checkbox"> Clip to layer below</label>
-        <div class="propertyLine"><span>Layer effect</span><select id="layerEffect" style="max-width:140px"><option value="none">None</option><option value="blur">Soft blur</option><option value="glow">Glow</option><option value="shadow">Drop shadow</option><option value="color-adjust">Color adjust</option></select></div>
+        <div class="propertyLine"><span>Layer effect</span><select id="layerEffect" style="max-width:140px"><option value="none">None</option><option value="blur">Soft blur</option><option value="glow">Glow</option><option value="shadow">Drop shadow</option><option value="color-adjust">Color adjust</option><option value="grayscale">Grayscale</option><option value="sepia">Sepia</option><option value="invert">Invert</option><option value="brightness">Brightness</option><option value="hue">Hue shift</option><option value="saturate">Saturation</option></select></div>
         <div class="propertyLine"><span>Effect strength</span><input id="layerEffectAmount" type="range" min="1" max="20" value="5"><span id="layerEffectAmountText">5</span></div>
         <div class="hint">Drag a layer row to reorder it. Blend mode controls how this layer combines with the ones below it.</div>
         <div class="panelButtons"><button class="small" id="addLayer">Add Layer</button><button class="small" id="duplicateLayer">Duplicate</button><button class="small" id="deleteLayer">Delete</button></div>
@@ -428,7 +429,7 @@ input[type="range"]{accent-color:var(--accent)}
       <div class="panelBody">
         <div id="objectList" class="objectList"></div>
         <button class="small" id="objectsAddAllFrames" type="button">Add selection to all frames</button>
-        <div class="hint">Select objects on the canvas or here. Ctrl-click to toggle multiple objects; right-click an object or its row for arrange, grouping and pivot tools.</div>
+        <div class="hint">Select objects on the canvas or here. Double-click a row to rename it; Ctrl-click toggles selection, and right-click opens arrange, grouping, rename, and pivot tools.</div>
       </div>
       <div class="panelResizeHandle" data-resize-panel="objectsPanel"></div>
     </div>
@@ -440,7 +441,9 @@ input[type="range"]{accent-color:var(--accent)}
         <div class="propertyLine"><span>Opacity</span><input id="strokeOpacity" type="range" min="5" max="100" value="100"><span id="strokeOpacityText">100%</span></div>
         <label class="checkRow"><input id="shapeFill" type="checkbox"> Fill shapes</label>
         <div class="propertyLine"><span>Fill color</span><input id="fillColor" type="color" value="#ffffff"></div>
-        <label class="checkRow"><input id="shapeGradient" type="checkbox"> Linear gradient fill</label>
+        <label class="checkRow"><input id="shapeGradient" type="checkbox"> Gradient fill</label>
+        <div class="propertyLine"><span>Gradient type</span><select id="shapeGradientMode"><option value="linear">Linear</option><option value="radial">Radial</option></select></div>
+        <div class="propertyLine"><span>Gradient middle</span><input id="gradientMiddleColor" type="color" value="#b0a9ff"></div>
         <div class="propertyLine"><span>Gradient end</span><input id="gradientColor" type="color" value="#4a5cff"></div>
         <div class="propertyLine"><span>Corner radius</span><input id="shapeCornerRadius" type="number" min="0" max="200" value="0"></div>
         <div class="propertyLine"><span>Bucket gap close</span><input id="bucketGapClose" type="range" min="0" max="12" value="0" title="Expand line barriers by this many pixels to stop small fill leaks"><span id="bucketGapCloseText">0 px</span></div>
@@ -488,6 +491,7 @@ input[type="range"]{accent-color:var(--accent)}
       <div class="panelHeader"><span class="panelTitle">Pens & Brushes</span><button class="panelClose small" data-close-panel="brushesPanel">Hide</button></div>
       <div class="panelBody">
         <div id="brushPresetGrid" class="brushPresetGrid"></div>
+        <button class="small" id="saveBrushPresetButton" type="button">Save Current as Brush</button>
         <div class="widgetSectionTitle">Current pen</div>
         <div class="penReadout"><strong id="currentPenName">Basic Round</strong><span id="currentPenDescription">Balanced round brush</span></div>
         <div class="widgetSectionTitle" style="margin-top:10px">Pressure &amp; tilt (stylus)</div>
@@ -672,7 +676,7 @@ input[type="range"]{accent-color:var(--accent)}
         <div class="panelButtons"><button class="small" id="rigSetRoleBtn">Set Role</button><button class="small" id="rigPivotBtn">Auto Pivot</button><button class="small" id="rigPlaceJointBtn">Place Joint</button><button class="small" id="rigUnlinkBtn">Unlink</button></div>
         <button class="small" id="rigPoseBtn" style="width:100%;margin-top:5px">Pose Selected Bone</button>
         <div class="panelButtons"><button class="small" id="rigIKBtn">IK Pose</button><button class="small" id="rigKeyPoseBtn">Key Rig Pose</button></div>
-        <div class="hint" id="rigStatus">Assign roles and parents, then use Pose Rig to rotate a bone and its descendants at the visible pivot. For IK, select the hand/end part, choose IK Pose, then drag the stage to move it. Key Rig Pose stores the selected bone chain on this frame.</div>
+        <div class="hint" id="rigStatus">Assign roles and parents, then use Pose Rig to rotate a bone and its descendants at the visible pivot. For IK, select the hand/end part, choose IK Pose, then drag the stage to move the end joint. IK supports linked chains with two or more segments. Key Rig Pose stores the selected bone chain on this frame.</div>
         <div class="widgetSectionTitle" style="margin-top:9px">Reusable Symbols</div>
         <div class="propertyLine"><span>Library</span><select id="symbolLibrarySelect"><option value="">No symbols yet</option></select></div>
         <div class="panelButtons"><button class="small" id="createSymbolBtn">Create from Selection</button><button class="small" id="insertSymbolBtn">Insert</button></div>
@@ -709,6 +713,7 @@ input[type="range"]{accent-color:var(--accent)}
             <button class="small" id="nextKeyframeBtn" title="Go to next marked keyframe">Next Key</button>
             <label class="timelineCompactControl">Easing <select id="keyframeEasing"><option value="linear">Linear</option><option value="ease-in">Ease In</option><option value="ease-out">Ease Out</option><option value="ease-in-out">Ease In/Out</option><option value="custom">Custom Curve</option></select></label>
             <button class="small" id="editEasingCurveBtn" type="button">Edit Curve</button>
+            <button class="small" id="editMotionPathBtn" type="button">Motion Path</button>
           </div>
           <div class="timelineButtonCluster">
             <button class="small" id="addFrame">Add Blank</button>
@@ -753,6 +758,7 @@ input[type="range"]{accent-color:var(--accent)}
             <button class="small" id="exposureSheetBtn" type="button">X-sheet</button>
             <button class="small" id="sceneManagerBtn" type="button">Scenes</button>
             <button class="small" id="tweenToNextBtn">Tween</button>
+            <button class="small" id="bakePhysicsBtn" type="button">Bake Spring</button>
             <input id="tweenCount" type="number" min="1" max="30" value="4" title="Tween frame count">
             <button class="small" id="dupRangeBtn">Duplicate Range</button>
             <button class="small" id="delRangeBtn">Delete Range</button>
@@ -877,7 +883,7 @@ function makeStrokeObject(points,strokeType,allocateId=true){
   if(!Number.isFinite(minX))return null;
   const cx=(minX+maxX)/2,cy=(minY+maxY)/2;
   const isFilledShape=fillEnabled&&["rectangle","ellipse","polygon","star"].includes(strokeType);
-  return{id:allocateId?nextObjectId++:0,type:strokeType,points:points.map(p=>({x:p.x-cx,y:p.y-cy})),x:cx,y:cy,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,fill:isFilledShape,fillColor,fillGradient:isFilledShape&&!!document.getElementById("shapeGradient")?.checked,gradientColor:document.getElementById("gradientColor")?.value||"#4a5cff",cornerRadius:Math.max(0,Math.min(200,Number(document.getElementById("shapeCornerRadius")?.value)||0))};
+  return{id:allocateId?nextObjectId++:0,type:strokeType,points:points.map(p=>({x:p.x-cx,y:p.y-cy})),x:cx,y:cy,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,fill:isFilledShape,fillColor,fillGradient:isFilledShape&&!!document.getElementById("shapeGradient")?.checked,gradientType:document.getElementById("shapeGradientMode")?.value==="radial"?"radial":"linear",gradientMiddleColor:document.getElementById("gradientMiddleColor")?.value||"#b0a9ff",gradientColor:document.getElementById("gradientColor")?.value||"#4a5cff",cornerRadius:Math.max(0,Math.min(200,Number(document.getElementById("shapeCornerRadius")?.value)||0))};
 }
 function addStroke(points,strokeType="stroke"){
   if(!canEditObjects([],true))return;
@@ -952,7 +958,7 @@ function drawObject(c,obj){
     else if(obj.points.length===2)c.lineTo(obj.points[1].x,obj.points[1].y);
     else for(let i=1;i<obj.points.length;i++){const a=obj.points[i-1],b=obj.points[i],mx=(a.x+b.x)/2,my=(a.y+b.y)/2;c.quadraticCurveTo(a.x,a.y,mx,my);if(i===obj.points.length-1)c.lineTo(b.x,b.y)}
   }
-  if(shouldFill){c.save();const bounds=objectLocalBounds(obj),gradient=!!obj.fillGradient&&bounds?c.createLinearGradient(bounds.minX,bounds.minY,bounds.maxX,bounds.maxY):null;if(gradient){gradient.addColorStop(0,obj.fillColor||obj.color||"#fff");gradient.addColorStop(1,obj.gradientColor||"#4a5cff");c.fillStyle=gradient}else c.fillStyle=obj.fillColor||obj.color||"#fff";c.fill();c.restore()}
+  if(shouldFill){c.save();const bounds=objectLocalBounds(obj);let gradient=null;if(obj.fillGradient&&bounds){if(obj.gradientType==="radial"){const cx=(bounds.minX+bounds.maxX)/2,cy=(bounds.minY+bounds.maxY)/2,radius=Math.max(1,Math.hypot(bounds.maxX-bounds.minX,bounds.maxY-bounds.minY)/2);gradient=c.createRadialGradient(cx,cy,0,cx,cy,radius)}else gradient=c.createLinearGradient(bounds.minX,bounds.minY,bounds.maxX,bounds.maxY);gradient.addColorStop(0,obj.fillColor||obj.color||"#fff");gradient.addColorStop(.5,obj.gradientMiddleColor||obj.fillColor||obj.color||"#fff");gradient.addColorStop(1,obj.gradientColor||"#4a5cff")}if(gradient)c.fillStyle=gradient;else c.fillStyle=obj.fillColor||obj.color||"#fff";c.fill();c.restore()}
   if(obj.brushStyle==="soft"){
     c.save();c.globalAlpha*=.42;c.shadowColor=obj.color||"#111111";c.shadowBlur=Math.max(2,(obj.width||1)*.8);c.stroke();c.restore();
     c.save();c.globalAlpha*=.58;c.stroke();c.restore();
@@ -1018,6 +1024,16 @@ function objectsForRender(frameIndex,layer){
       const t=easeKeyframeProgress((sampleIndex-a.index)/(b.index-a.index),a.frame.easing||"linear",a.frame.easingCurve),source=output.find(item=>item.id===id)||a.object,animated=deep(source);
       const mix=(left,right)=>Number(left||0)+(Number(right||0)-Number(left||0))*t;
       for(const key of ["x","y","scaleX","scaleY","opacity","pivotX","pivotY"]){const defaultValue=key.startsWith("scale")?1:key==="opacity"?1:0;animated[key]=mix(a.object[key]??defaultValue,b.object[key]??defaultValue)}
+      const path=a.frame.motionPaths?.[id];
+      if(path){
+        const dx=(Number(b.object.x)||0)-(Number(a.object.x)||0),dy=(Number(b.object.y)||0)-(Number(a.object.y)||0),length=Math.hypot(dx,dy),nx=length?-dy/length:0,ny=length?dx/length:0;
+        const p0={x:Number(a.object.x)||0,y:Number(a.object.y)||0},p3={x:Number(b.object.x)||0,y:Number(b.object.y)||0};
+        const p1={x:p0.x+dx*.25+nx*length*(Number(path.bend1)||0),y:p0.y+dy*.25+ny*length*(Number(path.bend1)||0)};
+        const p2={x:p3.x-dx*.25+nx*length*(Number(path.bend2)||0),y:p3.y-dy*.25+ny*length*(Number(path.bend2)||0)};
+        const u=1-t;
+        animated.x=u*u*u*p0.x+3*u*u*t*p1.x+3*u*t*t*p2.x+t*t*t*p3.x;
+        animated.y=u*u*u*p0.y+3*u*u*t*p1.y+3*u*t*t*p2.y+t*t*t*p3.y;
+      }
       const rotationA=Number(a.object.rotation)||0,rotationDelta=((Number(b.object.rotation)||0)-rotationA+540)%360-180;animated.rotation=rotationA+rotationDelta*t;
       const tweenableShapes=new Set(["stroke","line","rectangle","ellipse"]);
       if(a.object.type===b.object.type&&tweenableShapes.has(a.object.type)&&Array.isArray(a.object.points)&&Array.isArray(b.object.points)&&a.object.points.length&&b.object.points.length){
@@ -1049,6 +1065,40 @@ document.getElementById("editEasingCurveBtn")?.addEventListener("click",()=>{
   };
   modal.querySelectorAll("[data-curve]").forEach(input=>input.addEventListener("input",()=>{modal.querySelector(`[data-curve-value="${input.dataset.curve}"]`).textContent=input.value+"%";draw()}));
   draw();
+});
+document.getElementById("editMotionPathBtn")?.addEventListener("click",()=>{
+  const objects=selectedObjects(),frame=activeFrame(),object=objects[0],status=document.getElementById("timelineStatusText");
+  if(objects.length!==1||!frame||!(frame.keyframes||[]).includes(object.id)){if(status)status.textContent="Select one object keyed on this frame to edit its outgoing motion path.";return}
+  const objectLayer=layers.find(layer=>(frame.layers[layer.id]||[]).some(item=>item.id===object.id));
+  const nextIndex=objectLayer?frames.findIndex((candidate,index)=>index>currentFrame&&(candidate.keyframes||[]).includes(object.id)&&(candidate.layers[objectLayer.id]||[]).some(item=>item.id===object.id)):-1;
+  if(nextIndex<0){if(status)status.textContent="Add a later keyframe for this object before editing its motion path.";return}
+  const saved=frame.motionPaths?.[object.id]||{bend1:0,bend2:0},path={bend1:Number(saved.bend1)||0,bend2:Number(saved.bend2)||0};
+  const modal=openModal("Bezier Motion Path",'<canvas id="motionPathPreview" width="360" height="210" style="width:100%;height:210px;display:block;border:1px solid var(--border);border-radius:6px;touch-action:none"></canvas><div class="hint">Drag either handle away from the straight path to curve motion between this keyframe and the next.</div>',"Apply",(element,close)=>{pushHistory();if(!frame.motionPaths)frame.motionPaths={};if(Math.abs(path.bend1)<.005&&Math.abs(path.bend2)<.005)delete frame.motionPaths[object.id];else frame.motionPaths[object.id]={...path};renderAll();if(status)status.textContent="Bezier motion path updated.";close()});
+  const preview=modal.querySelector("#motionPathPreview"),context=preview.getContext("2d"),bounds={left:36,right:324,top:24,bottom:186},toPixel=point=>({x:bounds.left+point.x*(bounds.right-bounds.left),y:bounds.bottom-point.y*(bounds.bottom-bounds.top)}),points=()=>[{x:0,y:0},{x:.25,y:path.bend1},{x:.75,y:path.bend2},{x:1,y:0}];
+  const draw=()=>{const [p0,p1,p2,p3]=points().map(toPixel);context.clearRect(0,0,preview.width,preview.height);context.strokeStyle="#888";context.lineWidth=1;context.setLineDash([4,4]);context.beginPath();context.moveTo(p0.x,p0.y);context.lineTo(p1.x,p1.y);context.moveTo(p3.x,p3.y);context.lineTo(p2.x,p2.y);context.stroke();context.setLineDash([]);context.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue("--accent");context.lineWidth=3;context.beginPath();context.moveTo(p0.x,p0.y);context.bezierCurveTo(p1.x,p1.y,p2.x,p2.y,p3.x,p3.y);context.stroke();for(const point of [p1,p2]){context.beginPath();context.arc(point.x,point.y,7,0,Math.PI*2);context.fillStyle="#fff";context.fill();context.strokeStyle="#333";context.stroke()}};
+  let dragging=-1;
+  preview.addEventListener("pointerdown",event=>{const rect=preview.getBoundingClientRect(),x=(event.clientX-rect.left)*preview.width/rect.width,y=(event.clientY-rect.top)*preview.height/rect.height,handles=points().slice(1,3).map(toPixel),distances=handles.map(point=>Math.hypot(point.x-x,point.y-y));dragging=distances.indexOf(Math.min(...distances));if(distances[dragging]>24)dragging=-1;if(dragging>=0)preview.setPointerCapture(event.pointerId)});
+  preview.addEventListener("pointermove",event=>{if(dragging<0)return;const rect=preview.getBoundingClientRect(),y=(event.clientY-rect.top)*preview.height/rect.height;path[dragging===0?"bend1":"bend2"]=Math.max(-.8,Math.min(.8,(bounds.bottom-y)/(bounds.bottom-bounds.top)));draw()});
+  preview.addEventListener("pointerup",()=>dragging=-1);preview.addEventListener("pointercancel",()=>dragging=-1);draw();
+});
+document.getElementById("bakePhysicsBtn")?.addEventListener("click",()=>{
+  const objects=selectedObjects(),object=objects[0],status=document.getElementById("timelineStatusText");
+  if(objects.length!==1||!object?.rigParentId){if(status)status.textContent="Select one child bone linked to a parent to bake secondary spring motion.";return}
+  const layer=layers.find(candidate=>frames.some(frame=>(frame.layers[candidate.id]||[]).some(item=>item.id===object.id)));
+  if(!layer||!canEditObjects([object]))return;
+  const samples=frames.map((_,index)=>objectsForRender(index,layer).find(item=>item.id===object.id));
+  if(samples.some(sample=>!sample)){if(status)status.textContent="This rig part needs a pose on every frame before physics can be baked.";return}
+  openModal("Bake Secondary Motion",'<p>Simulate springy follow-through and bake the result as editable keyframes across the timeline.</p><label class="propertyLine"><span>Stiffness</span><input id="springStiffness" type="number" min="1" max="60" value="18"></label><label class="propertyLine"><span>Damping</span><input id="springDamping" type="number" min="0.5" max="20" step="0.5" value="5"></label><div class="hint">Higher stiffness follows the original pose faster; higher damping reduces wobble.</div>',"Bake",(element,close)=>{
+    const stiffness=Number(element.querySelector("#springStiffness").value),damping=Number(element.querySelector("#springDamping").value);
+    if(!Number.isFinite(stiffness)||stiffness<1||stiffness>60||!Number.isFinite(damping)||damping<.5||damping>20){status.textContent="Stiffness must be 1–60 and damping 0.5–20.";return}
+    const fps=Math.max(1,Math.min(100,Number(document.getElementById("fps").value)||8)),angles=samples.map(sample=>Number(sample.rotation)||0),targets=[angles[0]];
+    for(let i=1;i<angles.length;i++)targets[i]=targets[i-1]+((angles[i]-angles[i-1]+540)%360-180);
+    let angle=targets[0],velocity=0;const simulated=[angle];
+    for(let i=1;i<targets.length;i++){const elapsed=Math.max(1,Number(frames[i-1].duration)||1)/fps,steps=Math.max(1,Math.min(600,Math.ceil(elapsed*60))),dt=elapsed/steps;for(let step=0;step<steps;step++){velocity+=((targets[i]-angle)*stiffness-velocity*damping)*dt;angle+=velocity*dt}simulated.push(angle)}
+    pushHistory();
+    for(let i=0;i<frames.length;i++){const frame=frames[i],pose=deep(samples[i]);pose.rotation=simulated[i];const items=frame.layers[layer.id]||(frame.layers[layer.id]=[]),index=items.findIndex(item=>item.id===pose.id);if(index<0)items.push(pose);else items.splice(index,1,pose);frame.keyframes=[...new Set([...(frame.keyframes||[]),object.id])]}
+    renderAll();status.textContent=`Baked spring follow-through across ${frames.length} frames.`;close();
+  });
 });
 function render(){ctx.clearRect(0,0,W,H);const f=activeFrame();if(f)for(const l of layers)if(l.visible)for(const o of objectsForRender(currentFrame,l))drawObject(ctx,o);renderSelection();renderOnion()}
 function renderSelection(){
@@ -1230,7 +1280,7 @@ function rigAffectedObjects(roots){
   while(changed){changed=false;for(const obj of objects)if(obj.rigParentId!=null&&found.has(obj.rigParentId)&&!found.has(obj.id)){found.set(obj.id,obj);changed=true}}
   return [...found.values()];
 }
-function beginTransform(e,kind,handle){const p=getCanvasPoint(e),roots=selectedObjects(),objs=kind==="move"||kind==="rotate"?rigAffectedObjects(roots):roots,b=selectionBounds();if(!canEditObjects(objs))return;pushHistory();pointerAction={kind,pointerId:e.pointerId,transformKind:kind,handle,start:p,original:objs.map(o=>({id:o.id,x:o.x,y:o.y,rotation:o.rotation,scaleX:o.scaleX,scaleY:o.scaleY})),bounds:deep(b)};canvas.setPointerCapture(e.pointerId)}
+function beginTransform(e,kind,handle){const p=getCanvasPoint(e),roots=selectedObjects(),objs=["move","rotate","scale"].includes(kind)?rigAffectedObjects(roots):roots,b=selectionBounds();if(!canEditObjects(objs))return;pushHistory();pointerAction={kind,pointerId:e.pointerId,transformKind:kind,handle,start:p,original:objs.map(o=>({id:o.id,x:o.x,y:o.y,rotation:o.rotation,scaleX:o.scaleX,scaleY:o.scaleY})),bounds:deep(b)};canvas.setPointerCapture(e.pointerId)}
 function originalFor(id){return pointerAction.original.find(x=>x.id===id)}
 function updateMove(p){const dx=p.x-pointerAction.start.x,dy=p.y-pointerAction.start.y;for(const o of rigAffectedObjects(selectedObjects())){const q=originalFor(o.id);if(q){o.x=q.x+dx;o.y=q.y+dy}}renderAll()}
 function updateRotate(p){const b=pointerAction.bounds,cx=(b.minX+b.maxX)/2,cy=(b.minY+b.maxY)/2,a0=Math.atan2(pointerAction.start.y-cy,pointerAction.start.x-cx),a1=Math.atan2(p.y-cy,p.x-cx),delta=(a1-a0)*180/Math.PI,rad=delta*Math.PI/180;for(const o of rigAffectedObjects(selectedObjects())){const q=originalFor(o.id);if(!q)continue;const pivot=objectPivot(o),px=q.x+pivot.x,py=q.y+pivot.y,dx=px-cx,dy=py-cy;o.x=cx+dx*Math.cos(rad)-dy*Math.sin(rad)-pivot.x;o.y=cy+dx*Math.sin(rad)+dy*Math.cos(rad)-pivot.y;o.rotation=q.rotation+delta}renderAll()}
@@ -1243,7 +1293,7 @@ function updateRigPose(action){
   }
   renderAll();
 }
-function updateScale(p,handle){const b=pointerAction.bounds,start=pointerAction.start;let anchor,sx=1,sy=1;if(handle==="nw")anchor={x:b.maxX,y:b.maxY};else if(handle==="n")anchor={x:(b.minX+b.maxX)/2,y:b.maxY};else if(handle==="ne")anchor={x:b.minX,y:b.maxY};else if(handle==="e")anchor={x:b.minX,y:(b.minY+b.maxY)/2};else if(handle==="se")anchor={x:b.minX,y:b.minY};else if(handle==="s")anchor={x:(b.minX+b.maxX)/2,y:b.minY};else if(handle==="sw")anchor={x:b.maxX,y:b.minY};else anchor={x:b.maxX,y:(b.minY+b.maxY)/2};if(handle==="n"||handle==="s"){sy=Math.max(.05,Math.abs(p.y-anchor.y)/Math.max(1,b.height))}else if(handle==="e"||handle==="w"){sx=Math.max(.05,Math.abs(p.x-anchor.x)/Math.max(1,b.width))}else{const x=Math.max(8,Math.abs(p.x-anchor.x))/Math.max(1,b.width),y=Math.max(8,Math.abs(p.y-anchor.y))/Math.max(1,b.height),s=Math.max(.05,Math.max(x,y));sx=s;sy=s}for(const o of selectedObjects()){const q=originalFor(o.id),pivot=objectPivot(o),px=q.x+pivot.x,py=q.y+pivot.y;o.x=anchor.x+(px-anchor.x)*sx-pivot.x;o.y=anchor.y+(py-anchor.y)*sy-pivot.y;o.scaleX=Math.max(.05,q.scaleX*sx);o.scaleY=Math.max(.05,q.scaleY*sy)}renderAll()}
+function updateScale(p,handle){const b=pointerAction.bounds,start=pointerAction.start;let anchor,sx=1,sy=1;if(handle==="nw")anchor={x:b.maxX,y:b.maxY};else if(handle==="n")anchor={x:(b.minX+b.maxX)/2,y:b.maxY};else if(handle==="ne")anchor={x:b.minX,y:b.maxY};else if(handle==="e")anchor={x:b.minX,y:(b.minY+b.maxY)/2};else if(handle==="se")anchor={x:b.minX,y:b.minY};else if(handle==="s")anchor={x:(b.minX+b.maxX)/2,y:b.minY};else if(handle==="sw")anchor={x:b.maxX,y:b.minY};else anchor={x:b.maxX,y:(b.minY+b.maxY)/2};if(handle==="n"||handle==="s"){sy=Math.max(.05,Math.abs(p.y-anchor.y)/Math.max(1,b.height))}else if(handle==="e"||handle==="w"){sx=Math.max(.05,Math.abs(p.x-anchor.x)/Math.max(1,b.width))}else{const x=Math.max(8,Math.abs(p.x-anchor.x))/Math.max(1,b.width),y=Math.max(8,Math.abs(p.y-anchor.y))/Math.max(1,b.height),s=Math.max(.05,Math.max(x,y));sx=s;sy=s}for(const o of rigAffectedObjects(selectedObjects())){const q=originalFor(o.id);if(!q)continue;const pivot=objectPivot(o),px=q.x+pivot.x,py=q.y+pivot.y;o.x=anchor.x+(px-anchor.x)*sx-pivot.x;o.y=anchor.y+(py-anchor.y)*sy-pivot.y;o.scaleX=Math.max(.05,q.scaleX*sx);o.scaleY=Math.max(.05,q.scaleY*sy)}renderAll()}
 function renderGrid(){gridCtx.clearRect(0,0,W,H);if(!grid)return;gridCtx.strokeStyle="rgba(120,120,120,.35)";gridCtx.lineWidth=1;for(let x=20;x<W;x+=20){gridCtx.beginPath();gridCtx.moveTo(x+.5,0);gridCtx.lineTo(x+.5,H);gridCtx.stroke()}for(let y=20;y<H;y+=20){gridCtx.beginPath();gridCtx.moveTo(0,y+.5);gridCtx.lineTo(W,y+.5);gridCtx.stroke()}}
 const onionLayerCanvas=document.createElement("canvas"),onionLayerCtx=onionLayerCanvas.getContext("2d");
 function drawOnionFrame(frame,alpha){
@@ -1335,7 +1385,7 @@ const BRUSH_PRESETS=[
 function renderBrushPresets(){
   const grid=document.getElementById("brushPresetGrid");if(!grid)return;
   grid.innerHTML="";
-  for(const preset of BRUSH_PRESETS){
+  for(const preset of [...BRUSH_PRESETS,...loadCustomBrushPresets()]){
     const b=document.createElement("button");b.type="button";b.className="brushPreset";b.dataset.brushPreset=preset.name;
     const n=document.createElement("span");n.className="brushPresetName";n.textContent=preset.name;
     const d=document.createElement("span");d.className="brushPresetMeta";d.textContent=preset.desc;
@@ -1343,10 +1393,22 @@ function renderBrushPresets(){
   }
 }
 function applyBrushPreset(name){
-  const preset=BRUSH_PRESETS.find(p=>p.name===name);if(!preset)return;
+  const preset=[...BRUSH_PRESETS,...loadCustomBrushPresets()].find(p=>p.name===name);if(!preset)return;
   currentPen=preset.name;brushSize=preset.width;penOpacity=preset.opacity;penCap=preset.cap;penJoin=preset.join;penComposite=preset.composite;penDash=deep(preset.dash);penStyle=preset.style||"solid";
   setTool("brush");syncPenControls();
 }
+const CUSTOM_BRUSHES_KEY="bba_custom_brush_presets_v1";
+function loadCustomBrushPresets(){try{const presets=JSON.parse(localStorage.getItem(CUSTOM_BRUSHES_KEY)||"[]");return Array.isArray(presets)?presets.filter(preset=>preset&&typeof preset.name==="string"&&Number.isFinite(Number(preset.width))):[]}catch(error){console.warn("Could not load custom brush presets.",error);return[]}}
+document.getElementById("saveBrushPresetButton")?.addEventListener("click",()=>{
+  const modal=openModal("Save Current Brush",'<label class="propertyLine"><span>Brush name</span><input id="customBrushName" type="text" maxlength="40" value="'+escapeHtml(currentPen||"Custom Brush")+'"></label><div class="hint">Saves the current size, opacity, cap, join, blend mode, dash, and brush style on this device.</div>',"Save",(element,close)=>{
+    const name=element.querySelector("#customBrushName").value.trim();if(!name)return;
+    const presets=loadCustomBrushPresets(),preset={name,width:Math.max(.5,Math.min(100,Number(brushSize)||4)),opacity:Math.max(0,Math.min(1,Number(penOpacity)||0)),cap:penCap||"round",join:penJoin||"round",composite:penComposite||"source-over",dash:deep(penDash||[]),style:penStyle||"solid",desc:"Custom brush · "+Math.round(brushSize*10)/10+" px"};
+    const existing=presets.findIndex(item=>item.name.toLowerCase()===name.toLowerCase());if(existing>=0)presets.splice(existing,1,preset);else presets.push(preset);
+    try{localStorage.setItem(CUSTOM_BRUSHES_KEY,JSON.stringify(presets))}catch(error){console.error("Could not save custom brush presets.",error);element.querySelector("#customBrushName").setCustomValidity("Browser storage could not save this brush.");element.querySelector("#customBrushName").reportValidity();return}
+    currentPen=name;renderBrushPresets();syncPenControls();close();
+  });
+  modal.querySelector("#customBrushName")?.focus();
+});
 
 function syncGridControls(){
   const main=document.getElementById("grid");
@@ -1956,23 +2018,34 @@ function drawCompositedLayers(context,frame,frameIndex,includeGuideLayers=false)
   if(!layerCompositeCanvas){layerCompositeCanvas=document.createElement("canvas");layerCompositeContext=layerCompositeCanvas.getContext("2d");layerMaskCanvas=document.createElement("canvas");layerMaskContext=layerMaskCanvas.getContext("2d")}
   for(let index=0;index<visible.length;index++){
     const layer=visible[index],under=visible[index-1],objects=objectsForRender(frameIndex,layer),opacity=Math.max(0,Math.min(1,Number(layer.opacity??1))),mode=LAYER_COMPOSITE_MODES.has(layer.blendMode)?layer.blendMode:"source-over",effect=layer.effect||"none",clip=!!layer.clipToBelow&&!!under;
+    const projectionMatrix=targetLayer=>{
+      const matrix={a:matrixBase.a,b:matrixBase.b,c:matrixBase.c,d:matrixBase.d,e:matrixBase.e,f:matrixBase.f},depth=Math.max(0,Math.min(100,Number(targetLayer.depth??50))),factor=.5+depth/100,view=cameraForFrame(frameIndex),dx=-view.x*(factor-1),dy=-view.y*(factor-1);
+      matrix.e+=matrix.a*dx+matrix.c*dy;matrix.f+=matrix.b*dx+matrix.d*dy;return matrix
+    };
+    const matrixBase=context.getTransform(),layerMatrix=projectionMatrix(layer);
     const needsScratch=mode!=="source-over"||opacity<.999||clip||effect!=="none";
-    if(!needsScratch){for(const object of objects)drawObject(context,object);continue}
+    if(!needsScratch){context.save();context.setTransform(layerMatrix);for(const object of objects)drawObject(context,object);context.restore();continue}
     for(const [canvas,scratch] of [[layerCompositeCanvas,layerCompositeContext],[layerMaskCanvas,layerMaskContext]]){
       if(canvas.width!==context.canvas.width||canvas.height!==context.canvas.height){canvas.width=context.canvas.width;canvas.height=context.canvas.height}
       scratch.setTransform(1,0,0,1,0,0);scratch.clearRect(0,0,canvas.width,canvas.height);
     }
-    const setCameraTransform=scratch=>scratch.setTransform(matrix.a,matrix.b,matrix.c,matrix.d,matrix.e,matrix.f);
+    const setCameraTransform=(scratch,targetLayer=layer)=>{const transform=targetLayer===layer?layerMatrix:projectionMatrix(targetLayer);scratch.setTransform(transform.a,transform.b,transform.c,transform.d,transform.e,transform.f)};
     setCameraTransform(layerCompositeContext);layerCompositeContext.save();
     const amount=Math.max(1,Math.min(20,Number(layer.effectAmount)||5));
     if(effect==="blur")layerCompositeContext.filter=`blur(${amount/3}px)`;
     else if(effect==="glow"){layerCompositeContext.shadowColor="#ffd36a";layerCompositeContext.shadowBlur=amount*2}
     else if(effect==="shadow"){layerCompositeContext.shadowColor="rgba(0,0,0,.65)";layerCompositeContext.shadowBlur=amount;layerCompositeContext.shadowOffsetX=amount*.35;layerCompositeContext.shadowOffsetY=amount*.45}
     else if(effect==="color-adjust")layerCompositeContext.filter=`contrast(${100+amount*5}%) saturate(${100+amount*8}%)`;
+    else if(effect==="grayscale")layerCompositeContext.filter=`grayscale(${amount/20})`;
+    else if(effect==="sepia")layerCompositeContext.filter=`sepia(${amount/20})`;
+    else if(effect==="invert")layerCompositeContext.filter=`invert(${amount/20})`;
+    else if(effect==="brightness")layerCompositeContext.filter=`brightness(${100+amount*10}%)`;
+    else if(effect==="hue")layerCompositeContext.filter=`hue-rotate(${amount*18}deg)`;
+    else if(effect==="saturate")layerCompositeContext.filter=`saturate(${100+amount*20}%)`;
     for(const object of objects)drawObject(layerCompositeContext,object);
     layerCompositeContext.restore();
     if(clip){
-      setCameraTransform(layerMaskContext);for(const object of objectsForRender(frameIndex,under))drawObject(layerMaskContext,object);
+      setCameraTransform(layerMaskContext,under);for(const object of objectsForRender(frameIndex,under))drawObject(layerMaskContext,object);
       layerCompositeContext.save();layerCompositeContext.setTransform(1,0,0,1,0,0);layerCompositeContext.globalCompositeOperation="destination-in";layerCompositeContext.drawImage(layerMaskCanvas,0,0);layerCompositeContext.restore();
     }
     context.save();context.setTransform(1,0,0,1,0,0);context.globalAlpha*=opacity;context.globalCompositeOperation=mode;context.drawImage(layerCompositeCanvas,0,0);context.restore();
@@ -2064,7 +2137,8 @@ document.getElementById("rigSetRoleBtn")?.addEventListener("click",()=>{
   const objects=selectedObjects(),role=document.getElementById("rigRole").value,status=document.getElementById("rigStatus");
   if(!objects.length||!role){if(status)status.textContent="Select an object and a bone role first.";return}
   if(!canEditObjects(objects))return;
-  pushHistory();for(const object of objects){object.rigRole=role;if(role==="body")setAutomaticRigPivot(object)}
+  const roleName=role.split("-").map(part=>part.charAt(0).toUpperCase()+part.slice(1)).join(" ");
+  pushHistory();for(const object of objects){object.rigRole=role;object.name=roleName;if(role==="body")setAutomaticRigPivot(object)}
   if(status)status.textContent=`Assigned ${role} to ${objects.length} object${objects.length===1?"":"s"}.`;
   renderAll();
 });
@@ -2196,6 +2270,50 @@ async function exportSequence(scale,transparent,onProgress=()=>{},start=0,end=fr
   }
   downloadBlob(storedZip(entries),`${safeFileName(projectName)}_frames_${start+1}-${end+1}.zip`);
 }
+function gifLzw(indices){
+  const minimumCodeSize=8,clearCode=1<<minimumCodeSize,endCode=clearCode+1,output=[];
+  let bitBuffer=0,bitCount=0,codeSize=minimumCodeSize+1,nextCode=endCode+1,dictionary=new Map();
+  const writeCode=code=>{bitBuffer|=code<<bitCount;bitCount+=codeSize;while(bitCount>=8){output.push(bitBuffer&255);bitBuffer>>>=8;bitCount-=8}};
+  writeCode(clearCode);
+  if(indices.length){
+    let prefix=indices[0];
+    for(let index=1;index<indices.length;index++){
+      const symbol=indices[index],key=prefix*256+symbol,found=dictionary.get(key);
+      if(found!==undefined){prefix=found;continue}
+      writeCode(prefix);
+      if(nextCode<4096){dictionary.set(key,nextCode++);if(nextCode>(1<<codeSize)&&codeSize<12)codeSize++}
+      else{writeCode(clearCode);dictionary=new Map();codeSize=minimumCodeSize+1;nextCode=endCode+1}
+      prefix=symbol;
+    }
+    writeCode(prefix);
+  }
+  writeCode(endCode);if(bitCount)output.push(bitBuffer&255);return output;
+}
+async function exportGif(scale,transparent,start=0,end=frames.length-1,onProgress=()=>{}){
+  const width=W*scale,height=H*scale,count=end-start+1,totalPixels=width*height*count;
+  if(width>65535||height>65535||totalPixels>60_000_000)throw new Error("GIF export is too large to encode safely. Reduce the scale or export fewer frames.");
+  const parts=[];let chunk=[];const flush=()=>{if(chunk.length){parts.push(new Uint8Array(chunk));chunk=[]}},push=value=>{chunk.push(value&255);if(chunk.length>=8192)flush()},push16=value=>{push(value);push(value>>8)},writeText=value=>{for(const character of value)push(character.charCodeAt(0))};
+  const writeBlocks=data=>{for(let offset=0;offset<data.length;offset+=255){const block=data.slice(offset,offset+255);push(block.length);for(const value of block)push(value)}push(0)};
+  writeText("GIF89a");push16(width);push16(height);push(0xf7);push(0);push(0);
+  push(0);push(0);push(0);
+  for(let index=0;index<256;index++){const q=Math.max(0,index-1);push(Math.round(Math.floor(q/32)*255/7));push(Math.round(Math.floor(q%32/4)*255/7));push(Math.round((q%4)*255/3))}
+  push(0x21);push(0xff);push(11);writeText("NETSCAPE2.0");push(3);push(1);push16(0);push(0);
+  const fps=Math.max(1,Math.min(100,Number(document.getElementById("playbackFps")?.value||document.getElementById("fps")?.value||8)));
+  for(let frameIndex=start;frameIndex<=end;frameIndex++){
+    const frame=frames[frameIndex],canvas=logicalFrameCanvas(frame,scale,transparent,frameIndex),pixels=canvas.getContext("2d",{willReadFrequently:true}).getImageData(0,0,width,height).data,indices=new Uint8Array(width*height);
+    for(let pixel=0;pixel<indices.length;pixel++){
+      const offset=pixel*4,alpha=pixels[offset+3];
+      if(transparent&&alpha<128){indices[pixel]=0;continue}
+      const q=(pixels[offset]>>5)*32+(pixels[offset+1]>>5)*4+(pixels[offset+2]>>6);
+      indices[pixel]=Math.min(254,q)+1;
+    }
+    const delay=Math.max(1,Math.min(65535,Math.round(Math.max(1,Number(frame.duration)||1)*100/fps)));
+    push(0x21);push(0xf9);push(4);push(transparent?1:0);push16(delay);push(0);push(0);
+    push(0x2c);push16(0);push16(0);push16(width);push16(height);push(0);push(8);writeBlocks(gifLzw(indices));onProgress(frameIndex-start+1,count);
+    await new Promise(resolve=>setTimeout(resolve,0));
+  }
+  push(0x3b);flush();downloadBlob(new Blob(parts,{type:"image/gif"}),`${safeFileName(projectName)}_frames_${start+1}-${end+1}.gif`);
+}
 async function exportWebm(scale,transparent,start=0,end=frames.length-1){
   if(!canvas.captureStream||typeof MediaRecorder==="undefined")throw new Error("WebM recording is not supported by this browser.");
   const fps=Math.max(1,Math.min(100,Number(document.getElementById("playbackFps")?.value||document.getElementById("fps")?.value||8)));
@@ -2221,7 +2339,7 @@ async function performExport(root=document){
   if(!Number.isInteger(startValue)||!Number.isInteger(endValue)||start<0||end>=frames.length||start>end)throw new Error("Choose a valid frame range from 1 to "+frames.length+".");
   if(status)status.textContent="Exporting…";
   try{
-    if(format==="png")exportCurrentImage("png",scale,transparent);else if(format==="jpeg")exportCurrentImage("jpeg",scale,false);else if(format==="svg")downloadBlob(new Blob([frameToSvg(activeFrame())],{type:"image/svg+xml"}),`${safeFileName(projectName)}_frame_${String(currentFrame+1).padStart(3,"0")}.svg`);else if(format==="sprite")exportSprite(scale,transparent,start,end);else if(format==="sequence")await exportSequence(scale,transparent,(done,total)=>{if(status)status.textContent=`Packaging frame ${done} of ${total}…`},start,end);else if(format==="json")downloadBlob(new Blob([currentProjectJson()],{type:"application/json"}),`${safeFileName(projectName)}.json`);else if(format==="webm")await exportWebm(scale,transparent,start,end);
+    if(format==="png")exportCurrentImage("png",scale,transparent);else if(format==="jpeg")exportCurrentImage("jpeg",scale,false);else if(format==="svg")downloadBlob(new Blob([frameToSvg(activeFrame())],{type:"image/svg+xml"}),`${safeFileName(projectName)}_frame_${String(currentFrame+1).padStart(3,"0")}.svg`);else if(format==="sprite")exportSprite(scale,transparent,start,end);else if(format==="sequence")await exportSequence(scale,transparent,(done,total)=>{if(status)status.textContent=`Packaging frame ${done} of ${total}…`},start,end);else if(format==="gif")await exportGif(scale,transparent,start,end,(done,total)=>{if(status)status.textContent=`Encoding GIF frame ${done} of ${total}…`});else if(format==="json")downloadBlob(new Blob([currentProjectJson()],{type:"application/json"}),`${safeFileName(projectName)}.json`);else if(format==="webm")await exportWebm(scale,transparent,start,end);
     if(status)status.textContent="Export complete.";
   }catch(err){console.error(err);if(status)status.textContent="Export failed: "+(err?.message||"Unknown error")}
 }
@@ -3546,15 +3664,16 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     baseEnsureFrameLayers();
     for(const l of layers){
       if(!l.blendMode||!BLEND_MODE_MAP[l.blendMode])l.blendMode="normal";
+      if(!Number.isFinite(Number(l.depth)))l.depth=50;
       if(typeof l.clipToBelow!=="boolean")l.clipToBelow=false;
-      if(!["none","blur","glow","shadow","color-adjust"].includes(l.effect))l.effect="none";
+      if(!["none","blur","glow","shadow","color-adjust","grayscale","sepia","invert","brightness","hue","saturate"].includes(l.effect))l.effect="none";
       if(!Number.isFinite(Number(l.effectAmount)))l.effectAmount=5;
     }
   };
   ensureFrameLayers();
 
   const baseMakeLayer=makeLayer;
-  makeLayer=function(name){const l=baseMakeLayer(name);l.blendMode="normal";return l};
+  makeLayer=function(name){const l=baseMakeLayer(name);l.blendMode="normal";l.depth=50;return l};
 
   render=function(){
     ctx.clearRect(0,0,W,H);
@@ -3583,6 +3702,16 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
       amount.onfocus=()=>{historyPushed=false};
       amount.oninput=()=>{if(!historyPushed){pushHistory();historyPushed=true}l.effectAmount=Math.max(1,Math.min(20,Number(amount.value)||5));if(amountText)amountText.textContent=String(l.effectAmount);render()};
       amount.onchange=()=>{historyPushed=false};
+    }
+    const depth=document.getElementById("layerDepth"),depthText=document.getElementById("layerDepthText");
+    if(l&&depth){
+      if(document.activeElement!==depth)depth.value=String(Math.max(0,Math.min(100,Number(l.depth??50))));
+      if(depthText)depthText.textContent=depth.value;
+      let depthHistoryPushed=false;
+      depth.onpointerdown=()=>{if(!depthHistoryPushed){pushHistory();depthHistoryPushed=true}};
+      depth.onfocus=()=>{depthHistoryPushed=false};
+      depth.oninput=()=>{if(!depthHistoryPushed){pushHistory();depthHistoryPushed=true}l.depth=Math.max(0,Math.min(100,Number(depth.value)||0));if(depthText)depthText.textContent=String(l.depth);render()};
+      depth.onchange=()=>{depthHistoryPushed=false};
     }
   };
 
@@ -4256,8 +4385,21 @@ wirePlaybackWidget();
   const fileButton=document.getElementById("fileMenuBtn");
 
   function objectLabel(obj,index){
-    const detail=obj.type==="text"?`: ${obj.text||"Text"}`:`${index+1}. ${obj.type||"Object"}`;
-    return obj.type==="text"?`${index+1}. Text: ${obj.text||"Text"}`:detail;
+    const fallback=obj.type==="text"?`Text: ${obj.text||"Text"}`:(obj.type||"Object");
+    return `${index+1}. ${obj.name?.trim()||fallback}`;
+  }
+
+  function renameObject(object){
+    if(!object||!canEditObjects([object]))return;
+    const fallback=object.name||(object.type==="text"?`Text: ${object.text||"Text"}`:(object.type||"Object"));
+    const modal=openModal("Rename Object",'<label class="propertyLine"><span>Name</span><input id="renameObjectInput" type="text" maxlength="80" value="'+escapeHtml(fallback)+'"></label>',"Rename",(element,close)=>{
+      const name=element.querySelector("#renameObjectInput").value.trim();
+      if(!name){element.querySelector("#renameObjectInput").focus();return}
+      pushHistory();object.name=name;renderAll();close();
+    });
+    const input=modal.querySelector("#renameObjectInput");
+    input?.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();modal.querySelector(".modalActions .primary")?.click()}});
+    input?.focus();input?.select();
   }
 
   function refreshObjects(){
@@ -4284,6 +4426,7 @@ wirePlaybackWidget();
         }
         renderAll();
       };
+      button.ondblclick=event=>{event.preventDefault();event.stopPropagation();renameObject(obj)};
       button.oncontextmenu=event=>showObjectMenu(event,obj,objectLocalToWorld(obj,{x:0,y:0}));
       objectList.appendChild(button);
     });
@@ -4452,6 +4595,7 @@ wirePlaybackWidget();
     const menu=document.createElement("div");menu.id="objectContextMenu";menu.className="objectContextMenu";
     const actions=[
       ["Duplicate",duplicateSelected],
+      ["Rename object",()=>renameObject(hit)],
       ["Center on canvas",alignSelection],
       ["Bring to front",()=>{pushHistory();changeLayerOrder(1);renderAll()}],
       ["Send to back",()=>{pushHistory();changeLayerOrder(-1);renderAll()}],
@@ -4534,7 +4678,7 @@ wirePlaybackWidget();
 
   function openFileMenu(){
     const selectedRange=[...selectedTimelineFrames].sort((a,b)=>a-b),defaultStart=selectedRange.length?selectedRange[0]+1:1,defaultEnd=selectedRange.length?selectedRange[selectedRange.length-1]+1:frames.length;
-    const body='<div class="fileMenuActions"><button type="button" class="small" id="fileSaveProject">Save Project</button><button type="button" class="small" id="fileSaveProjectFile">Save Project File</button><button type="button" class="small" id="fileImportProject">Import JSON</button><button type="button" class="small" id="fileOpenProjectFile">Open Project File</button><button type="button" class="small" id="fileVersionHistory">Version History</button></div><div class="exportFormats"><label class="propertyLine"><span>Format</span><select id="exportFormat"><option value="png">PNG — Current Frame</option><option value="jpeg">JPEG — Current Frame</option><option value="svg">SVG — Current Frame</option><option value="sprite">PNG — Sprite Sheet</option><option value="sequence">PNG — Frame Sequence (ZIP)</option><option value="webm">WebM — Animation</option><option value="json">JSON — Project Data</option></select></label><div class="propertyLine"><span>Frame range</span><input id="exportRangeStart" type="number" min="1" max="'+frames.length+'" value="'+defaultStart+'" aria-label="Export first frame"><span>to</span><input id="exportRangeEnd" type="number" min="1" max="'+frames.length+'" value="'+defaultEnd+'" aria-label="Export last frame"></div><label class="propertyLine"><span>Scale</span><select id="exportScale"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option></select></label><label class="checkRow"><input id="exportTransparent" type="checkbox"> Transparent background</label><button class="primary" id="fileExportNow" type="button">Export</button><div class="exportStatus" id="exportStatus"></div><div class="exportHint">Frame range applies to sprite sheets, ZIP image sequences, and WebM; current-frame formats stay on the active frame.</div></div>';
+    const body='<div class="fileMenuActions"><button type="button" class="small" id="fileSaveProject">Save Project</button><button type="button" class="small" id="fileSaveProjectFile">Save Project File</button><button type="button" class="small" id="fileImportProject">Import JSON</button><button type="button" class="small" id="fileOpenProjectFile">Open Project File</button><button type="button" class="small" id="fileVersionHistory">Version History</button></div><div class="exportFormats"><label class="propertyLine"><span>Format</span><select id="exportFormat"><option value="png">PNG — Current Frame</option><option value="jpeg">JPEG — Current Frame</option><option value="svg">SVG — Current Frame</option><option value="sprite">PNG — Sprite Sheet</option><option value="sequence">PNG — Frame Sequence (ZIP)</option><option value="gif">GIF — Animation (offline)</option><option value="webm">WebM — Animation (real time)</option><option value="json">JSON — Project Data</option></select></label><div class="propertyLine"><span>Frame range</span><input id="exportRangeStart" type="number" min="1" max="'+frames.length+'" value="'+defaultStart+'" aria-label="Export first frame"><span>to</span><input id="exportRangeEnd" type="number" min="1" max="'+frames.length+'" value="'+defaultEnd+'" aria-label="Export last frame"></div><label class="propertyLine"><span>Scale</span><select id="exportScale"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option></select></label><label class="checkRow"><input id="exportTransparent" type="checkbox"> Transparent background</label><button class="primary" id="fileExportNow" type="button">Export</button><div class="exportStatus" id="exportStatus"></div><div class="exportHint">Frame range applies to sprite sheets, ZIP image sequences, GIF, and WebM; WebM captures in real time. GIF uses a compact 3-3-2 color palette.</div></div>';
     const modal=openModal("File",body,"Close",(m,close)=>close());
     modal.querySelector("#fileSaveProject").onclick=()=>{try{saveCurrent();modal.querySelector("#exportStatus").textContent="Project saved."+(window.__recoveryWarning||"")}catch(error){console.error("Project save failed.",error);modal.querySelector("#exportStatus").textContent="Save failed: "+(error?.message||"Storage error")}};
     modal.querySelector("#fileSaveProjectFile").onclick=async()=>{
@@ -4766,8 +4910,12 @@ wirePlaybackWidget();
 
   function rigChainForEnd(end){
     const objects=allVisibleObjects(),parent=object=>objects.find(candidate=>String(candidate.id)===String(object.rigParentId));
-    const middle=parent(end),root=middle&&parent(middle);
-    return root&&middle?{root,middle,end}:null;
+    const chain=[end],seen=new Set([end.id]);let current=end;
+    while(current.rigParentId!=null&&chain.length<=objects.length){
+      current=parent(current);if(!current||seen.has(current.id))return null;
+      seen.add(current.id);chain.push(current);
+    }
+    return chain.length>=3?chain.reverse():null;
   }
   function keyRigPose(objects,saveHistory=true){
     if(!canEditObjects(objects))return false;
@@ -4785,40 +4933,39 @@ wirePlaybackWidget();
     if(status)status.textContent=changed?`Keyed ${chain.length} connected rig part${chain.length===1?"":"s"} on frame ${currentFrame+1}.`:"This rig pose is already keyed on the current frame.";
   });
   function solveRigPose(action,target){
-    const {root,middle,end,original,shoulder,elbow,wrist,upperLength,lowerLength,bendDirection}=action;
+    const {chain,original,initialPoints,lengths}=action;
     for(const item of original){
       const object=allVisibleObjects().find(candidate=>candidate.id===item.id);if(!object)continue;
       object.x=item.x;object.y=item.y;object.rotation=item.rotation;object.scaleX=item.scaleX;object.scaleY=item.scaleY;
     }
-    let dx=target.x-shoulder.x,dy=target.y-shoulder.y,distance=Math.hypot(dx,dy);
-    const minDistance=Math.abs(upperLength-lowerLength)+.001,maxDistance=Math.max(minDistance,upperLength+lowerLength-.001);
-    distance=Math.max(minDistance,Math.min(maxDistance,distance));
-    const targetAngle=Math.atan2(dy,dx);
-    const cosElbow=Math.max(-1,Math.min(1,(upperLength*upperLength+distance*distance-lowerLength*lowerLength)/(2*upperLength*distance)));
-    const elbowAngle=targetAngle+bendDirection*Math.acos(cosElbow);
-    const desiredElbow={x:shoulder.x+Math.cos(elbowAngle)*upperLength,y:shoulder.y+Math.sin(elbowAngle)*upperLength};
-    const rootDelta=Math.atan2(desiredElbow.y-shoulder.y,desiredElbow.x-shoulder.x)-Math.atan2(elbow.y-shoulder.y,elbow.x-shoulder.x);
-    updateRigPose({delta:rootDelta,pivot:shoulder,original});
-    const currentMiddle=objectLocalToWorld(middle,objectPivot(middle)),currentEnd=objectLocalToWorld(end,objectPivot(end));
-    const forearmDelta=Math.atan2(target.y-currentMiddle.y,target.x-currentMiddle.x)-Math.atan2(currentEnd.y-currentMiddle.y,currentEnd.x-currentMiddle.x);
-    const forearmOriginal=rigAffectedObjects([middle]).map(object=>({id:object.id,x:object.x,y:object.y,rotation:Number(object.rotation)||0,scaleX:object.scaleX||1,scaleY:object.scaleY||1}));
-    updateRigPose({delta:forearmDelta,pivot:currentMiddle,original:forearmOriginal});
+    const points=initialPoints.map(point=>({...point})),root=points[0],reach=lengths.reduce((sum,length)=>sum+length,0);
+    if(Math.hypot(target.x-root.x,target.y-root.y)>=reach){
+      for(let index=0;index<lengths.length;index++){const from=points[index],dx=target.x-from.x,dy=target.y-from.y,distance=Math.hypot(dx,dy)||1;points[index+1]={x:from.x+dx/distance*lengths[index],y:from.y+dy/distance*lengths[index]}}
+    }else{
+      for(let iteration=0;iteration<10;iteration++){
+        points[points.length-1]={...target};
+        for(let index=lengths.length-1;index>=0;index--){const next=points[index+1],from=points[index],dx=from.x-next.x,dy=from.y-next.y,distance=Math.hypot(dx,dy)||1;points[index]={x:next.x+dx/distance*lengths[index],y:next.y+dy/distance*lengths[index]}}
+        points[0]={...root};
+        for(let index=0;index<lengths.length;index++){const from=points[index],next=points[index+1],dx=next.x-from.x,dy=next.y-from.y,distance=Math.hypot(dx,dy)||1;points[index+1]={x:from.x+dx/distance*lengths[index],y:from.y+dy/distance*lengths[index]}}
+      }
+    }
+    for(let index=0;index<chain.length-1;index++){
+      const parent=chain[index],child=chain[index+1],pivot=objectLocalToWorld(parent,objectPivot(parent)),childPivot=objectLocalToWorld(child,objectPivot(child)),fromAngle=Math.atan2(childPivot.y-pivot.y,childPivot.x-pivot.x),toAngle=Math.atan2(points[index+1].y-points[index].y,points[index+1].x-points[index].x),subtree=rigAffectedObjects([parent]).map(object=>({id:object.id,x:object.x,y:object.y,rotation:Number(object.rotation)||0,scaleX:object.scaleX||1,scaleY:object.scaleY||1}));
+      updateRigPose({delta:toAngle-fromAngle,pivot,original:subtree});
+    }
   }
   canvas.addEventListener("pointerdown",event=>{
     if(tool!=="rig-ik"||event.button!==0)return;
     event.preventDefault();event.stopImmediatePropagation();
     if(playing)return;
     const selectedRig=selectedObjects(),point=getCanvasPoint(event),end=selectedRig.length===1?selectedRig[0]:topObjectAt(point.x,point.y),chain=end&&rigChainForEnd(end),status=document.getElementById("rigStatus");
-    if(!chain){if(status)status.textContent="Select a hand/end part with two linked parent bones to use IK Pose.";return}
-    const objects=rigAffectedObjects([chain.root]),locked=objects.map(layerForObject).find(layer=>layer?.locked);
+    if(!chain){if(status)status.textContent="Select an end part with at least two linked parent bones to use IK Pose.";return}
+    const objects=rigAffectedObjects([chain[0]]),locked=objects.map(layerForObject).find(layer=>layer?.locked);
     if(locked){if(status)status.textContent=`"${locked.name}" is locked. Unlock it before posing this rig.`;return}
     if(!selectedRig.length){selected.clear();selected.add(end.id)}
-    const shoulder=objectLocalToWorld(chain.root,objectPivot(chain.root)),elbow=objectLocalToWorld(chain.middle,objectPivot(chain.middle)),wrist=objectLocalToWorld(chain.end,objectPivot(chain.end));
-    const cross=(elbow.x-shoulder.x)*(wrist.y-shoulder.y)-(elbow.y-shoulder.y)*(wrist.x-shoulder.x);
+    const initialPoints=chain.map(object=>objectLocalToWorld(object,objectPivot(object))),lengths=initialPoints.slice(1).map((point,index)=>Math.max(.001,Math.hypot(point.x-initialPoints[index].x,point.y-initialPoints[index].y)));
     const action={
-      kind:"rigIK",pointerId:event.pointerId,root:chain.root,middle:chain.middle,end:chain.end,
-      shoulder,elbow,wrist,upperLength:Math.max(.001,Math.hypot(elbow.x-shoulder.x,elbow.y-shoulder.y)),
-      lowerLength:Math.max(.001,Math.hypot(wrist.x-elbow.x,wrist.y-elbow.y)),bendDirection:cross<0?-1:1,
+      kind:"rigIK",pointerId:event.pointerId,chain,initialPoints,lengths,
       original:objects.map(object=>({id:object.id,x:object.x,y:object.y,rotation:Number(object.rotation)||0,scaleX:object.scaleX||1,scaleY:object.scaleY||1}))
     };
     pushHistory();pointerAction=action;
@@ -4835,7 +4982,7 @@ wirePlaybackWidget();
     event.preventDefault();event.stopImmediatePropagation();pointerAction=null;
     const status=document.getElementById("rigStatus");
     if(event.type==="pointerup"){
-      const keyed=keyRigPose(rigAffectedObjects([action.root]),false);
+      const keyed=keyRigPose(rigAffectedObjects([action.chain[0]]),false);
       if(status)status.textContent=keyed?`IK pose set and keyed on frame ${currentFrame+1}.`:`IK pose set on frame ${currentFrame+1}; the rig already had keys here.`;
     }else{
       for(const item of action.original){
@@ -5190,6 +5337,447 @@ wirePlaybackWidget();
   };
   document.getElementById("exploreFeaturesBtn")?.addEventListener("click",window.openFeatureExplorer);
 })();
+</script>
+<style>
+/* ===== Step 2: Menu bar + canvas header ===== */
+.topbar.bbaTop{height:36px;flex:0 0 36px;padding:3px 8px;gap:2px;overflow:visible;position:relative;z-index:200}
+.topbar.bbaTop > :not(.bbaMenuBar):not(.bbaTopRight){display:none!important}
+.bbaMenuBar{display:flex;align-items:center;gap:1px}
+.bbaMenuBar button.bbaMenuBtn:not(.x):not(.colorSwatch),.bbaTopRight button:not(.bbaSearch):not(.colorSwatch){background:none!important;box-shadow:none!important;border:1px solid transparent!important;border-radius:6px!important;padding:3px 10px!important;min-height:26px!important;font-size:13px!important;color:var(--text)!important}
+.bbaMenuBar button.bbaMenuBtn:not(.colorSwatch):hover,.bbaMenuBar button.bbaMenuBtn.open:not(.colorSwatch),.bbaTopRight button:not(.colorSwatch):hover{background:color-mix(in srgb,var(--accent) 16%,transparent)!important;border-color:color-mix(in srgb,var(--accent) 40%,transparent)!important}
+.bbaTopRight{margin-left:auto;display:flex;align-items:center;gap:4px;min-width:0}
+.bbaTopRight .bbaTitle{font-size:12px;font-weight:600;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px;opacity:.85}
+.bbaTopRight button.bbaSearch:not(.colorSwatch){background:transparent!important;border:1px solid var(--border)!important;color:var(--muted)!important;min-width:150px;text-align:left}
+.bbaTopRight button.bbaSearch kbd,.bbaDropItem kbd{font:11px system-ui;opacity:.7;margin-left:8px}
+.bbaDrop{position:fixed;z-index:100000;min-width:230px;max-height:calc(100vh - 60px);overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.28);padding:4px;font-size:13px;color:var(--text)}
+button.bbaDropItem:not(.colorSwatch){display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;text-align:left;padding:5px 10px;border:none!important;background:none!important;box-shadow:none!important;border-radius:5px!important;min-height:0!important;font-size:13px;color:var(--text)!important;cursor:pointer}
+button.bbaDropItem:not(.colorSwatch):hover:not(.disabled),button.bbaDropItem.hl:not(.colorSwatch){background:color-mix(in srgb,var(--accent) 22%,transparent)!important}
+.bbaDropItem.disabled{opacity:.4;cursor:default}
+.bbaDropItem .bbaCheck{width:14px;display:inline-block;opacity:.8}
+.bbaDropItem .arrow{opacity:.6}
+.bbaDropSep{height:1px;background:var(--border);margin:4px 2px}
+.bbaDropHead{font-size:10px;text-transform:uppercase;letter-spacing:.06em;opacity:.55;padding:5px 10px 2px}
+/* canvas header */
+#canvasHeader{position:absolute;left:0;right:0;top:0;height:32px;display:flex;align-items:center;gap:8px;padding:2px 8px;background:var(--panel);border-bottom:1px solid var(--border);z-index:5;overflow-x:auto;overflow-y:hidden;white-space:nowrap}
+#canvasHeader label.control{display:flex;align-items:center;gap:5px;font-size:11px;margin:0}
+#canvasHeader input[type=range]{width:90px}
+#canvasHeader button{min-height:24px!important;padding:2px 8px!important;font-size:11px!important}
+#canvasHeader .hdrSpacer{flex:1}
+#canvasPanel #canvasArea{top:32px}
+#canvasHeader .hdrSep{width:1px;height:16px;background:var(--border)}
+
+</style>
+<script>
+/* ===== BBA Navigation Step 1: Command Registry =====
+   One list of commands feeding menus, palette, shortcuts, tooltips, pie menu and keymap editor. */
+(function(){
+"use strict";
+const LS_RECENT="bba_cmd_recent_v1",LS_FAV="bba_cmd_fav_v1",LS_KEYMAP="bba_keymap_v1";
+const readJSON=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
+const writeJSON=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const BBA=window.BBA=window.BBA||{};
+const map=new Map();
+let recent=readJSON(LS_RECENT,[]),favorites=readJSON(LS_FAV,[]),keymap=readJSON(LS_KEYMAP,{}),lastRun=null;
+const subs=[];
+const notify=()=>subs.forEach(f=>{try{f()}catch(e){console.error(e)}});
+const isMac=/Mac|iPhone|iPad/.test(navigator.platform||"");
+
+/* ---- key chord helpers ("Ctrl+Shift+K") ---- */
+function normChord(s){
+  if(!s)return"";
+  const parts=String(s).split("+").map(p=>p.trim()).filter(Boolean);
+  let ctrl=false,shift=false,alt=false,key="";
+  for(const p of parts){const l=p.toLowerCase();if(l==="ctrl"||l==="cmd"||l==="meta")ctrl=true;else if(l==="shift")shift=true;else if(l==="alt"||l==="option")alt=true;else key=p.length===1?p.toLowerCase():p}
+  const names={" ":"Space",space:"Space",left:"ArrowLeft",right:"ArrowRight",up:"ArrowUp",down:"ArrowDown",esc:"Escape",del:"Delete"};
+  key=names[key.toLowerCase?key.toLowerCase():key]||key;
+  return(ctrl?"Ctrl+":"")+(alt?"Alt+":"")+(shift?"Shift+":"")+(key.length===1?key.toUpperCase():key);
+}
+function chordFromEvent(e){
+  let key=e.key;if(["Control","Shift","Alt","Meta"].includes(key))return"";
+  if(e.code==="Space")key="Space";
+  if(key==="="&&e.shiftKey)key="+";
+  return normChord((e.ctrlKey||e.metaKey?"Ctrl+":"")+(e.altKey?"Alt+":"")+(e.shiftKey&&key.length>1||e.shiftKey&&/[a-z]/i.test(key)?"Shift+":"")+key);
+}
+function prettyChord(c){
+  if(!c)return"";
+  const sym={ArrowLeft:"←",ArrowRight:"→",ArrowUp:"↑",ArrowDown:"↓",Escape:"Esc"};
+  return c.split("+").map(p=>p==="Ctrl"&&isMac?"⌘":sym[p]||p).join(isMac?"":"+");
+}
+
+/* ---- core API ---- */
+function register(def){
+  if(!def||!def.id)throw new Error("command needs an id");
+  const c=Object.assign({category:"General",menu:null,keywords:"",advanced:false,native:false},def);
+  c.shortcutDefault=c.shortcut||"";
+  c.shortcut=c.shortcut||"";
+  map.set(c.id,c);
+  return c;
+}
+const get=id=>map.get(id);
+const list=()=>[...map.values()];
+const editorOpen=()=>document.getElementById("editorView")?.style.display==="flex";
+function isEnabled(c){
+  if(typeof c==="string")c=map.get(c);
+  if(!c)return false;
+  try{return c.when?!!c.when():true}catch(e){return false}
+}
+function shortcutOf(c){
+  if(typeof c==="string")c=map.get(c);
+  if(!c)return"";
+  const custom=keymap[c.id];
+  if(custom!==undefined)return custom;
+  return typeof c.shortcut==="function"?c.shortcut():c.shortcut;
+}
+function run(id,opts){
+  const c=map.get(id);
+  if(!c){console.warn("Unknown command",id);return false}
+  if(!isEnabled(c))return false;
+  try{c.run(opts)}catch(e){console.error("Command failed:",id,e);return false}
+  if(!(opts&&opts.silent)&&id!=="cmd.repeatLast"){
+    lastRun=id;
+    recent=[id,...recent.filter(x=>x!==id)].slice(0,12);writeJSON(LS_RECENT,recent);
+  }
+  notify();
+  return true;
+}
+const recentList=()=>recent.filter(id=>map.has(id));
+const favoriteList=()=>favorites.filter(id=>map.has(id));
+function toggleFavorite(id){favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];writeJSON(LS_FAV,favorites);notify()}
+const isFavorite=id=>favorites.includes(id);
+function setShortcut(id,chord){
+  chord=normChord(chord);
+  if(chord){for(const c of map.values()){if(c.id!==id&&normChord(shortcutOf(c))===chord){keymap[c.id]="";}}}
+  keymap[id]=chord;writeJSON(LS_KEYMAP,keymap);notify();
+}
+function resetShortcut(id){delete keymap[id];writeJSON(LS_KEYMAP,keymap);notify()}
+function resetAllShortcuts(){keymap={};writeJSON(LS_KEYMAP,keymap);notify()}
+function findByChord(chord){
+  chord=normChord(chord);if(!chord)return null;
+  for(const c of map.values())if(normChord(shortcutOf(c))===chord)return c;
+  return null;
+}
+function menuItems(menu){return list().filter(c=>c.menu&&c.menu.split("/")[0]===menu)}
+
+Object.assign(BBA,{commands:{register,get,list,run,isEnabled,shortcutOf,prettyChord,normChord,chordFromEvent,recentList,favoriteList,toggleFavorite,isFavorite,setShortcut,resetShortcut,resetAllShortcuts,findByChord,menuItems,subscribe:f=>subs.push(f),lastRun:()=>lastRun,isMac}});
+
+/* ---- helpers for registering ---- */
+const $=id=>document.getElementById(id);
+const click=id=>()=>{const el=$(id);if(el)el.click()};
+const exists=id=>()=>!!$(id);
+const sel=()=>typeof selected!=="undefined"&&selected.size>0;
+const R=(id,label,category,run,o)=>register(Object.assign({id,label,category,run},o||{}));
+const ids=(prefix,label,category,btn,o)=>R(prefix,label,category,click(btn),Object.assign({when:exists(btn)},o||{}));
+
+/* ---------- FILE ---------- */
+R("file.home","Home / Project List","File",click("homeBtn"),{menu:"File",order:1});
+R("file.save","Save Project","File",()=>{const el=$("saveBtn");el&&el.click()},{menu:"File",shortcut:"Ctrl+S",native:true,order:2,keywords:"store"});
+R("file.menu","File & Export…","File",click("fileMenuBtn"),{menu:"File",order:3,keywords:"export render png webm gif video import open"});
+R("file.versionHistory","Version History…","File",()=>window.openProjectVersionHistory?.(),{menu:"File",order:4,keywords:"recover restore snapshot"});
+R("file.canvasSize","Canvas Size…","File",click("canvasSettingsBtn"),{menu:"File",order:5,keywords:"dimensions aspect resolution"});
+R("file.backup","Backup Project (JSON)","File",click("backupProjectButton"),{menu:"File",order:6,when:exists("backupProjectButton")});
+R("file.import","Import Project (JSON)","File",click("importProjectButton"),{menu:"File",order:7,when:exists("importProjectButton")});
+R("file.newAnimation","New Animation…","File",()=>{$("homeBtn")?.click();setTimeout(()=>$("newBtn")?.click(),50)},{menu:"File",order:8});
+R("file.importImage","Import Image…","File",click("importImageButton"),{menu:"File",order:9,when:exists("importImageButton")});
+R("file.preview","Preview Through Camera","File",()=>openCameraPreview(),{menu:"File",shortcut:"F12",native:true,order:10,keywords:"render play"});
+
+/* ---------- EDIT ---------- */
+R("edit.undo","Undo","Edit",()=>undo(),{menu:"Edit",shortcut:"Ctrl+Z",native:true,order:1});
+R("edit.redo","Redo","Edit",()=>redo(),{menu:"Edit",shortcut:"Ctrl+Shift+Z",native:true,order:2});
+R("edit.cut","Cut","Edit",()=>{objectClipboard=selectedObjects().map(deep);deleteSelected()},{menu:"Edit",shortcut:"Ctrl+X",native:true,when:sel,order:3});
+R("edit.copy","Copy","Edit",()=>{objectClipboard=selectedObjects().map(deep)},{menu:"Edit",shortcut:"Ctrl+C",native:true,when:sel,order:4});
+R("edit.paste","Paste","Edit",()=>pasteClipboard(),{menu:"Edit",shortcut:"Ctrl+V",native:true,order:5});
+R("edit.duplicate","Duplicate Selection","Edit",()=>duplicateSelection(),{menu:"Edit",shortcut:"Ctrl+D",native:true,when:sel,order:6});
+R("edit.delete","Delete Selection","Edit",()=>deleteSelected(),{menu:"Edit",shortcut:"Delete",native:true,when:sel,order:7});
+R("edit.deselect","Deselect All","Edit",()=>{selected.clear();renderAll()},{menu:"Edit",shortcut:"Escape",native:true,order:8});
+R("edit.arrange","Arrange / Edit Tools…","Edit",click("editMenuBtn"),{menu:"Edit",order:9,keywords:"align distribute group"});
+R("edit.repeat","Repeat Last Command","Edit",()=>{if(lastRun)run(lastRun)},{menu:"Edit",shortcut:"Shift+R",order:10,when:()=>!!lastRun,id:"cmd.repeatLast"});
+BBA.commands.get("cmd.repeatLast").label="Repeat Last Command";
+
+/* ---------- VIEW ---------- */
+R("view.zoomIn","Zoom In","View",()=>setZoom(zoom+10),{menu:"View",shortcut:"Ctrl++",native:true,order:1});
+R("view.zoomOut","Zoom Out","View",()=>setZoom(zoom-10),{menu:"View",shortcut:"Ctrl+-",native:true,order:2});
+R("view.zoomFit","Zoom to 100% / Fit","View",()=>{updateCanvasFitScale();setZoom(100)},{menu:"View",shortcut:"F",native:true,order:3});
+R("view.reset","Reset View","View",()=>resetView(),{menu:"View",shortcut:"Ctrl+0",native:true,order:4});
+R("view.rotateLeft","Rotate View Left","View",()=>rotateViewBy(-15),{menu:"View",order:5});
+R("view.rotateRight","Rotate View Right","View",()=>rotateViewBy(15),{menu:"View",order:6});
+R("view.grid","Toggle Grid","View",()=>{const g=$("grid");g.checked=!g.checked;g.dispatchEvent(new Event("change"))},{menu:"View",shortcut:"G",native:true,order:7});
+R("view.onion","Toggle Onion Skin","View",()=>{const o=$("onion");if(!o)return;o.checked=!o.checked;o.dispatchEvent(new Event("change"))},{menu:"View",shortcut:"O",native:true,order:8});
+R("view.pan","Pan (hold)","View",()=>{},{shortcut:"H",native:true,when:()=>false});
+
+/* ---------- LAYER ---------- */
+ids("layer.add","Add Layer","Layer","addLayer",{menu:"Layer",order:1});
+ids("layer.duplicate","Duplicate Layer","Layer","duplicateLayer",{menu:"Layer",order:2});
+ids("layer.delete","Delete Layer","Layer","deleteLayer",{menu:"Layer",order:3});
+ids("layer.folder","New Layer Folder","Layer","addLayerFolderButton",{menu:"Layer",order:4});
+R("layer.bringForward","Move Layer Up","Layer",()=>window.animationEditorActions.bringToFront(),{menu:"Layer",order:5,keywords:"order front"});
+R("layer.sendBackward","Move Layer Down","Layer",()=>window.animationEditorActions.sendToBack(),{menu:"Layer",order:6,keywords:"order back"});
+
+/* ---------- FRAME ---------- */
+R("frame.prev","Previous Frame","Frame",()=>goFrame(-1),{menu:"Frame",shortcut:"Shift+ArrowLeft",native:true,order:1});
+R("frame.next","Next Frame","Frame",()=>goFrame(1),{menu:"Frame",shortcut:"Shift+ArrowRight",native:true,order:2});
+R("frame.first","First Frame","Frame",()=>{currentFrame=0;selected.clear();renderAll()},{menu:"Frame",shortcut:"Ctrl+Home",native:true,order:3});
+R("frame.last","Last Frame","Frame",()=>{currentFrame=frames.length-1;selected.clear();renderAll()},{menu:"Frame",shortcut:"Ctrl+End",native:true,order:4});
+R("frame.play","Play / Pause","Frame",()=>{playing?stopPlaying():startPlaying()},{menu:"Frame",shortcut:"Space",native:true,order:5});
+ids("frame.addBlank","Add Blank Frame","Frame","addFrame",{menu:"Frame",order:6});
+ids("frame.duplicate","Duplicate Frame","Frame","duplicateFrame",{menu:"Frame",order:7});
+ids("frame.insertBefore","Insert Frame Before","Frame","timelineInsertBeforeBtn",{menu:"Frame",order:8});
+ids("frame.insertAfter","Insert Frame After","Frame","timelineInsertAfterBtn",{menu:"Frame",order:9});
+ids("frame.delete","Delete Frame","Frame","deleteFrame",{menu:"Frame",order:10});
+ids("frame.markKey","Mark Keyframe","Frame","markKeyframeBtn",{menu:"Frame",order:11});
+ids("frame.prevKey","Previous Keyframe","Frame","prevKeyframeBtn",{menu:"Frame",order:12});
+ids("frame.nextKey","Next Keyframe","Frame","nextKeyframeBtn",{menu:"Frame",order:13});
+ids("frame.tween","Tween to Next Key","Frame","tweenToNextBtn",{menu:"Frame",order:14,keywords:"inbetween interpolate"});
+ids("frame.easing","Edit Easing Curve…","Frame","editEasingCurveBtn",{menu:"Frame",order:15});
+ids("frame.motionPath","Edit Motion Path…","Frame","editMotionPathBtn",{menu:"Frame",order:16,advanced:true});
+ids("frame.bakeSpring","Bake Spring Physics","Frame","bakePhysicsBtn",{menu:"Frame",order:17,advanced:true,keywords:"physics bounce"});
+ids("frame.copyKeys","Copy Keys","Frame","copyFrameBtn",{menu:"Frame",order:18});
+ids("frame.pasteKeys","Paste Keys","Frame","pasteFrameBtn",{menu:"Frame",order:19});
+ids("frame.dupRange","Duplicate Range","Frame","dupRangeBtn",{menu:"Frame",order:20});
+ids("frame.delRange","Delete Range","Frame","delRangeBtn",{menu:"Frame",order:21});
+ids("frame.revRange","Reverse Range","Frame","revRangeBtn",{menu:"Frame",order:22});
+ids("frame.setIn","Set Range In","Frame","timelineSetInBtn",{menu:"Frame",order:23});
+ids("frame.setOut","Set Range Out","Frame","timelineSetOutBtn",{menu:"Frame",order:24});
+ids("frame.clearRange","Clear Range","Frame","timelineClearRangeBtn",{menu:"Frame",order:25});
+ids("frame.xsheet","Exposure Sheet (X-sheet)…","Frame","exposureSheetBtn",{menu:"Frame",order:26});
+ids("frame.scenes","Scenes / Sequences…","Frame","sceneManagerBtn",{menu:"Frame",order:27});
+
+/* ---------- OBJECT ---------- */
+const A=n=>()=>window.animationEditorActions[n]();
+R("object.group","Join / Group","Object",A("join"),{menu:"Object",when:sel,order:1});
+R("object.ungroup","Ungroup","Object",A("ungroup"),{menu:"Object",when:sel,order:2});
+R("object.front","Bring to Front","Object",A("bringToFront"),{menu:"Object",when:sel,order:3});
+R("object.back","Send to Back","Object",A("sendToBack"),{menu:"Object",when:sel,order:4});
+R("object.center","Center on Canvas","Object",A("center"),{menu:"Object",when:sel,order:5});
+for(const [k,l] of [["alignLeft","Align Left"],["alignRight","Align Right"],["alignTop","Align Top"],["alignBottom","Align Bottom"],["alignCenterX","Align Center Horizontally"],["alignCenterY","Align Center Vertically"],["distributeX","Distribute Horizontally"],["distributeY","Distribute Vertically"]])
+  R("object."+k,l,"Object",A(k),{menu:"Object/Align",when:sel});
+ids("object.text","Create Text","Object","createTextButton",{menu:"Object",order:20});
+ids("object.symbol","Create Symbol from Selection","Object","createSymbolBtn",{menu:"Object",order:21,when:()=>!!$("createSymbolBtn")&&sel()});
+ids("object.insertSymbol","Insert Symbol","Object","insertSymbolBtn",{menu:"Object",order:22});
+ids("object.allFrames","Add Selection to All Frames","Object","objectsAddAllFrames",{menu:"Object",order:23});
+
+/* ---------- TOOLS ---------- */
+const TOOLS=[["brush","Brush","Drawing"],["line","Line","Drawing"],["rectangle","Rectangle","Drawing"],["ellipse","Ellipse","Drawing"],["polygon","Polygon","Drawing"],["star","Star","Drawing"],["lasso","Lasso Select","Editing"],["transform","Transform","Editing"],["node","Edit Points","Editing"],["eyedropper","Eyedropper","Drawing"],["bucket","Paint Bucket","Drawing"],["camera","Edit Camera","Camera"],["rig","Pose Rig","Rig"],["rig-ik","IK Pose","Rig"]];
+for(const [t,l,cat] of TOOLS)
+  R("tool."+t,l+" Tool","Tools",()=>setTool(t),{menu:"Tools",shortcut:()=>{const k=typeof toolShortcuts!=="undefined"&&toolShortcuts[t];return k?k.toUpperCase():""},native:true,toolId:t,keywords:"tool "+cat.toLowerCase(),advanced:cat==="Camera"||cat==="Rig"});
+R("brush.bigger","Increase Brush Size","Tools",()=>{brushSize=Math.min(100,brushSize+1);const b=$("brushSize");if(b)b.value=brushSize},{shortcut:"]",native:true});
+R("brush.smaller","Decrease Brush Size","Tools",()=>{brushSize=Math.max(1,brushSize-1);const b=$("brushSize");if(b)b.value=brushSize},{shortcut:"[",native:true});
+
+/* ---------- CAMERA / RIG ---------- */
+ids("camera.key","Set Camera Key","Camera","cameraKeyBtn",{advanced:true});
+ids("camera.reset","Reset Camera","Camera","cameraResetBtn",{advanced:true});
+ids("camera.controls","Show Camera Controls","Camera","cameraControlsBtn",{advanced:true});
+ids("rig.setRole","Set Rig Role","Rig","rigSetRoleBtn",{advanced:true});
+ids("rig.autoPivot","Auto Pivot","Rig","rigPivotBtn",{advanced:true});
+ids("rig.placeJoint","Place Joint","Rig","rigPlaceJointBtn",{advanced:true});
+ids("rig.unlink","Unlink Rig Bone","Rig","rigUnlinkBtn",{advanced:true});
+ids("rig.pose","Pose Selected Bone","Rig","rigPoseBtn",{advanced:true});
+ids("rig.ik","IK Pose","Rig","rigIKBtn",{advanced:true});
+ids("rig.keyPose","Key Rig Pose","Rig","rigKeyPoseBtn",{advanced:true});
+
+/* ---------- WINDOW (panels) ---------- */
+function showPanelEl(panel){
+  if(!panel)return;
+  panel.classList.remove("is-hidden","collapsed","tab-hidden");
+  const tabs=panel.closest(".panelTabGroup");
+  if(tabs)tabs.querySelectorAll(".panel").forEach(p=>p.classList.toggle("tab-hidden",p!==panel));
+  if(typeof frontPanel==="function")frontPanel(panel);
+}
+BBA.showPanel=showPanelEl;
+const panelTitle=p=>p.querySelector(".panelTitle")?.textContent||p.id;
+function registerPanels(){
+  document.querySelectorAll("#workspace > .panel, #workspace .panel").forEach(p=>{
+    if(!p.id||map.has("window.panel."+p.id))return;
+    R("window.panel."+p.id,"Show "+panelTitle(p)+" Panel","Window",()=>showPanelEl(document.getElementById(p.id)),{menu:"Window/Panels",keywords:"panel widget show open"});
+  });
+}
+registerPanels();BBA.registerPanels=registerPanels;
+ids("window.workspace","Workspace Layouts…","Window","workspaceBtn",{menu:"Window",order:1});
+ids("window.presets","Workspace Presets…","Window","workspacePresetsBtn",{menu:"Window",order:2,when:exists("workspacePresetsBtn")});
+ids("window.widgetLibrary","Widget Library…","Window","widgetLibraryBtn",{menu:"Window",order:3});
+R("window.colorSchemes","Color Schemes…","Window",()=>window.__openColorSchemeStudio?.(),{menu:"Window",order:4,when:()=>!!window.__openColorSchemeStudio,keywords:"theme appearance"});
+ids("window.resetAppearance","Reset Appearance","Window","resetAppearanceButton",{menu:"Window",order:5,when:exists("resetAppearanceButton")});
+
+/* ---------- HELP ---------- */
+R("help.shortcuts","Keyboard Shortcuts…","Help",()=>showShortcutList(),{menu:"Help",shortcut:"Ctrl+/",native:true,order:1});
+R("help.palette","Command Palette…","Help",()=>window.openFeatureExplorer?.(),{menu:"Help",shortcut:"Ctrl+K",native:true,order:2,keywords:"search find explore"});
+R("help.recover","Recovery Status","Help",click("fileVersionHistory"),{when:()=>false});
+map.delete("help.recover");
+
+/* ---------- Dispatcher for registry-owned shortcuts ----------
+   Native shortcuts stay handled by the original listener. Anything the user rebinds,
+   or any command with a non-native shortcut, is dispatched here (capture phase, runs first). */
+document.addEventListener("keydown",e=>{
+  if(!editorOpen())return;
+  const tag=(e.target&&e.target.tagName||"").toLowerCase();
+  if(tag==="input"||tag==="textarea"||tag==="select"||e.target?.isContentEditable)return;
+  if(document.querySelector("#modalRoot .modal, .modal.open"))return;
+  const chord=chordFromEvent(e);if(!chord)return;
+  const c=findByChord(chord);if(!c)return;
+  const custom=keymap[c.id]!==undefined&&keymap[c.id]!=="";
+  if(c.native&&!custom)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  run(c.id);
+},true);
+
+/* If a user rebinds a native command away from its default, silence the default key so it doesn't also fire. */
+document.addEventListener("keydown",e=>{
+  if(!editorOpen())return;
+  const tag=(e.target&&e.target.tagName||"").toLowerCase();
+  if(tag==="input"||tag==="textarea"||tag==="select")return;
+  const chord=chordFromEvent(e);if(!chord)return;
+  for(const c of map.values()){
+    if(!c.native||keymap[c.id]===undefined)continue;
+    if(normChord(c.shortcutDefault&&typeof c.shortcutDefault==="string"?c.shortcutDefault:"")===chord&&normChord(keymap[c.id])!==chord){e.preventDefault();e.stopImmediatePropagation();return}
+  }
+},true);
+
+console.info("BBA command registry ready:",map.size,"commands");
+})();
+
+</script>
+<script>
+/* ===== BBA Navigation Step 2: Menu bar + canvas header ===== */
+(function(){
+"use strict";
+const C=BBA.commands,$=id=>document.getElementById(id);
+const top=document.querySelector("#editorView .topbar");
+if(!top)return;
+// tools live under Edit > Tools
+for(const c of C.list())if(c.menu==="Tools")c.menu="Edit/Tools";
+for(const c of C.list()){if(c.menu==="Window/Panels")c.menu="Window/Panels"}
+
+/* ---------- menu bar ---------- */
+const MENUS=["File","Edit","View","Layer","Frame","Object","Window","Help"];
+top.classList.add("bbaTop");
+const bar=document.createElement("div");bar.className="bbaMenuBar";bar.setAttribute("role","menubar");
+const right=document.createElement("div");right.className="bbaTopRight";
+top.prepend(bar);top.append(right);
+let openMenu=null,dropEls=[];
+function closeAll(){dropEls.forEach(d=>d.remove());dropEls=[];bar.querySelectorAll(".open").forEach(b=>b.classList.remove("open"));openMenu=null}
+function sortItems(a,b){return(a.order||99)-(b.order||99)||a.label.localeCompare(b.label)}
+function buildItems(menu){
+  // group: direct items + submenus by second path segment
+  const direct=[],subs=new Map();
+  for(const c of C.menuItems(menu)){
+    const parts=c.menu.split("/");
+    if(parts.length>1){if(!subs.has(parts[1]))subs.set(parts[1],[]);subs.get(parts[1]).push(c)}else direct.push(c);
+  }
+  return{direct:direct.sort(sortItems),subs};
+}
+function itemButton(c){
+  const b=document.createElement("button");b.type="button";b.className="bbaDropItem";b.setAttribute("role","menuitem");
+  const en=C.isEnabled(c);if(!en)b.classList.add("disabled");
+  const l=document.createElement("span");l.textContent=c.label;
+  const k=document.createElement("kbd");k.textContent=C.prettyChord(C.shortcutOf(c));
+  b.append(l,k);
+  b.addEventListener("click",()=>{if(!en)return;closeAll();C.run(c.id)});
+  return b;
+}
+function position(el,x,y,flyout){
+  document.body.appendChild(el);
+  const r=el.getBoundingClientRect(),vw=innerWidth,vh=innerHeight;
+  if(x+r.width>vw-6)x=flyout?x-r.width-(flyout===true?0:flyout):vw-r.width-6;
+  if(y+r.height>vh-6)y=Math.max(6,vh-r.height-6);
+  el.style.left=x+"px";el.style.top=y+"px";
+}
+function showDrop(menu,anchor){
+  closeAll();BBA.registerPanels?.();
+  const {direct,subs}=buildItems(menu);
+  const drop=document.createElement("div");drop.className="bbaDrop";drop.setAttribute("role","menu");
+  let lastOrderGroup=null;
+  for(const c of direct){
+    const g=Math.floor((c.order||0)/10);
+    if(lastOrderGroup!==null&&g!==lastOrderGroup&&(c.order||0)>=10&&menu!=="Frame")drop.appendChild(Object.assign(document.createElement("div"),{className:"bbaDropSep"}));
+    lastOrderGroup=g;drop.appendChild(itemButton(c));
+  }
+  if(subs.size&&direct.length)drop.appendChild(Object.assign(document.createElement("div"),{className:"bbaDropSep"}));
+  for(const [name,items] of subs){
+    const b=document.createElement("button");b.type="button";b.className="bbaDropItem";
+    b.innerHTML="<span>"+name+"</span><span class='arrow'>▸</span>";
+    let fly=null;
+    const open=()=>{
+      dropEls.filter(d=>d!==drop&&d.dataset.fly).forEach(d=>{d.remove()});dropEls=dropEls.filter(d=>d===drop||!d.dataset.fly);
+      fly=document.createElement("div");fly.className="bbaDrop";fly.dataset.fly="1";
+      for(const c of items.sort(sortItems))fly.appendChild(itemButton(c));
+      const r=b.getBoundingClientRect();position(fly,r.right+2,r.top-4,r.width+4);dropEls.push(fly);
+    };
+    b.addEventListener("mouseenter",open);b.addEventListener("click",open);
+    drop.appendChild(b);
+  }
+  if(menu==="Help"){}
+  const r=anchor.getBoundingClientRect();position(drop,r.left,r.bottom+2);
+  dropEls.push(drop);anchor.classList.add("open");openMenu=menu;
+}
+for(const m of MENUS){
+  const b=document.createElement("button");b.type="button";b.className="bbaMenuBtn";b.textContent=m;b.dataset.menu=m;b.setAttribute("role","menuitem");b.setAttribute("aria-haspopup","true");
+  b.addEventListener("click",e=>{e.stopPropagation();openMenu===m?closeAll():showDrop(m,b)});
+  b.addEventListener("mouseenter",()=>{if(openMenu&&openMenu!==m)showDrop(m,b)});
+  bar.appendChild(b);
+}
+document.addEventListener("mousedown",e=>{if(openMenu&&!e.target.closest(".bbaDrop,.bbaMenuBar"))closeAll()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&openMenu){closeAll();e.stopPropagation()}},true);
+window.addEventListener("blur",closeAll);
+window.addEventListener("resize",closeAll);
+
+/* ---------- right side of the top bar ---------- */
+const mk=(txt,title,fn,cls)=>{const b=document.createElement("button");b.type="button";b.textContent=txt;b.title=title;if(cls)b.className=cls;b.addEventListener("click",fn);return b};
+const titleEl=document.createElement("span");titleEl.className="bbaTitle";
+const srcTitle=$("projectTitle");
+const syncTitle=()=>{titleEl.textContent=srcTitle?srcTitle.textContent:""};
+syncTitle();if(srcTitle)new MutationObserver(syncTitle).observe(srcTitle,{childList:true,characterData:true,subtree:true});
+const undoB=mk("↶","Undo ("+C.prettyChord("Ctrl+Z")+")",()=>C.run("edit.undo"));
+const redoB=mk("↷","Redo ("+C.prettyChord("Ctrl+Shift+Z")+")",()=>C.run("edit.redo"));
+const saveB=mk("Save","Save ("+C.prettyChord("Ctrl+S")+")",()=>C.run("file.save"));
+const homeB=mk("Home","Back to project list",()=>C.run("file.home"));
+const search=mk("Search commands…","Command palette ("+C.prettyChord("Ctrl+K")+")",()=>C.run("help.palette"),"bbaSearch");
+const kbd=document.createElement("kbd");kbd.textContent=C.prettyChord("Ctrl+K");search.appendChild(kbd);
+right.append(titleEl,undoB,redoB,saveB,homeB,search);
+
+/* ---------- canvas header ---------- */
+const panelBody=document.querySelector("#canvasPanel .panelBody");
+const hdr=document.createElement("div");hdr.id="canvasHeader";
+panelBody.prepend(hdr);
+const move=id=>{const el=$(id);const holder=el&&(el.closest("label.control")||el);return holder};
+const zoomL=move("zoom"),rotL=move("viewRotation"),gridL=move("grid");
+// rename labels shorter
+if(zoomL&&zoomL.firstChild&&zoomL.firstChild.nodeType===3)zoomL.firstChild.textContent="Zoom ";
+if(rotL&&rotL.firstChild&&rotL.firstChild.nodeType===3)rotL.firstChild.textContent="Rotate ";
+const sep=()=>Object.assign(document.createElement("span"),{className:"hdrSep"});
+const rl=$("rotateLeftBtn"),rr=$("rotateRightBtn"),rv=$("resetViewBtn");
+if(rl)rl.textContent="⟲";if(rr)rr.textContent="⟳";if(rv)rv.textContent="Reset";
+const onionL=document.createElement("label");onionL.className="control";
+onionL.innerHTML='<input type="checkbox" id="hdrOnion"> Onion';
+const fit=mk("100%","Zoom to 100% ("+C.prettyChord("F")+")",()=>C.run("view.zoomFit"));
+const prev=mk("◀","Previous frame",()=>C.run("frame.prev"));
+const next=mk("▶","Next frame",()=>C.run("frame.next"));
+const play=mk("Play","Play / Pause (Space)",()=>C.run("frame.play"));
+const frameInfo=document.createElement("span");frameInfo.id="hdrFrameInfo";frameInfo.style.cssText="font-size:11px;opacity:.75;min-width:70px";
+hdr.append(...[zoomL,fit,sep(),rotL,rl,rr,rv,sep(),gridL,onionL,Object.assign(document.createElement("span"),{className:"hdrSpacer"}),prev,play,next,frameInfo].filter(Boolean));
+// canvas header buttons should not trigger canvas drag
+hdr.addEventListener("pointerdown",e=>e.stopPropagation());
+/* sync proxies */
+const hOnion=$("hdrOnion");
+hOnion.addEventListener("change",()=>C.run("view.onion"));
+function syncHeader(){
+  try{
+    if(typeof onion!=="undefined")hOnion.checked=!!onion;
+    frameInfo.textContent="Frame "+(currentFrame+1)+" / "+frames.length;
+    play.textContent=(typeof playing!=="undefined"&&playing)?"Pause":"Play";
+    undoB.disabled=typeof history==="undefined"||!history.length;
+    redoB.disabled=typeof future==="undefined"||!future.length;
+  }catch(e){}
+}
+for(const name of ["renderAll","renderOnion","renderGrid","startPlaying","stopPlaying","goFrame","undo","redo","setTool"]){
+  const base=window[name];
+  if(typeof base!=="function")continue;
+  window[name]=function(){const r=base.apply(this,arguments);syncHeader();return r};
+}
+// project title / editor open: run once now and when the editor appears
+syncHeader();
+setInterval(syncHeader,500);
+console.info("BBA menu bar ready");
+})();
+
 </script>
 </body>
 </html>
