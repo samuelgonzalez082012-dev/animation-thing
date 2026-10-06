@@ -2845,15 +2845,26 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
 /* Built-in workspace preset chooser */
 (function(){
   const BUILTIN_WIDGET_PRESETS=[
-    {name:"Animation Pro Studio",description:"A spacious production workspace with canvas, timeline, layers, objects, brush tools, and playback ready; Camera and rig controls remain one click away."},
-    {name:"Character Rigging",description:"Focuses the canvas, object/layer controls, timeline, and full Project Studio rig and camera controls for character posing."},
-    {name:"Studio",description:"Balanced layout for drawing and animation, with camera and project settings available from the top toolbar."},
-    {name:"Animation Focus",description:"Large canvas with a prominent timeline."},
-    {name:"Illustration",description:"Brushes, colors, symmetry, and canvas up front."},
-    {name:"Timeline Focus",description:"Frames, playback, onion skin, and layers emphasized."},
-    {name:"Clean Canvas",description:"Minimal workspace for distraction-free drawing."},
-    {name:"Full Studio",description:"Most production widgets visible together."}
+    {name:"Animation Pro Studio",description:"Spacious production workspace. Related widgets are grouped into tabs: Layers and Objects, Tools and Brushes, Properties and Color, Playback and Onion Skin, Guides, Project and Appearance."},
+    {name:"Full Studio",description:"Every widget available, tucked into the same seven tab groups as Animation Pro Studio."},
+    {name:"Studio",description:"Balanced drawing and animation layout: Layers/Objects and Tools/Create on the left, Brushes/Color/Symmetry and Playback/Onion Skin/Navigator on the right."},
+    {name:"Animation Focus",description:"Large canvas with a prominent timeline. Layers/Objects on the left, Properties/Color and Playback/Onion Skin on the right."},
+    {name:"Illustration",description:"Drawing first: Tools/Create on the left, with Brushes and a Color/Symmetry/Guides group on the right."},
+    {name:"Timeline Focus",description:"Tall timeline with Layers/Objects on the left and Playback/Onion Skin/Navigator on the right."},
+    {name:"Character Rigging",description:"Canvas, Layers/Objects, Tools/Create, timeline, and the full Project Studio rig and camera controls for character posing."},
+    {name:"Clean Canvas",description:"Minimal workspace for distraction-free drawing."}
   ];
+
+  /* Tab groups for each built-in preset (first id is the tab shown by default). Group members share one spot. */
+  const PRESET_TAB_GROUPS={
+    "Animation Pro Studio":[["layersPanel","objectsPanel"],["toolsPanel","brushesPanel","createPanel"],["propertiesPanel","colorPanel","symmetryPanel"],["playbackPanel","onionPanel","navigatorPanel"],["guidesPanel","projectPanel","appearancePanel"]],
+    "Studio":[["layersPanel","objectsPanel"],["toolsPanel","createPanel"],["brushesPanel","colorPanel","symmetryPanel"],["playbackPanel","onionPanel","navigatorPanel"]],
+    "Animation Focus":[["layersPanel","objectsPanel"],["propertiesPanel","colorPanel"],["playbackPanel","onionPanel","navigatorPanel"]],
+    "Illustration":[["toolsPanel","createPanel"],["brushesPanel"],["colorPanel","symmetryPanel","guidesPanel"]],
+    "Timeline Focus":[["layersPanel","objectsPanel"],["playbackPanel","onionPanel","navigatorPanel"]],
+    "Character Rigging":[["layersPanel","objectsPanel"],["toolsPanel","createPanel"]]
+  };
+  PRESET_TAB_GROUPS["Full Studio"]=PRESET_TAB_GROUPS["Animation Pro Studio"];
 
   function presetBase(){
     return {
@@ -2916,6 +2927,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
         layout.timelinePanel={left:250,top:840,width:710,height:130,hidden:false,collapsed:false,zIndex:25};
         break;
     }
+    (PRESET_TAB_GROUPS[name]||[]).forEach(g=>g.forEach(id=>shown.add(id)));
     for(const id of workspacePanelIds)layout[id].hidden=!shown.has(id);
     return {name,description:BUILTIN_WIDGET_PRESETS.find(x=>x.name===name)?.description||"",layout};
   }
@@ -2931,25 +2943,20 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     if(name==="Animation Pro Studio"){
       const timelineH=Math.max(190,Math.min(310,Math.round(h*.30))),mainH=h-timelineH-gap;
       if(w<1020){
-        const left=Math.max(170,Math.min(220,Math.round(w*.32))),layersH=Math.round(mainH*.42);
-        put("layersPanel",0,0,left,layersH,false,31);
-        put("toolsPanel",0,layersH+gap,left,mainH-layersH-gap,false,31);
+        const left=Math.max(170,Math.min(220,Math.round(w*.32))),topH=Math.round(mainH*.5);
+        for(const id of ["layersPanel","objectsPanel","propertiesPanel"])put(id,0,0,left,topH,false,31);
+        for(const id of ["toolsPanel","brushesPanel","colorPanel","createPanel"])put(id,0,topH+gap,left,mainH-topH-gap,false,32);
         put("canvasPanel",left+gap,0,Math.max(220,w-left-gap),mainH,false,35);
         put("timelinePanel",0,h-timelineH,w,timelineH,false,36);
       }else{
-        const left=Math.max(210,Math.min(270,Math.round(w*.17))),right=Math.max(245,Math.min(315,Math.round(w*.22))),centerW=Math.max(320,w-left-right-gap*2);
-        const layersH=Math.round(mainH*.40),objectsH=Math.round(mainH*.27),toolsH=mainH-layersH-objectsH-gap*2;
-        const propsH=Math.round(mainH*.28),brushH=Math.round(mainH*.36),colorH=mainH-propsH-brushH-gap*2;
-        put("layersPanel",0,0,left,layersH,false,31);
-        put("objectsPanel",0,layersH+gap,left,objectsH,false,32);
-        put("toolsPanel",0,layersH+objectsH+gap*2,left,toolsH,false,31);
+        const left=Math.max(210,Math.min(270,Math.round(w*.17))),right=Math.max(260,Math.min(320,Math.round(w*.22))),centerW=Math.max(320,w-left-right-gap*2);
+        const l1=Math.round(mainH*.5),r1=Math.round(mainH*.36),r2=Math.round(mainH*.24),r3=mainH-r1-r2-gap*2,rx=left+gap+centerW+gap;
+        for(const id of ["layersPanel","objectsPanel"])put(id,0,0,left,l1,false,31);
+        for(const id of ["toolsPanel","brushesPanel","createPanel"])put(id,0,l1+gap,left,mainH-l1-gap,false,32);
         put("canvasPanel",left+gap,0,centerW,mainH,false,35);
-        put("propertiesPanel",left+gap+centerW+gap,0,right,propsH,false,37);
-        put("brushesPanel",left+gap+centerW+gap,propsH+gap,right,brushH,false,37);
-        put("colorPanel",left+gap+centerW+gap,propsH+brushH+gap*2,right,colorH,false,37);
-        put("playbackPanel",left+gap+10,10,230,150,false,38);
-        put("onionPanel",left+gap+centerW+gap,propsH+brushH+gap*2+colorH+gap,right,Math.max(120,Math.floor(colorH*.55)),true,37);
-        put("navigatorPanel",left+gap+centerW+gap,propsH+brushH+gap*2+colorH+gap+Math.max(120,Math.floor(colorH*.55))+gap,right,Math.max(100,colorH-Math.max(120,Math.floor(colorH*.55))-gap*2),true,37);
+        for(const id of ["propertiesPanel","colorPanel","symmetryPanel"])put(id,rx,0,right,r1,false,37);
+        for(const id of ["playbackPanel","onionPanel","navigatorPanel"])put(id,rx,r1+gap,right,r2,false,37);
+        for(const id of ["guidesPanel","projectPanel","appearancePanel"])put(id,rx,r1+r2+gap*2,right,r3,false,37);
         put("timelinePanel",0,h-timelineH,w,timelineH,false,36);
       }
     } else if(name==="Clean Canvas") {
@@ -2957,73 +2964,79 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
       put("canvasPanel",0,0,w,h-timelineH,false,35);
       put("timelinePanel",0,h-timelineH,w,timelineH,false,36);
       put("navigatorPanel",w-250,10,240,180,false,37);
-    } else if(name==="Animation Focus") {
-      const timelineH=Math.max(180,Math.round(h*.28)), left=210, right=Math.max(245,Math.round(w*.2)), canvasW=Math.max(320,w-left-right-gap*2);
-      put("layersPanel",0,0,left,h-timelineH-gap,false,31);
-      put("canvasPanel",left+gap,0,canvasW,h-timelineH-gap,false,35);
-      put("propertiesPanel",w-right,0,right,h-timelineH-gap,false,32);
-      put("timelinePanel",0,h-timelineH,w,timelineH,false,36);
-      put("playbackPanel",w-right,h-timelineH+gap,right,118,false,37);
-    } else if(name==="Illustration") {
-      const right=Math.max(260,Math.round(w*.24)),bottom=Math.max(190,Math.round(h*.25));
-      put("canvasPanel",0,0,w-right-gap,h-bottom-gap,false,35);
-      put("brushesPanel",w-right,0,right,Math.max(250,Math.round(h*.34)),false,37);
-      put("colorPanel",w-right,Math.max(260,Math.round(h*.34))+gap,right,Math.max(220,Math.round(h*.27)),false,37);
-      put("symmetryPanel",w-right,Math.max(260,Math.round(h*.34))+Math.max(220,Math.round(h*.27))+gap*2,right,Math.max(180,h-(Math.max(260,Math.round(h*.34))+Math.max(220,Math.round(h*.27))+gap*3)),false,37);
-      put("timelinePanel",0,h-bottom,w-right-gap,bottom,false,36);
-    } else if(name==="Timeline Focus") {
-      const timelineH=Math.max(250,Math.round(h*.35)), left=210;
-      put("layersPanel",0,0,left,h-timelineH-gap,false,31);
-      put("canvasPanel",left+gap,0,w-left-gap,h-timelineH-gap,false,35);
-      put("timelinePanel",0,h-timelineH,w,timelineH,false,36);
-      put("playbackPanel",w-250,10,240,190,false,37);
-      put("onionPanel",w-250,210,240,200,false,37);
-    } else if(name==="Studio") {
-      const left=205,right=275,bottom=Math.max(150,Math.round(h*.22)),topH=h-bottom-gap;
-      const layersH=Math.max(210,Math.round(topH*.4)),objectsH=Math.max(140,Math.round(topH*.22));
-      put("layersPanel",0,0,left,layersH,false,31);
-      put("objectsPanel",0,layersH+gap,left,objectsH,false,32);
-      put("toolsPanel",0,layersH+objectsH+gap*2,left,Math.max(120,topH-layersH-objectsH-gap*2),false,31);
-      put("canvasPanel",left+gap,0,w-left-right-gap*2,topH,false,35);
-      put("brushesPanel",w-right,0,right,Math.max(250,Math.round(topH*.43)),false,37);
-      put("colorPanel",w-right,Math.max(250,Math.round(topH*.43))+gap,right,Math.max(180,topH-Math.max(250,Math.round(topH*.43))-gap),false,37);
-      put("timelinePanel",0,h-bottom,w,bottom,false,36);
-    } else if(name==="Character Rigging") {
-      // The rig preset keeps the Project Studio together as a dedicated right-side rigging station.
-      const timelineH=Math.max(220,Math.round(h*.27)),mainH=h-timelineH-gap;
-      if(w<720){
-        const canvasH=Math.round(mainH*.52);
-        put("canvasPanel",0,0,w,canvasH,false,35);
-        put("projectPanel",0,canvasH+gap,w,mainH-canvasH-gap,false,38);
-      }else{
-        const left=Math.max(190,Math.min(245,Math.round(w*.17))),right=Math.max(280,Math.min(340,Math.round(w*.25))),canvasW=Math.max(300,w-left-right-gap*2);
-        const layersH=Math.round(mainH*.42),objectsH=Math.round(mainH*.26);
-        put("layersPanel",0,0,left,layersH,false,31);
-        put("objectsPanel",0,layersH+gap,left,objectsH,false,32);
-        put("toolsPanel",0,layersH+objectsH+gap*2,left,mainH-layersH-objectsH-gap*2,false,31);
-        put("canvasPanel",left+gap,0,canvasW,mainH,false,35);
-        put("projectPanel",left+gap+canvasW+gap,0,right,mainH,false,38);
-      }
-      put("timelinePanel",0,h-timelineH,w,timelineH,false,36);
     } else {
-      // Full Studio: use full viewport with a practical production layout.
-      const bottom=Math.max(150,Math.round(h*.20)),left=Math.max(210,Math.round(w*.16)),right=Math.max(260,Math.round(w*.22)),midH=h-bottom;
-      const layersH=Math.round(midH*.38),objectsH=Math.round(midH*.22);
-      put("layersPanel",0,0,left,layersH,false,31);
-      put("objectsPanel",0,layersH+gap,left,objectsH,false,32);
-      put("toolsPanel",0,layersH+objectsH+gap*2,left,midH-layersH-objectsH-gap*2,false,31);
-      put("canvasPanel",left+gap,0,w-left-right-gap*2,midH,false,35);
-      put("brushesPanel",w-right,0,right,Math.round(midH*.36),false,37);
-      put("colorPanel",w-right,Math.round(midH*.36)+gap,right,Math.round(midH*.32),false,37);
-      put("timelinePanel",0,h-bottom,w,bottom,false,36);
-      put("playbackPanel",left+gap+10,10,230,150,false,38);
-      put("navigatorPanel",left+gap+250,10,230,150,false,38);
-      put("guidesPanel",left+gap+490,10,230,180,false,38);
-      put("projectPanel",w-right,midH*.68+gap*2,right,Math.max(120,midH*.32-gap*2),false,37);
+      /* Every other preset: columns of tab groups around the canvas. */
+      const place=(ids,x,y,pw,ph,z)=>ids.forEach(id=>put(id,x,y,pw,ph,false,z));
+      const column=(groups,x,y,cw,total,fractions,z)=>{
+        const usable=total-gap*(groups.length-1);let cy=y;
+        groups.forEach((ids,i)=>{const ph=i===groups.length-1?y+total-cy:Math.round(usable*fractions[i]);place(ids,x,cy,cw,ph,z);cy+=ph+gap});
+      };
+      const G=PRESET_TAB_GROUPS[name]||PRESET_TAB_GROUPS["Animation Pro Studio"];
+      const left=Math.max(195,Math.min(250,Math.round(w*.17))),right=Math.max(250,Math.min(310,Math.round(w*.22)));
+      if(name==="Full Studio"){
+        const timelineH=Math.max(190,Math.min(310,Math.round(h*.30))),mainH=h-timelineH-gap,centerW=Math.max(320,w-left-right-gap*2),rx=left+gap+centerW+gap;
+        column(G.slice(0,2),0,0,left,mainH,[.5,.5],31);
+        put("canvasPanel",left+gap,0,centerW,mainH,false,35);
+        column(G.slice(2),rx,0,right,mainH,[.36,.24,.4],37);
+        put("timelinePanel",0,h-timelineH,w,timelineH,false,36);
+      }else if(name==="Studio"){
+        const bottom=Math.max(150,Math.round(h*.22)),topH=h-bottom-gap,centerW=Math.max(300,w-left-right-gap*2);
+        column(G.slice(0,2),0,0,left,topH,[.5,.5],31);
+        put("canvasPanel",left+gap,0,centerW,topH,false,35);
+        column(G.slice(2),left+gap+centerW+gap,0,right,topH,[.6,.4],37);
+        put("timelinePanel",0,h-bottom,w,bottom,false,36);
+      }else if(name==="Animation Focus"){
+        const timelineH=Math.max(180,Math.round(h*.28)),topH=h-timelineH-gap,centerW=Math.max(300,w-left-right-gap*2);
+        column([G[0]],0,0,left,topH,[1],31);
+        put("canvasPanel",left+gap,0,centerW,topH,false,35);
+        column(G.slice(1),left+gap+centerW+gap,0,right,topH,[.58,.42],37);
+        put("timelinePanel",0,h-timelineH,w,timelineH,false,36);
+      }else if(name==="Illustration"){
+        const bottom=Math.max(190,Math.round(h*.3)),topH=h-bottom-gap,centerW=Math.max(300,w-left-right-gap*2);
+        column([G[0]],0,0,left,topH,[1],31);
+        put("canvasPanel",left+gap,0,centerW,topH,false,35);
+        column(G.slice(1),left+gap+centerW+gap,0,right,topH,[.4,.6],37);
+        put("timelinePanel",0,h-bottom,w-gap*0,bottom,false,36);
+      }else if(name==="Timeline Focus"){
+        const timelineH=Math.max(250,Math.round(h*.35)),topH=h-timelineH-gap,centerW=Math.max(300,w-left-right-gap*2);
+        column([G[0]],0,0,left,topH,[1],31);
+        put("canvasPanel",left+gap,0,centerW,topH,false,35);
+        column([G[1]],left+gap+centerW+gap,0,right,topH,[1],37);
+        put("timelinePanel",0,h-timelineH,w,timelineH,false,36);
+      }else{
+        /* Character Rigging: project studio as a dedicated right-side rigging station. */
+        const timelineH=Math.max(220,Math.round(h*.27)),mainH=h-timelineH-gap;
+        if(w<720){
+          const canvasH=Math.round(mainH*.52);
+          put("canvasPanel",0,0,w,canvasH,false,35);
+          put("projectPanel",0,canvasH+gap,w,mainH-canvasH-gap,false,38);
+        }else{
+          const l=Math.max(190,Math.min(245,Math.round(w*.17))),r=Math.max(280,Math.min(340,Math.round(w*.25))),canvasW=Math.max(300,w-l-r-gap*2);
+          column(G,0,0,l,mainH,[.55,.45],31);
+          put("canvasPanel",l+gap,0,canvasW,mainH,false,35);
+          put("projectPanel",l+gap+canvasW+gap,0,r,mainH,false,38);
+        }
+        put("timelinePanel",0,h-timelineH,w,timelineH,false,36);
+      }
     }
     return layout;
   }
 
+  function builtinTabGroups(name){
+    const ws=document.getElementById("workspace"),w=Math.max(320,ws?.clientWidth||window.innerWidth||1200);
+    if(name==="Animation Pro Studio"&&w<1020)return [["layersPanel","objectsPanel","propertiesPanel"],["toolsPanel","brushesPanel","colorPanel","createPanel"]];
+    if(name==="Character Rigging"&&w<720)return [];
+    return (PRESET_TAB_GROUPS[name]||[]).filter(g=>g.length>1);
+  }
+  function applyBuiltinTabGroups(name){
+    const groups=builtinTabGroups(name).map(ids=>({ids:ids.slice(),active:ids[0]}));
+    if(window.__bbaTabs)window.__bbaTabs.restore(groups);
+    try{
+      const stored=JSON.parse(localStorage.getItem(WORKSPACE_LAYOUT_KEY)||"{}");
+      if(groups.length)stored.__tabGroups=groups;else delete stored.__tabGroups;
+      localStorage.setItem(WORKSPACE_LAYOUT_KEY,JSON.stringify(stored));
+    }catch(error){console.error("Could not store the widget tab groups.",error)}
+  }
   function applyBuiltin(name){
     const preset=makeBuiltinPreset(name);
     const responsive=responsiveBuiltinLayout(name);
@@ -3083,7 +3096,9 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     lastResponsiveGeometry=null;
     applyingResponsivePreset=true;
     try{
+      if(window.__bbaTabs)window.__bbaTabs.ungroup();
       const applied=applyBuiltinBase(name);
+      applyBuiltinTabGroups(name);
       lastResponsiveGeometry=activeResponsivePreset?responsiveGeometry():null;
       return applied;
     }finally{
@@ -3201,16 +3216,51 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
       timelinePanel:"Frames, thumbnails, animation timing, and frame management."
     }[id]||"Workspace widget.");
 
+    /* The library lists one entry per tab group (plus any widgets that are on their own). */
+    const hiddenGroups=window.__bbaHiddenGroups||(window.__bbaHiddenGroups=[]);
+    const isShown=id=>{const p=document.getElementById(id);return !!p&&!p.classList.contains("is-hidden")};
+    function libraryEntries(){
+      const tabInfo=window.__bbaTabs?window.__bbaTabs.groups():[];
+      const entries=[],used=new Set();
+      const add=(ids,active)=>{ids.forEach(id=>used.add(id));entries.push({ids,active:active||ids[0]})};
+      tabInfo.forEach(g=>add(g.ids.slice(),g.active));
+      hiddenGroups.slice().forEach(ids=>{
+        const fresh=ids.filter(id=>!used.has(id)&&!isShown(id));
+        if(fresh.length<2){hiddenGroups.splice(hiddenGroups.indexOf(ids),1);return}
+        add(fresh);
+      });
+      workspacePanelIds.filter(id=>!used.has(id)).forEach(id=>add([id]));
+      const order=id=>workspacePanelIds.indexOf(id);
+      return entries.sort((x,y)=>order(x.ids[0])-order(y.ids[0]));
+    }
+    function hideEntry(e){
+      if(e.ids.length>1&&!hiddenGroups.some(h=>h.join()===e.ids.join()))hiddenGroups.push(e.ids.slice());
+      e.ids.forEach(id=>document.getElementById(id)?.classList.add("is-hidden"));
+    }
+    function showEntry(e){
+      e.ids.forEach(id=>document.getElementById(id)?.classList.remove("is-hidden"));
+      const i=hiddenGroups.findIndex(h=>h.join()===e.ids.join());
+      if(i>=0)hiddenGroups.splice(i,1);
+      if(e.ids.length>1&&window.__bbaTabs){
+        const cur=window.__bbaTabs.groups().filter(g=>!g.ids.some(id=>e.ids.includes(id)));
+        cur.push({ids:e.ids.slice(),active:e.active||e.ids[0]});
+        window.__bbaTabs.restore(cur);
+      }
+      const first=document.getElementById(e.active||e.ids[0]);
+      if(first){frontPanel(first);clampPanel(first)}
+    }
+    const entryTitle=e=>e.ids.map(titleForId).join(" | ");
+    const entryDescription=e=>e.ids.length>1?e.ids.map(titleForId).join(", ")+" share one widget. Click a tab in the widget to switch.":descriptionForId(e.ids[0]);
+
     function openWidgetLibrary(){
-      const rows=workspacePanelIds.map(id=>{
-        const p=document.getElementById(id);
-        const visible=p&&!p.classList.contains("is-hidden");
-        const title=titleForId(id);
+      const entries=libraryEntries();
+      const rows=entries.map((e,i)=>{
+        const visible=e.ids.some(isShown);
         return `<div class="widgetLibraryRow">
-          <div class="widgetLibraryInfo"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(descriptionForId(id))}</span></div>
+          <div class="widgetLibraryInfo"><strong>${escapeHtml(entryTitle(e))}</strong><span>${escapeHtml(entryDescription(e))}</span></div>
           <div class="widgetLibraryActions">
-            <button type="button" class="small" data-widget-toggle="${escapeHtml(id)}">${visible?"Hide":"Show"}</button>
-            <button type="button" class="small" data-widget-front="${escapeHtml(id)}">Bring Front</button>
+            <button type="button" class="small" data-widget-toggle="${i}">${visible?"Hide":"Show"}</button>
+            <button type="button" class="small" data-widget-front="${i}">Bring Front</button>
           </div>
         </div>`;
       }).join("");
@@ -3225,40 +3275,31 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
 
       openModal("Widget Library",body,"Done",(m,close)=>{savePanelLayout();close()});
 
-      const bringFront=id=>{
-        const panel=document.getElementById(id);if(!panel)return;
-        panel.classList.remove("is-hidden");
-        frontPanel(panel);
-        clampPanel(panel);
-        savePanelLayout();
-        openWidgetLibrary();
-      };
-
       document.querySelectorAll("[data-widget-front]").forEach(btn=>{
-        btn.addEventListener("click",()=>bringFront(btn.dataset.widgetFront));
-      });
-
-      document.querySelectorAll("[data-widget-toggle]").forEach(btn=>{
         btn.addEventListener("click",()=>{
-          const id=btn.dataset.widgetToggle,panel=document.getElementById(id);
-          if(!panel)return;
-          const show=panel.classList.contains("is-hidden");
-          panel.classList.toggle("is-hidden",!show);
-          if(show){frontPanel(panel);clampPanel(panel)}
-          savePanelLayout();
-          openWidgetLibrary();
+          const e=entries[Number(btn.dataset.widgetFront)];if(!e)return;
+          if(!e.ids.some(isShown))showEntry(e);
+          else{const p=document.getElementById(e.active||e.ids[0]);if(p){frontPanel(p);clampPanel(p)}}
+          savePanelLayout();openWidgetLibrary();
         });
       });
-
+      document.querySelectorAll("[data-widget-toggle]").forEach(btn=>{
+        btn.addEventListener("click",()=>{
+          const e=entries[Number(btn.dataset.widgetToggle)];if(!e)return;
+          if(e.ids.some(isShown))hideEntry(e);else showEntry(e);
+          savePanelLayout();openWidgetLibrary();
+        });
+      });
       document.getElementById("widgetLibraryShowAll")?.addEventListener("click",()=>{
-        for(const id of workspacePanelIds){const panel=document.getElementById(id);if(panel)panel.classList.remove("is-hidden")}
+        entries.forEach(e=>{if(!e.ids.every(isShown))showEntry(e)});
         savePanelLayout();openWidgetLibrary();
       });
       document.getElementById("widgetLibraryHideAll")?.addEventListener("click",()=>{
-        for(const id of workspacePanelIds){const panel=document.getElementById(id);if(panel)panel.classList.add("is-hidden")}
+        entries.forEach(e=>{if(e.ids.some(isShown))hideEntry(e)});
         savePanelLayout();openWidgetLibrary();
       });
       document.getElementById("widgetLibraryReset")?.addEventListener("click",()=>{
+        hiddenGroups.length=0;
         closeModalRoot();
         resetWorkspaceLayout();
         openWidgetLibrary();
@@ -3281,6 +3322,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
       panel.addEventListener("mousedown",()=>focusWidget(panel),true);
     }
   })();
+  window.applyBuiltin=applyBuiltin;
   if(!localStorage.getItem(WORKSPACE_LAYOUT_KEY))applyBuiltin("Animation Pro Studio");
 })();
 
@@ -3932,6 +3974,8 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
   const byId=id=>document.getElementById(id);
   const groupOf=id=>tabGroups.find(g=>g.ids.includes(id))||null;
   const titleOf=p=>(p&&p.querySelector(".panelTitle")?.textContent||p?.id||"").trim();
+  const TAB_LABELS={canvasPanel:"Canvas",layersPanel:"Layers",objectsPanel:"Objects",propertiesPanel:"Properties",toolsPanel:"Tools",brushesPanel:"Brushes",colorPanel:"Color",symmetryPanel:"Symmetry",createPanel:"Create",playbackPanel:"Playback",onionPanel:"Onion Skin",navigatorPanel:"Navigator",guidesPanel:"Guides",appearancePanel:"Appearance",projectPanel:"Project",timelinePanel:"Timeline"};
+  const tabLabelOf=p=>TAB_LABELS[p?.id]||titleOf(p);
   const ws=byId("workspace");
   if(!ws)return;
 
@@ -4007,7 +4051,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
         tab.tabIndex=mid===g.active?0:-1;
         tab.setAttribute("role","tab");
         tab.setAttribute("aria-selected",mid===g.active?"true":"false");
-        tab.textContent=titleOf(mp);
+        tab.textContent=tabLabelOf(mp);
         tab.title=titleOf(mp);
         strip.appendChild(tab);
       }
@@ -4244,6 +4288,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
   resetWorkspaceLayout=function(){
     ungroupAll();
     baseReset();
+    if(typeof window.applyBuiltin==="function")window.applyBuiltin("Animation Pro Studio");
   };
   const baseApplyPreset=applyWidgetPreset;
   applyWidgetPreset=function(name){
@@ -4311,10 +4356,25 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     cycle(best,e.key==="ArrowRight"?1:-1);
   });
 
+  window.__bbaTabs={ungroup:ungroupAll,restore:restoreGroups,groups:()=>tabGroups.map(g=>({ids:g.ids.slice(),active:g.active})),focus:id=>{const g=groupOf(id);if(g&&g.active!==id)activate(g,id)}};
+  /* One-time switch to the tabbed default layout. The previous layout is kept as a widget preset. */
+  function migrateToTabbedLayout(saved){
+    const FLAG="bba_layout_tabs_v2",BACKUP_NAME="Previous layout (before tabs)";
+    try{
+      if(localStorage.getItem(FLAG))return;
+      localStorage.setItem(FLAG,"1");
+      if(saved){
+        const list=getWidgetPresets();
+        if(!list.some(p=>p.name===BACKUP_NAME)){list.push({name:BACKUP_NAME,updatedAt:Date.now(),layout:saved});setWidgetPresets(list)}
+      }
+      if(typeof window.applyBuiltin==="function")window.applyBuiltin("Animation Pro Studio");
+    }catch(error){console.error("Could not switch to the tabbed default layout.",error)}
+  }
   /* Restore saved groups on startup. */
   try{
     const saved=JSON.parse(localStorage.getItem(WORKSPACE_LAYOUT_KEY)||"null");
     restoreGroups(saved&&saved.__tabGroups);
+    migrateToTabbedLayout(saved);
   }catch(err){}
 })();
 
