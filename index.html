@@ -119,6 +119,9 @@ button.primary{background-image:linear-gradient(180deg,color-mix(in srgb,var(--a
 .frameBtn.hasCameraKey .timelineCameraKeyMarker{display:inline}
 .brushPreset{min-height:58px;padding:7px;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:2px}
 .brushPreset.active{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.brushPresetIcon{display:block;color:var(--text);height:26px}.brushPresetIcon svg{width:44px;height:26px;display:block;overflow:visible}
+/* Pen picker: once the panel is narrowed, drop the words and descriptions and keep just the icons. */
+@container (max-width:215px){.brushPresetGrid{grid-template-columns:repeat(auto-fill,minmax(46px,1fr))!important;gap:4px}.brushPreset{min-height:38px;padding:4px;align-items:center}.brushPresetName,.brushPresetMeta{display:none}.brushPresetIcon{height:26px}.penReadout span{display:none}}
 .brushPresetName{font-size:11px;font-weight:700}
 .brushPresetMeta{font-size:9px;color:var(--muted);line-height:1.25}
 .penReadout,.playbackReadout{display:flex;flex-direction:column;gap:2px;font-size:11px;margin-top:8px}.penReadout span,.playbackReadout span{color:var(--muted)}
@@ -188,7 +191,7 @@ button.primary{background-image:linear-gradient(180deg,color-mix(in srgb,var(--a
 .tipCard{padding:8px;border:1px solid var(--border);border-radius:8px;background:color-mix(in srgb,var(--panel) 96%,var(--bg));font-size:10px;line-height:1.4;color:var(--muted)}
 
 /* Flat control skin: solid fills, thin outline, no glossy gradients */
-:root{--button-bg:var(--panel);--button-hover:color-mix(in srgb,var(--accent) 10%,var(--panel));--button-active:color-mix(in srgb,var(--accent) 18%,var(--panel));--button-outline:rgba(255,255,255,.82);--button-outline-width:1px;--button-outline-style:solid;--button-text:var(--text);--panel-outline:var(--border);--panel-outline-width:1px}
+:root{--button-bg:var(--panel);--button-hover:color-mix(in srgb,var(--accent) 10%,var(--panel));--button-active:color-mix(in srgb,var(--accent) 18%,var(--panel));--button-outline:var(--border);--button-outline-width:1px;--button-outline-style:solid;--button-text:var(--text);--panel-outline:var(--border);--panel-outline-width:1px}
 button:not(.colorSwatch),select,input[type="text"],input[type="number"],input[type="search"],textarea{background:var(--button-bg)!important;background-image:none!important;color:var(--button-text)!important;border:var(--button-outline-width) var(--button-outline-style,solid) var(--button-outline)!important;box-shadow:none!important}
 button:not(.colorSwatch):hover,select:hover,input[type="text"]:hover,input[type="number"]:hover,input[type="search"]:hover,textarea:hover{background:var(--button-hover)!important;border-color:var(--button-outline)!important;box-shadow:none!important}
 button:not(.colorSwatch):active{background:var(--button-active)!important;box-shadow:none!important;transform:translateY(1px)}
@@ -427,7 +430,7 @@ input[type="range"]{accent-color:var(--accent)}
         <div id="layerList"></div>
         <div class="propertyLine"><span>Folder</span><select id="layerFolderSelect" style="max-width:140px"><option value="">Unfiled</option></select></div>
         <button class="small" id="addLayerFolderButton" type="button">New Layer Folder</button>
-        <div class="propertyLine"><span>Layer timing</span><select id="layerTimingScale" title="Retimes this layer independently relative to the project timeline"><option value="0.25">¼×</option><option value="0.5">½×</option><option value="0.75">¾×</option><option value="1">1×</option><option value="1.25">1¼×</option><option value="1.5">1½×</option><option value="2">4x+</option><option value="3">3×</option><option value="4">4×</option></select></div>
+        <div class="propertyLine"><span>Layer timing</span><select id="layerTimingScale" title="Retimes this layer independently relative to the project timeline"><option value="0.25">¼×</option><option value="0.5">½×</option><option value="0.75">¾×</option><option value="1">1×</option><option value="1.25">1¼×</option><option value="1.5">1½×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option></select></div>
         <div class="propertyLine"><span>Layer opacity</span><input id="layerOpacity" type="range" min="0" max="100" value="100"><span id="layerOpacityText">100%</span></div>
         <div class="propertyLine"><span>Depth / parallax</span><input id="layerDepth" type="range" min="0" max="100" value="50"><span id="layerDepthText">50</span></div>
         <div class="propertyLine"><span>Blend mode</span><select id="layerBlendMode" style="max-width:140px">
@@ -612,8 +615,8 @@ input[type="range"]{accent-color:var(--accent)}
         <div class="symmetryModes"><label class="checkRow"><input id="symmetryHorizontal" type="checkbox"> Horizontal</label><label class="checkRow"><input id="symmetryVertical" type="checkbox"> Vertical</label></div>
         <div class="propertyLine"><span>Radial copies</span><input id="symmetryRadial" type="number" min="1" max="12" value="1"></div>
         <div class="widgetSectionTitle" style="margin-top:10px">Stroke quality</div>
-        <div class="propertyLine"><span>Smoothing</span><input id="strokeSmoothing" class="sliderWide" type="range" min="0" max="90" value="35"></div>
-        <div class="propertyLine"><span>Stabilizer</span><input id="strokeStabilizer" class="sliderWide" type="range" min="0" max="90" value="18"></div>
+        <div class="propertyLine"><span>Smoothing</span><input id="strokeSmoothing" class="sliderWide" type="range" min="0" max="60" value="20"></div>
+        <div class="propertyLine"><span>Stabilizer</span><input id="strokeStabilizer" class="sliderWide" type="range" min="0" max="60" value="10"></div>
         <div class="propertyLine"><span>Point spacing</span><input id="strokeSpacing" class="sliderWide" type="range" min="1" max="8" value="2"></div>
         <label class="checkRow"><input id="ultraCrisp" type="checkbox" checked> Ultra-crisp rendering</label>
         <div class="qualityBadge">High-resolution vector-style strokes</div>
@@ -679,6 +682,7 @@ input[type="range"]{accent-color:var(--accent)}
         <div class="propertyLine"><span>Panel outline</span><input id="editorPanelOutline" type="color" value="#d6d6d2"></div>
         <div class="propertyLine"><span>Panel outline width</span><input id="editorPanelOutlineWidth" type="range" min="0" max="3" step="0.5" value="1"><span id="editorPanelOutlineWidthText">1px</span></div>
         <div class="widgetButtonGrid"><button class="small" id="openColorSchemesButton" type="button">Color Schemes</button><button class="small" id="saveColorSchemeButton" type="button">Save Scheme</button></div>
+        <button class="small" id="studioLayoutAppearanceBtn" type="button" style="margin-top:7px">Studio Layout</button>
         <button class="small" id="resetAppearanceButton" style="margin-top:7px">Reset Appearance</button>
         <div class="hint">Appearance settings persist independently from animation artwork.</div>
       </div>
@@ -786,16 +790,16 @@ input[type="range"]{accent-color:var(--accent)}
             <button class="small" id="timelineClearRangeBtn">Clear</button>
           </div>
           <div class="timelineDetailGroup timelineToolsGroup">
-            <button class="small" id="exposureSheetBtn" type="button">X-sheet</button>
+            <button class="small" id="exposureSheetBtn" type="button" title="Exposure sheet: a table view of what is on each frame and for how long, like traditional animation paperwork">Exposure Sheet</button>
             <button class="small" id="sceneManagerBtn" type="button">Scenes</button>
-            <button class="small" id="tweenToNextBtn">Tween</button>
-            <button class="small" id="bakePhysicsBtn" type="button">Bake Spring</button>
+            <button class="small" id="tweenToNextBtn" title="Insert in-between frames from this keyframe to the next keyframe of the selected objects">Tween to Next Key</button>
+            <button class="small" id="bakePhysicsBtn" type="button" title="Turn a spring/bounce simulation into real frames you can edit">Bake Spring Physics</button>
             <input id="tweenCount" type="number" min="1" max="30" value="4" title="Tween frame count">
-            <button class="small" id="dupRangeBtn">Duplicate Range</button>
-            <button class="small" id="delRangeBtn">Delete Range</button>
-            <button class="small" id="revRangeBtn">Reverse Range</button>
-            <button class="small" id="copyFrameBtn" title="Copy the selected objects' current poses as keyframes">Copy Keys</button>
-            <button class="small" id="pasteFrameBtn" title="Paste copied object poses as keyframes on this frame">Paste Keys</button>
+            <button class="small" id="dupRangeBtn" title="Duplicate the selected frames (shift-click frames, or set In/Out) right after the range">Duplicate Range</button>
+            <button class="small" id="delRangeBtn" title="Delete the selected frames (shift-click frames, or set In/Out)">Delete Range</button>
+            <button class="small" id="revRangeBtn" title="Reverse the order of the selected frames">Reverse Range</button>
+            <button class="small" id="copyFrameBtn" title="Copy the selected objects' current poses so you can paste them on another frame">Copy Poses</button>
+            <button class="small" id="pasteFrameBtn" title="Paste the copied poses onto this frame as keyframes">Paste Poses</button>
           </div>
         </div>
 
@@ -819,6 +823,7 @@ const gridCanvas=document.getElementById("gridCanvas"),gridCtx=gridCanvas.getCon
 let DPR=Math.min(2,Math.max(1,window.devicePixelRatio||1));
 function configureHiDPICanvas(el,c,scale=DPR){el.width=Math.round(W*scale);el.height=Math.round(H*scale);el.style.width="100%";el.style.height="100%";c.setTransform(scale,0,0,scale,0,0);c.imageSmoothingEnabled=true}
 configureHiDPICanvas(canvas,ctx);configureHiDPICanvas(selCanvas,selCtx);configureHiDPICanvas(onionCanvas,onionCtx);configureHiDPICanvas(gridCanvas,gridCtx,1);
+function syncViewportSize(){viewport.style.width=W+"px";viewport.style.height=H+"px"}
 function setProjectCanvasSize(width,height,adjustCoordinates=false){
   const nextWidth=Math.round(Number(width)),nextHeight=Math.round(Number(height));
   if(!Number.isFinite(nextWidth)||!Number.isFinite(nextHeight)||nextWidth<64||nextHeight<64||nextWidth>8192||nextHeight>8192||nextWidth*nextHeight>12_000_000)throw new Error("Canvas dimensions must be 64–8192 px per side and no more than 12 million pixels.");
@@ -832,14 +837,14 @@ function setProjectCanvasSize(width,height,adjustCoordinates=false){
     for(const state of Object.values(cameraKeys)){if(state){state.x*=sx;state.y*=sy}}
     perspectiveVanishingPoints=perspectiveVanishingPoints.map(point=>({x:point.x*sx,y:point.y*sy}));
   }
-  updateCanvasFitScale();renderAll();
+  syncViewportSize();updateCanvasFitScale();renderAll();
 }
-const viewport=document.getElementById("canvasViewport");
+const viewport=document.getElementById("canvasViewport");syncViewportSize();
 let nextObjectId=1,nextLayerId=1,nextFrameId=1;
 let layers=[],frames=[],currentLayerId=null,currentFrame=0;
 let tool="brush",color="#111111",brushSize=4,penOpacity=1,penCap="round",penJoin="round",penComposite="source-over",penDash=[],penStyle="solid",currentPen="Basic Round";
 let fillEnabled=false,fillColor="#ffffff",bucketGapClose=0;
-let strokeSmoothing=.35,strokeStabilizer=.18,strokeSpacing=2,ultraCrisp=true,widgetContentBaseScale=.95;
+let strokeSmoothing=.2,strokeStabilizer=.1,strokeSpacing=2,ultraCrisp=true,widgetContentBaseScale=.95;
 let symmetryEnabled=false,symmetryHorizontal=false,symmetryVertical=false,symmetryRadial=1;
 const COLOR_STORE_KEY="bba_color_studio_v2";
 let selected=new Set(),history=[],future=[],scenes=[],activeSceneId=null;
@@ -880,7 +885,9 @@ function currentObjects(){
   if(!Array.isArray(f.layers[l.id])) f.layers[l.id]=[];
   return f.layers[l.id];
 }
-function allVisibleObjects(){const f=activeFrame(),out=[];for(const l of layers)if(l.visible)out.push(...(f.layers[l.id]||[]));return out}
+/* Eraser marks are not selectable objects: they only punch holes in their layer. */
+function isEraserObject(o){return !!o&&o.composite==="destination-out"}
+function allVisibleObjects(){const f=activeFrame(),out=[];for(const l of layers)if(l.visible)for(const o of (f.layers[l.id]||[]))if(!isEraserObject(o))out.push(o);return out}
 function snapshot(){return{layers:deep(layers),frames:deep(frames),camera:deep(camera),cameraKeys:deep(cameraKeys),symbols:deep(symbols),scenes:deep(scenes),activeSceneId,projectAudio:deep(projectAudio),currentLayerId,currentFrame,nextObjectId,nextLayerId,nextFrameId,canvasWidth:W,canvasHeight:H}}
 function restore(s){editVersion++;if(s.canvasWidth&&s.canvasHeight)setProjectCanvasSize(s.canvasWidth,s.canvasHeight);layers=deep(s.layers);frames=deep(s.frames);camera=deep(s.camera||{x:W/2,y:H/2,zoom:1,rotation:0});cameraKeys=deep(s.cameraKeys||{});symbols=deep(s.symbols||[]);scenes=deep(s.scenes||[]);activeSceneId=s.activeSceneId||null;projectAudio=deep(s.projectAudio||null);currentLayerId=s.currentLayerId;currentFrame=s.currentFrame;nextObjectId=s.nextObjectId;nextLayerId=s.nextLayerId;nextFrameId=s.nextFrameId;selected.clear();ensureFrameLayers();renderAll()}
 function pushHistory(){editVersion++;history.push(snapshot());if(history.length>HISTORY_LIMIT)history.shift();future=[]}
@@ -1150,8 +1157,8 @@ function renderSelection(){
   selCtx.restore();
 }
 function handlePoint(b,h){const cx=(b.minX+b.maxX)/2,cy=(b.minY+b.maxY)/2;return{nw:{x:b.minX,y:b.minY},n:{x:cx,y:b.minY},ne:{x:b.maxX,y:b.minY},e:{x:b.maxX,y:cy},se:{x:b.maxX,y:b.maxY},s:{x:cx,y:b.maxY},sw:{x:b.minX,y:b.maxY},w:{x:b.minX,y:cy}}[h]}
-function pointInObject(x,y,o){const p=objectPivot(o),r=-(o.rotation||0)*Math.PI/180,c=Math.cos(r),s=Math.sin(r),dx=x-(o.x||0)-p.x,dy=y-(o.y||0)-p.y,lx=(dx*c-dy*s)/(o.scaleX||1)+p.x,ly=(dx*s+dy*c)/(o.scaleY||1)+p.y,b=objectLocalBounds(o);if(!b)return false;const pad=Math.max(5,(o.width||1)/2);return lx>=b.minX-pad&&lx<=b.maxX+pad&&ly>=b.minY-pad&&ly<=b.maxY+pad}
-function topObjectAt(x,y){const f=activeFrame();for(let li=layers.length-1;li>=0;li--){const l=layers[li];if(!l.visible)continue;const arr=f.layers[l.id]||[];for(let i=arr.length-1;i>=0;i--)if(pointInObject(x,y,arr[i]))return arr[i]}return null}
+function pointInObject(x,y,o){if(isEraserObject(o))return false;const p=objectPivot(o),r=-(o.rotation||0)*Math.PI/180,c=Math.cos(r),s=Math.sin(r),dx=x-(o.x||0)-p.x,dy=y-(o.y||0)-p.y,lx=(dx*c-dy*s)/(o.scaleX||1)+p.x,ly=(dx*s+dy*c)/(o.scaleY||1)+p.y,b=objectLocalBounds(o);if(!b)return false;const pad=Math.max(5,(o.width||1)/2);return lx>=b.minX-pad&&lx<=b.maxX+pad&&ly>=b.minY-pad&&ly<=b.maxY+pad}
+function topObjectAt(x,y){const f=activeFrame();for(let li=layers.length-1;li>=0;li--){const l=layers[li];if(!l.visible)continue;const arr=f.layers[l.id]||[];for(let i=arr.length-1;i>=0;i--)if(!isEraserObject(arr[i])&&pointInObject(x,y,arr[i]))return arr[i]}return null}
 function setCanvasViewportTransform(){
   const scale=Math.max(.05,(zoom/100)*canvasFitScale);
   viewport.style.transform=`translate(${panX}px,${panY}px) rotate(${viewRotation}deg) scale(${scale})`;
@@ -1201,11 +1208,16 @@ function previewObjectFromAction(){
   if(a.kind==="rectangle")return{points:[a.start,a.current],x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,type:"rectangle"};
   if(a.kind==="ellipse")return{points:[a.start,a.current],x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,type:"ellipse"};
   if(a.kind==="polygon"||a.kind==="star"){return makeStrokeObject(shapeVertices(a.kind,a.start,a.current),a.kind,false)}
-  if(a.kind==="draw")return{points:a.points,x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,type:"stroke"};
+  if(a.kind==="draw")return{points:stabilizeStrokePoints(a.points),x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,type:"stroke"};
   return null;
 }
+let polygonSides=6,starPoints=5;
+function constrainDrawPoint(a,p,e){
+  if(!e||!a||!a.start)return p;let q=p;const s=a.start;
+  if(e.shiftKey){let dx=p.x-s.x,dy=p.y-s.y;if(a.kind==="line"){const ang=Math.round(Math.atan2(dy,dx)/(Math.PI/12))*(Math.PI/12),d=Math.hypot(dx,dy);q={x:s.x+Math.cos(ang)*d,y:s.y+Math.sin(ang)*d}}else if(["rectangle","ellipse","polygon","star"].includes(a.kind)){const m=Math.max(Math.abs(dx),Math.abs(dy));q={x:s.x+Math.sign(dx||1)*m,y:s.y+Math.sign(dy||1)*m}}}
+  return q}
 function shapeVertices(kind,start,end){
-  const cx=(start.x+end.x)/2,cy=(start.y+end.y)/2,rx=Math.abs(end.x-start.x)/2,ry=Math.abs(end.y-start.y)/2,count=kind==="star"?10:6;
+  const cx=(start.x+end.x)/2,cy=(start.y+end.y)/2,rx=Math.abs(end.x-start.x)/2,ry=Math.abs(end.y-start.y)/2,count=kind==="star"?Math.max(3,Math.min(24,starPoints))*2:Math.max(3,Math.min(24,polygonSides));
   return Array.from({length:count},(_,index)=>{
     const angle=-Math.PI/2+index*Math.PI*2/count,radius=kind==="star"&&index%2?.42:1;
     return{x:cx+Math.cos(angle)*rx*radius,y:cy+Math.sin(angle)*ry*radius};
@@ -1288,13 +1300,13 @@ canvas.addEventListener("pointerdown",e=>{
   if(hit){if(!e.shiftKey){selected.clear();if(hit.groupId){for(const obj of allVisibleObjects())if(obj.groupId===hit.groupId)selected.add(obj.id)}else selected.add(hit.id)}else if(hit.groupId){for(const obj of allVisibleObjects())if(obj.groupId===hit.groupId)selected.add(obj.id)}else selected.add(hit.id);beginTransform(e,"move")}
   else{selected.clear();pointerAction={kind:"box",pointerId:e.pointerId,start:p,current:p};try{canvas.setPointerCapture(e.pointerId)}catch{}renderSelectionBox()}
 });
-canvas.addEventListener("pointermove",e=>{if(!pointerAction||pointerAction.pointerId!==e.pointerId)return;if(pointerAction.kind==="pan"){panX=pointerAction.origin.x+e.clientX-pointerAction.start.x;panY=pointerAction.origin.y+e.clientY-pointerAction.start.y;setCanvasViewportTransform();return}const p=getCanvasPoint(e);if(pointerAction.kind==="node"){const object=allVisibleObjects().find(item=>item.id===pointerAction.objectId);if(object){const pivot=objectPivot(object),r=-(object.rotation||0)*Math.PI/180,c=Math.cos(r),s=Math.sin(r),dx=p.x-(object.x||0)-pivot.x,dy=p.y-(object.y||0)-pivot.y;object.points[pointerAction.pointIndex]={x:(dx*c-dy*s)/(object.scaleX||1)+pivot.x,y:(dx*s+dy*c)/(object.scaleY||1)+pivot.y};renderAll()}return}if(pointerAction.kind==="draw"){pointerAction.points.push(p);pointerAction.current=p;renderPreview()}else if(pointerAction.kind==="line"){pointerAction.points=[pointerAction.start,p];pointerAction.current=p;renderPreview()}else if(["rectangle","ellipse","polygon","star"].includes(pointerAction.kind)){pointerAction.current=p;pointerAction.points=[pointerAction.start,p];renderPreview()}else if(pointerAction.kind==="lasso"){pointerAction.points.push(p);pointerAction.current=p;renderSelection()}else if(pointerAction.kind==="box"){pointerAction.current=p;renderSelectionBox()}else if(pointerAction.kind==="move")updateMove(p);else if(pointerAction.kind==="rotate")updateRotate(p);else if(pointerAction.kind==="scale")updateScale(p,pointerAction.handle)});
+canvas.addEventListener("pointermove",e=>{if(!pointerAction||pointerAction.pointerId!==e.pointerId)return;if(pointerAction.kind==="pan"){panX=pointerAction.origin.x+e.clientX-pointerAction.start.x;panY=pointerAction.origin.y+e.clientY-pointerAction.start.y;setCanvasViewportTransform();return}let p=getCanvasPoint(e);p=constrainDrawPoint(pointerAction,p,e);if(pointerAction.kind==="node"){const object=allVisibleObjects().find(item=>item.id===pointerAction.objectId);if(object){const pivot=objectPivot(object),r=-(object.rotation||0)*Math.PI/180,c=Math.cos(r),s=Math.sin(r),dx=p.x-(object.x||0)-pivot.x,dy=p.y-(object.y||0)-pivot.y;object.points[pointerAction.pointIndex]={x:(dx*c-dy*s)/(object.scaleX||1)+pivot.x,y:(dx*s+dy*c)/(object.scaleY||1)+pivot.y};renderAll()}return}if(pointerAction.kind==="draw"){pointerAction.points.push(p);pointerAction.current=p;renderPreview()}else if(pointerAction.kind==="line"){pointerAction.points=[pointerAction.start,p];pointerAction.current=p;renderPreview()}else if(["rectangle","ellipse","polygon","star"].includes(pointerAction.kind)){pointerAction.current=p;pointerAction.points=[pointerAction.start,p];renderPreview()}else if(pointerAction.kind==="lasso"){pointerAction.points.push(p);pointerAction.current=p;renderSelection()}else if(pointerAction.kind==="box"){pointerAction.current=p;renderSelectionBox()}else if(pointerAction.kind==="move")updateMove(p);else if(pointerAction.kind==="rotate")updateRotate(p);else if(pointerAction.kind==="scale")updateScale(p,pointerAction.handle)});
 canvas.addEventListener("pointerup",finishPointer);canvas.addEventListener("pointercancel",finishPointer);canvas.addEventListener("lostpointercapture",finishPointer);
 function finishPointer(event){
   if(!pointerAction||pointerAction.pointerId!==event.pointerId)return;
   const action=pointerAction;
   if(event.type==="pointerup"&&["draw","line","rectangle","ellipse","polygon","star","lasso"].includes(action.kind)){
-    const point=getCanvasPoint(event),last=action.points[action.points.length-1];
+    const point=constrainDrawPoint(action,getCanvasPoint(event),event),last=action.points[action.points.length-1];
     if(!last||Math.hypot(point.x-last.x,point.y-last.y)>.01)action.points.push(point);
     action.current=point;
   }
@@ -1426,6 +1438,19 @@ const BRUSH_PRESETS=[
   {name:"Technical Pen",desc:"Fine, consistent linework",width:1.5,opacity:1,cap:"round",join:"round",composite:"source-over",dash:[],style:"solid"},
   {name:"Eraser",desc:"Erases rendered strokes",width:16,opacity:1,cap:"round",join:"round",composite:"destination-out",dash:[],style:"solid"}
 ];
+function brushPresetIconSvg(pr){
+  /* A tiny sample stroke drawn with the pen's own width/opacity/cap/dash/style, so each pen is recognisable as an icon. */
+  const w=Math.max(1,Math.min(9,Number(pr.width)/2.4||2));
+  if(pr.composite==="destination-out")return '<svg viewBox="0 0 44 26" aria-hidden="true"><g transform="rotate(-28 22 13)"><rect x="9" y="6" width="26" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="9" y="6" width="11" height="14" rx="3" fill="currentColor" opacity=".45"/></g></svg>';
+  let extra="";
+  if(pr.style==="chalk")extra=' stroke-dasharray="3 1.6"';
+  else if(pr.style==="spray")extra=' stroke-dasharray="0.1 3.2"';
+  else if(Array.isArray(pr.dash)&&pr.dash.length)extra=' stroke-dasharray="'+pr.dash.map(n=>Math.max(.1,n*(w>4?1:1.3))).join(" ")+'"';
+  const blur=pr.style==="soft"||pr.style==="watercolor"?' style="filter:blur(1.4px)"':"";
+  const cap=["round","butt","square"].includes(pr.cap)?pr.cap:"round";
+  const op=Math.max(.25,Math.min(1,Number(pr.opacity)||1));
+  return '<svg viewBox="0 0 44 26" aria-hidden="true"><path d="M4 19C11 3 19 25 27 12S37 7 40 7" fill="none" stroke="currentColor" stroke-width="'+w.toFixed(1)+'" stroke-linecap="'+cap+'" stroke-linejoin="round" opacity="'+op+'"'+extra+blur+'/></svg>';
+}
 function renderBrushPresets(){
   const grid=document.getElementById("brushPresetGrid");if(!grid)return;
   grid.innerHTML="";
@@ -1433,7 +1458,8 @@ function renderBrushPresets(){
     const b=document.createElement("button");b.type="button";b.className="brushPreset";b.dataset.brushPreset=preset.name;
     const n=document.createElement("span");n.className="brushPresetName";n.textContent=preset.name;
     const d=document.createElement("span");d.className="brushPresetMeta";d.textContent=preset.desc;
-    b.append(n,d);b.onclick=()=>applyBrushPreset(preset.name);grid.appendChild(b);
+    const ic=document.createElement("span");ic.className="brushPresetIcon";ic.innerHTML=brushPresetIconSvg(preset);b.title=preset.name+(preset.desc?" — "+preset.desc:"");
+    b.append(ic,n,d);b.onclick=()=>applyBrushPreset(preset.name);grid.appendChild(b);
   }
 }
 function applyBrushPreset(name){
@@ -1528,7 +1554,11 @@ function closeModalRoot(){
   const root=document.getElementById("modalRoot");
   if(root) root.innerHTML="";
 }
-function renderAll(){render();renderGrid();renderLayers();renderFrames();updateProperties();updateWidgetReadouts();if(typeof syncCameraControls==="function")syncCameraControls();if(typeof syncSymbolLibrary==="function")syncSymbolLibrary()}
+function renderAllCore(){render();renderGrid();renderLayers();renderFrames();updateProperties();updateWidgetReadouts();if(typeof syncCameraControls==="function")syncCameraControls();if(typeof syncSymbolLibrary==="function")syncSymbolLibrary()}
+/* One render pipeline: modules register extra steps instead of wrapping renderAll. Pre-steps run newest-first, post-steps in load order. */
+const renderPreSteps=[],renderPostSteps=[];
+function registerRenderStep(fn,when){if(when==="pre")renderPreSteps.unshift(fn);else renderPostSteps.push(fn)}
+function renderAll(){for(const f of renderPreSteps)f();renderAllCore();for(const f of renderPostSteps)f()}
 function updateProperties(){
   const o=selectedObjects();
   document.getElementById("objectRotation").value=o.length===1?Math.round(o[0].rotation||0):0;
@@ -1538,13 +1568,13 @@ function updateProperties(){
   const text=document.getElementById("strokeOpacityText");if(text)text.textContent=Math.round(opacity*100)+"%";
 }
 function setTool(t){
-  tool=t;
+  const prevTool=tool;tool=t;
   for(const b of document.querySelectorAll(".toolChoice"))b.classList.toggle("primary",b.dataset.tool===t);
   document.getElementById("brushTool").classList.toggle("primary",t==="brush");
   document.getElementById("lineTool").classList.toggle("primary",t==="line");
   document.getElementById("transformTool").classList.toggle("primary",t==="transform");
   document.getElementById("pointTool").classList.toggle("primary",t==="node");
-  if(t!=="rig"&&t!=="rig-pivot"&&t!=="rig-ik")selected.clear();renderAll();
+  {const isRig=x=>x==="rig"||x==="rig-pivot"||x==="rig-ik";if(isRig(t)!==isRig(prevTool))selected.clear()}renderAll();
 }
 for(const b of document.querySelectorAll(".toolChoice"))b.onclick=()=>setTool(b.dataset.tool);
 document.getElementById("brushTool").onclick=()=>setTool("brush");document.getElementById("lineTool").onclick=()=>setTool("line");document.getElementById("transformTool").onclick=()=>setTool("transform");
@@ -1585,7 +1615,7 @@ try{const saved=JSON.parse(localStorage.getItem("bba_tool_shortcuts_v1")||"null"
 function showShortcutList(){
   const rows=[
     ["H","Hold and drag to pan"],
-    ["Ctrl + Z","Undo"],["Ctrl + Shift + Z","Redo"],["Ctrl + Y","Redo"],["Ctrl + S","Save project"],["Ctrl + + / -","Zoom canvas"],["Ctrl + Shift + + / -","Resize widget contents"],["Ctrl + 0","Reset canvas view"],["F12","Camera render preview"],["Ctrl + ?","Keyboard shortcuts"],
+    ["Ctrl + Z","Undo"],["Ctrl + Shift + Z","Redo"],["Ctrl + Y","Redo"],["Ctrl + S","Save project"],["Ctrl + + / -","Zoom canvas"],["Ctrl + Shift + + / -","Resize widget contents"],["Ctrl + 0","Reset canvas view"],["F12","Camera render preview"],["Ctrl + /  (or Ctrl + ?)","Keyboard shortcuts"],[", / .","Previous / next frame"],["Home / End","First / last frame"],["K / Shift + K","Next / previous keyframe"],["Mouse wheel","Zoom toward the cursor"],["F / Ctrl + 1","Fit view / actual size"],
     ["Shift + Left / Right","Previous / next frame"],["Ctrl + Home / End","First / last frame"],
     ["Delete / Backspace","Delete selected objects"],["Escape","Deselect / cancel current operation"],["Space","Play / stop timeline"],
     ["G","Toggle grid"],["O","Toggle onion skin"],["F","Fit canvas to widget"],["Ctrl + D","Duplicate selection"],["Ctrl + C","Copy selection"],["Ctrl + X","Cut selection"],["Ctrl + V","Paste selection"],
@@ -1623,6 +1653,11 @@ document.addEventListener("keydown",e=>{
   if(e.key==="F12"){e.preventDefault();openCameraPreview();return}
   if(ctrl&&e.key==="Home"){e.preventDefault();currentFrame=0;selected.clear();renderAll();return}
   if(ctrl&&e.key==="End"){e.preventDefault();currentFrame=frames.length-1;selected.clear();renderAll();return}
+  if(selected.size&&!e.altKey&&!ctrl&&["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)){
+    e.preventDefault();const step=e.shiftKey?10:1,dx=e.key==="ArrowLeft"?-step:e.key==="ArrowRight"?step:0,dy=e.key==="ArrowUp"?-step:e.key==="ArrowDown"?step:0;
+    const objs=rigAffectedObjects(selectedObjects());if(!objs.length||!canEditObjects(objs))return;
+    if(!nudgeHistoryTimer)pushHistory();clearTimeout(nudgeHistoryTimer);nudgeHistoryTimer=setTimeout(()=>nudgeHistoryTimer=null,600);
+    for(const o of objs){o.x=(o.x||0)+dx;o.y=(o.y||0)+dy}editVersion++;renderAll();return}
   if(e.shiftKey&&e.key==="ArrowLeft"){e.preventDefault();goFrame(-1);return}
   if(e.shiftKey&&e.key==="ArrowRight"){e.preventDefault();goFrame(1);return}
   if(ctrl&&key==="z"){e.preventDefault();e.shiftKey?redo():undo();return}
@@ -1632,19 +1667,20 @@ document.addEventListener("keydown",e=>{
   if(ctrl&&key==="c"){e.preventDefault();objectClipboard=selectedObjects().map(deep);return}
   if(ctrl&&key==="x"){e.preventDefault();objectClipboard=selectedObjects().map(deep);deleteSelected();return}
   if(ctrl&&key==="v"){e.preventDefault();pasteClipboard();return}
-  if(e.key==="Delete"||e.key==="Backspace"){if(tool==="transform"){e.preventDefault();deleteSelected();return}}
+  if(e.key==="Delete"||e.key==="Backspace"){if(selected.size){e.preventDefault();deleteSelected();return}}
   if(e.key==="Escape"){closeModalRoot();selected.clear();pointerAction=null;renderAll();return}
   if(key==="h"){panToolActive=true;return}
   if(e.code==="Space"){e.preventDefault();if(playing)stopPlaying();else startPlaying();return}
   if(key==="g"){e.preventDefault();grid=!grid;document.getElementById("grid").checked=grid;renderGrid();syncGridControls();return}
   if(key==="o"){e.preventDefault();onion=!onion;const w=document.getElementById("onionEnabledWidget");if(w)w.checked=onion;document.getElementById("onion").checked=onion;renderOnion();return}
-  if(key==="f"){e.preventDefault();updateCanvasFitScale();setZoom(100);return}
+  if(key==="f"){e.preventDefault();panX=0;panY=0;updateCanvasFitScale();setZoom(100);return}
   if(e.key==="["||e.key==="]"){e.preventDefault();const delta=e.key==="]"?1:-1;brushSize=Math.max(1,Math.min(100,brushSize+delta));const bs=document.getElementById("brushSize");if(bs)bs.value=brushSize;return}
-  if(e.key==="ArrowUp"){e.preventDefault();setZoom(zoom+10);return}
-  if(e.key==="ArrowDown"){e.preventDefault();setZoom(zoom-10);return}
-  if(e.key==="ArrowLeft"){e.preventDefault();rotateViewBy(-10);return}
-  if(e.key==="ArrowRight"){e.preventDefault();rotateViewBy(10);return}
+  if(e.key==="ArrowUp"&&(e.altKey||!selected.size)){e.preventDefault();setZoom(zoom+10);return}
+  if(e.key==="ArrowDown"&&(e.altKey||!selected.size)){e.preventDefault();setZoom(zoom-10);return}
+  if(e.key==="ArrowLeft"&&(e.altKey||!selected.size)){e.preventDefault();rotateViewBy(-10);return}
+  if(e.key==="ArrowRight"&&(e.altKey||!selected.size)){e.preventDefault();rotateViewBy(10);return}
 });
+let nudgeHistoryTimer=null;
 document.addEventListener("keyup",e=>{if(e.key.toLowerCase()==="h")panToolActive=false});
 
 function duplicateSelection(){
@@ -1818,7 +1854,6 @@ function goHome(){try{saveCurrent()}catch(error){console.error("Project save fai
 function saveFromButton(){
   try{saveCurrent()}catch(error){console.error("Project save failed.",error);const status=document.getElementById("projectSaveStatus");if(status)status.textContent="Save failed: "+(error?.message||"Storage error");return}
   const status=document.getElementById("projectSaveStatus");if(status)status.textContent="Saved"+(window.__recoveryWarning||"");
-  openModal("Save Widget Presets?",'<div style="font-size:13px;line-height:1.5">Do you want to save your widget presets too?</div>',"Yes",(m,close)=>{close();openSaveWidgetPresetModal()},"No");
 }
 document.getElementById("saveBtn").onclick=saveFromButton;document.getElementById("homeBtn").onclick=goHome;
 document.getElementById("fps").onchange=e=>{const v=Math.max(1,Math.min(100,+e.target.value||8));e.target.value=v;document.getElementById("playbackFps").value=v;rebuildPlaybackTimer()};
@@ -2073,7 +2108,7 @@ function drawCompositedLayers(context,frame,frameIndex,includeGuideLayers=false)
       matrix.e+=matrix.a*dx+matrix.c*dy;matrix.f+=matrix.b*dx+matrix.d*dy;return matrix
     };
     const matrixBase=context.getTransform(),layerMatrix=projectionMatrix(layer);
-    const needsScratch=mode!=="source-over"||opacity<.999||clip||effect!=="none";
+    const needsScratch=mode!=="source-over"||opacity<.999||clip||effect!=="none"||objects.some(o=>o&&o.composite==="destination-out");
     if(!needsScratch){context.save();context.setTransform(layerMatrix);for(const object of objects)drawObject(context,object);context.restore();continue}
     for(const [canvas,scratch] of [[layerCompositeCanvas,layerCompositeContext],[layerMaskCanvas,layerMaskContext]]){
       if(canvas.width!==context.canvas.width||canvas.height!==context.canvas.height){canvas.width=context.canvas.width;canvas.height=context.canvas.height}
@@ -2237,6 +2272,7 @@ document.getElementById("insertSymbolBtn")?.addEventListener("click",()=>{
   currentObjects().push(instance);selected.clear();selected.add(instance.id);renderAll();
 });
 function renderCameraFrame(){
+  if(tool!=="camera"&&!(window.BBAProfessional?.camera?.guides))return;
   const view=cameraForFrame(currentFrame),scale=Math.max(.1,view.zoom);
   selCtx.save();selCtx.translate(view.x,view.y);selCtx.rotate(view.rotation*Math.PI/180);
   selCtx.strokeStyle="#20a9ff";selCtx.lineWidth=2/scale;selCtx.setLineDash([8/scale,5/scale]);
@@ -2340,23 +2376,68 @@ function gifLzw(indices){
   }
   writeCode(endCode);if(bitCount)output.push(bitBuffer&255);return output;
 }
+
+function buildGifPalette(histogram){
+  /* Median-cut over a 5-bit-per-channel histogram -> up to 255 representative colors. */
+  const bins=[];for(let i=0;i<histogram.length;i++)if(histogram[i])bins.push({r:(i>>10)&31,g:(i>>5)&31,b:i&31,n:histogram[i]});
+  if(!bins.length)return[[0,0,0]];
+  let boxes=[bins];
+  const range=box=>{let a=[31,31,31],z=[0,0,0];for(const c of box){a[0]=Math.min(a[0],c.r);a[1]=Math.min(a[1],c.g);a[2]=Math.min(a[2],c.b);z[0]=Math.max(z[0],c.r);z[1]=Math.max(z[1],c.g);z[2]=Math.max(z[2],c.b)}return[z[0]-a[0],z[1]-a[1],z[2]-a[2]]};
+  while(boxes.length<255){
+    let bi=-1,bs=0,bax=0;
+    boxes.forEach((box,i)=>{if(box.length<2)return;const r=range(box),m=Math.max(r[0],r[1],r[2]),score=m*Math.log2(2+box.reduce((t,c)=>t+c.n,0));if(m>0&&score>bs){bs=score;bi=i;bax=r.indexOf(m)}});
+    if(bi<0)break;
+    const box=boxes[bi],key=bax===0?"r":bax===1?"g":"b";box.sort((p,q)=>p[key]-q[key]);
+    const total=box.reduce((t,c)=>t+c.n,0);let acc=0,cut=0;for(;cut<box.length-1;cut++){acc+=box[cut].n;if(acc>=total/2)break}
+    cut=Math.min(cut,box.length-2);boxes.splice(bi,1,box.slice(0,cut+1),box.slice(cut+1));
+  }
+  return boxes.filter(b=>b.length).map(box=>{let n=0,r=0,g=0,b=0;for(const c of box){n+=c.n;r+=c.r*c.n;g+=c.g*c.n;b+=c.b*c.n}return[Math.round(r/n*255/31),Math.round(g/n*255/31),Math.round(b/n*255/31)]});
+}
 async function exportGif(scale,transparent,start=0,end=frames.length-1,onProgress=()=>{}){
   const width=W*scale,height=H*scale,count=end-start+1,totalPixels=width*height*count;
   if(width>65535||height>65535||totalPixels>60_000_000)throw new Error("GIF export is too large to encode safely. Reduce the scale or export fewer frames.");
   const parts=[];let chunk=[];const flush=()=>{if(chunk.length){parts.push(new Uint8Array(chunk));chunk=[]}},push=value=>{chunk.push(value&255);if(chunk.length>=8192)flush()},push16=value=>{push(value);push(value>>8)},writeText=value=>{for(const character of value)push(character.charCodeAt(0))};
   const writeBlocks=data=>{for(let offset=0;offset<data.length;offset+=255){const block=data.slice(offset,offset+255);push(block.length);for(const value of block)push(value)}push(0)};
+  /* Pass 1: sample every frame to build one adaptive 255-color palette for the whole animation. */
+  let stride;const histogram=new Uint32Array(32768);stride=width*height<=2_500_000?1:Math.floor(width*height/600000)||1;while(stride>1&&width%stride===0)stride++;
+  for(let frameIndex=start;frameIndex<=end;frameIndex++){
+    const px=logicalFrameCanvas(frames[frameIndex],scale,transparent,frameIndex).getContext("2d",{willReadFrequently:true}).getImageData(0,0,width,height).data;
+    for(let pixel=0;pixel<width*height;pixel+=stride){const o=pixel*4;if(transparent&&px[o+3]<128)continue;histogram[((px[o]>>3)<<10)|((px[o+1]>>3)<<5)|(px[o+2]>>3)]++}
+    if((frameIndex-start)%4===3)await new Promise(resolve=>setTimeout(resolve,0));
+  }
+  const palette=buildGifPalette(histogram),dither=!!window.__gifDither,lut=new Int16Array(32768).fill(-1);
+  const nearest=(r,g,b)=>{let best=0,bd=1e9;for(let i=0;i<palette.length;i++){const p=palette[i],d=(p[0]-r)**2*.3+(p[1]-g)**2*.59+(p[2]-b)**2*.11;if(d<bd){bd=d;best=i}}return best};
+  const lookup=(r,g,b)=>{r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));const k=((r>>3)<<10)|((g>>3)<<5)|(b>>3);let v=lut[k];if(v<0){v=nearest((r>>3<<3)+4,(g>>3<<3)+4,(b>>3<<3)+4);lut[k]=v}return v};
   writeText("GIF89a");push16(width);push16(height);push(0xf7);push(0);push(0);
-  push(0);push(0);push(0);
-  for(let index=0;index<256;index++){const q=Math.max(0,index-1);push(Math.round(Math.floor(q/32)*255/7));push(Math.round(Math.floor(q%32/4)*255/7));push(Math.round((q%4)*255/3))}
+  for(let index=0;index<256;index++){const c=index===0?[0,0,0]:(palette[index-1]||[0,0,0]);push(c[0]);push(c[1]);push(c[2])}
   push(0x21);push(0xff);push(11);writeText("NETSCAPE2.0");push(3);push(1);push16(0);push(0);
   const fps=Math.max(1,Math.min(100,Number(document.getElementById("playbackFps")?.value||document.getElementById("fps")?.value||8)));
   for(let frameIndex=start;frameIndex<=end;frameIndex++){
     const frame=frames[frameIndex],canvas=logicalFrameCanvas(frame,scale,transparent,frameIndex),pixels=canvas.getContext("2d",{willReadFrequently:true}).getImageData(0,0,width,height).data,indices=new Uint8Array(width*height);
-    for(let pixel=0;pixel<indices.length;pixel++){
-      const offset=pixel*4,alpha=pixels[offset+3];
-      if(transparent&&alpha<128){indices[pixel]=0;continue}
-      const q=(pixels[offset]>>5)*32+(pixels[offset+1]>>5)*4+(pixels[offset+2]>>6);
-      indices[pixel]=Math.min(254,q)+1;
+    if(!dither){
+      for(let pixel=0;pixel<indices.length;pixel++){
+        const offset=pixel*4;
+        if(transparent&&pixels[offset+3]<128){indices[pixel]=0;continue}
+        indices[pixel]=lookup(pixels[offset],pixels[offset+1],pixels[offset+2])+1;
+      }
+    }else{
+      /* Floyd–Steinberg error diffusion */
+      let cur=new Float32Array((width+2)*3),next=new Float32Array((width+2)*3);
+      for(let y=0;y<height;y++){
+        next.fill(0);
+        for(let x=0;x<width;x++){
+          const pixel=y*width+x,offset=pixel*4;
+          if(transparent&&pixels[offset+3]<128){indices[pixel]=0;continue}
+          const ci=(x+1)*3,r=pixels[offset]+cur[ci],g=pixels[offset+1]+cur[ci+1],b=pixels[offset+2]+cur[ci+2];
+          const pi=lookup(Math.round(r),Math.round(g),Math.round(b)),pc=palette[pi];indices[pixel]=pi+1;
+          const er=r-pc[0],eg=g-pc[1],eb=b-pc[2];
+          cur[ci+3]+=er*7/16;cur[ci+4]+=eg*7/16;cur[ci+5]+=eb*7/16;
+          next[ci-3]+=er*3/16;next[ci-2]+=eg*3/16;next[ci-1]+=eb*3/16;
+          next[ci]+=er*5/16;next[ci+1]+=eg*5/16;next[ci+2]+=eb*5/16;
+          next[ci+3]+=er/16;next[ci+4]+=eg/16;next[ci+5]+=eb/16;
+        }
+        [cur,next]=[next,cur];
+      }
     }
     const delay=Math.max(1,Math.min(65535,Math.round(Math.max(1,Number(frame.duration)||1)*100/fps)));
     push(0x21);push(0xf9);push(4);push(transparent?1:0);push16(delay);push(0);push(0);
@@ -2385,7 +2466,7 @@ async function exportWebm(scale,transparent,start=0,end=frames.length-1){
 }
 function currentProjectJson(){return JSON.stringify({format:"Bare Bones Animator Project",version:4,name:projectName,exportedAt:Date.now(),state:projectState()},null,2)}
 async function performExport(root=document){
-  const format=root.querySelector("#exportFormat")?.value,scale=Math.max(1,Math.min(4,Number(root.querySelector("#exportScale")?.value)||1)),transparent=!!root.querySelector("#exportTransparent")?.checked,status=root.querySelector("#exportStatus"),startValue=Number(root.querySelector("#exportRangeStart")?.value),endValue=Number(root.querySelector("#exportRangeEnd")?.value),start=startValue-1,end=endValue-1;
+  window.__gifDither=!!root.querySelector("#exportDither")?.checked;const format=root.querySelector("#exportFormat")?.value,scale=Math.max(1,Math.min(4,Number(root.querySelector("#exportScale")?.value)||1)),transparent=!!root.querySelector("#exportTransparent")?.checked,status=root.querySelector("#exportStatus"),startValue=Number(root.querySelector("#exportRangeStart")?.value),endValue=Number(root.querySelector("#exportRangeEnd")?.value),start=startValue-1,end=endValue-1;
   if(!format)throw new Error("Choose an export format.");
   if(!Number.isInteger(startValue)||!Number.isInteger(endValue)||start<0||end>=frames.length||start>end)throw new Error("Choose a valid frame range from 1 to "+frames.length+".");
   if(status)status.textContent="Exporting…";
@@ -2778,6 +2859,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     {id:"dark",name:"Classic Dark",desc:"The original dark workspace",bg:"#17181a",panel:"#212226",border:"#34363a",text:"#eceded",muted:"#8a8d93",accent:"#7c8bff",accentText:"#111111",canvas:"#ffffff",button:"#212226",hover:"#2a2d32",active:"#33363d",outline:"#ffffff"},
     {id:"paper",name:"Paper",desc:"Warm paper with ink controls",bg:"#efece5",panel:"#fbfaf6",border:"#d1cbbf",text:"#25231f",muted:"#706b61",accent:"#8a5a34",accentText:"#ffffff",canvas:"#ffffff",button:"#f7f4ed",hover:"#ece7dd",active:"#dfd7c9",outline:"#ffffff"},
     {id:"graphite",name:"Graphite",desc:"Neutral charcoal studio",bg:"#242629",panel:"#2d3034",border:"#4c5055",text:"#f0f1f2",muted:"#a7abb0",accent:"#9aa0a6",accentText:"#101214",canvas:"#ffffff",button:"#35393e",hover:"#40454b",active:"#4b5158",outline:"#ffffff"},
+    {id:"studio-matte",name:"Studio Matte Grey",desc:"Flat matte greys for Studio Layout (Animate / Harmony style)",bg:"#585858",panel:"#3a3a3a",border:"#262626",text:"#d9d9d9",muted:"#9b9b9b",accent:"#27a8d8",accentText:"#06222e",canvas:"#ffffff",button:"#474747",hover:"#555555",active:"#626262",outline:"#2a2a2a",outlineWidth:1,buttonText:"#e0e0e0",panelOutline:"#262626",panelOutlineWidth:1,roundness:"square",shadows:"off"},
     {id:"slate",name:"Slate Blue",desc:"Cool professional blue-gray",bg:"#202833",panel:"#293341",border:"#465463",text:"#eef3f7",muted:"#a6b1bc",accent:"#6ea8fe",accentText:"#07111f",canvas:"#ffffff",button:"#313c49",hover:"#3b4857",active:"#465567",outline:"#ffffff"},
     {id:"ocean",name:"Ocean",desc:"Deep blue with aqua accents",bg:"#0e2430",panel:"#12313f",border:"#2b5667",text:"#e9fbff",muted:"#9cc5d0",accent:"#4fd1c5",accentText:"#08201d",canvas:"#ffffff",button:"#173d4d",hover:"#1d4b5d",active:"#25586b",outline:"#ffffff"},
     {id:"forest",name:"Forest",desc:"Evergreen and moss palette",bg:"#18251d",panel:"#213128",border:"#3e5948",text:"#edf6ef",muted:"#a9c0ad",accent:"#73c991",accentText:"#0a1a10",canvas:"#ffffff",button:"#293b30",hover:"#32483a",active:"#3b5543",outline:"#ffffff"},
@@ -2819,14 +2901,14 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
   function allSchemes(){return schemes.concat(customSchemes())}
   function cssTheme(t){
     const r=document.documentElement;
-    const vars={"--bg":t.bg,"--panel":t.panel,"--border":t.border,"--text":t.text,"--muted":t.muted,"--accent":t.accent,"--accentText":t.accentText,"--canvas":t.canvas,"--button-bg":t.button||t.panel,"--button-hover":t.hover||t.panel,"--button-active":t.active||t.panel,"--button-outline":t.outline||"#ffffff","--button-outline-width":String(t.outlineWidth??1)+"px","--button-outline-style":t.outlineStyle||"solid","--button-text":t.buttonText||t.text,"--panel-outline":t.panelOutline||t.border,"--panel-outline-width":String(t.panelOutlineWidth??1)+"px"};
+    const vars={"--bg":t.bg,"--panel":t.panel,"--border":t.border,"--text":t.text,"--muted":t.muted,"--accent":t.accent,"--accentText":t.accentText,"--canvas":t.canvas,"--button-bg":t.button||t.panel,"--button-hover":t.hover||t.panel,"--button-active":t.active||t.panel,"--button-outline":t.outline||t.border||"#ffffff","--button-outline-width":String(t.outlineWidth??1)+"px","--button-outline-style":t.outlineStyle||"solid","--button-text":t.buttonText||t.text,"--panel-outline":t.panelOutline||t.border,"--panel-outline-width":String(t.panelOutlineWidth??1)+"px"};
     for(const [k,v] of Object.entries(vars))r.style.setProperty(k,v);
     r.removeAttribute("data-theme");
     if(t.roundness)r.setAttribute("data-roundness",t.roundness);else r.removeAttribute("data-roundness");
     if(t.shadows)r.setAttribute("data-shadows",t.shadows);else r.removeAttribute("data-shadows");
     r.setAttribute("data-buttontexture","none");
     localStorage.setItem(THEME_KEY,JSON.stringify(t));
-    const ids=[["editorAccentColor",t.accent],["editorWorkspaceColor",t.bg],["editorPanelColor",t.panel],["editorCanvasColor",t.canvas],["editorButtonOutline",t.outline||"#ffffff"],["editorButtonOutlineWidth",String(t.outlineWidth??1)],["editorButtonOutlineStyle",t.outlineStyle||"solid"],["editorPanelOutline",t.panelOutline||t.border],["editorPanelOutlineWidth",String(t.panelOutlineWidth??1)]];
+    const ids=[["editorAccentColor",t.accent],["editorWorkspaceColor",t.bg],["editorPanelColor",t.panel],["editorCanvasColor",t.canvas],["editorButtonOutline",t.outline||t.border||"#ffffff"],["editorButtonOutlineWidth",String(t.outlineWidth??1)],["editorButtonOutlineStyle",t.outlineStyle||"solid"],["editorPanelOutline",t.panelOutline||t.border],["editorPanelOutlineWidth",String(t.panelOutlineWidth??1)]];
     for(const [id,val] of ids){const e=document.getElementById(id);if(e)e.value=val}
     const wt=document.getElementById("editorButtonOutlineWidthText");if(wt)wt.textContent=String(t.outlineWidth??1)+"px";const pwt=document.getElementById("editorPanelOutlineWidthText");if(pwt)pwt.textContent=String(t.panelOutlineWidth??1)+"px";
     saveHomeSettings({themeScheme:t.id||t.name,accent:t.accent});
@@ -2837,7 +2919,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
   function schemeCard(t,custom=false){return `<button type="button" class="schemeCard" data-color-scheme="${esc(t.id||t.name)}"><div class="schemeSwatches"><span style="background:${t.bg}"></span><span style="background:${t.panel}"></span><span style="background:${t.accent}"></span><span style="background:${t.button||t.panel}"></span><span style="background:${t.outline||"#fff"}"></span></div><strong>${esc(t.name)}${custom?" · Custom":""}</strong><small>${esc(t.desc||"Custom color scheme")}</small></button>`}
   function openSchemeEditor(existing){
     const t=existing||{id:"custom_"+Date.now(),name:"My Color Scheme",desc:"Custom scheme",bg:"#f3f3f1",panel:"#ffffff",border:"#d6d6d2",text:"#191919",muted:"#777777",accent:"#4a5cff",accentText:"#ffffff",canvas:"#ffffff",button:"#ffffff",hover:"#f0f0f0",active:"#e6e6e6",outline:"#ffffff",outlineWidth:1,buttonText:"#191919",roundness:"default",shadows:"low"};
-    const body=`<div class="schemeEditor">\n<label>Name<input id="schemeName" type="text" value="${esc(t.name)}"></label><label>Description<input id="schemeDesc" type="text" value="${esc(t.desc||"")}"></label>\n<div class="schemeSection">Core colors</div>\n<label>Workspace background<input id="scBg" type="color" value="${t.bg}"></label><label>Panel background<input id="scPanel" type="color" value="${t.panel}"></label>\n<label>Panel border<input id="scBorder" type="color" value="${t.border}"></label><label>Text<input id="scText" type="color" value="${t.text}"></label>\n<label>Muted text<input id="scMuted" type="color" value="${t.muted}"></label><label>Accent<input id="scAccent" type="color" value="${t.accent}"></label>\n<label>Accent text<input id="scAccentText" type="color" value="${t.accentText}"></label><label>Canvas<input id="scCanvas" type="color" value="${t.canvas}"></label>\n<div class="schemeSection">Button design</div>\n<label>Button fill<input id="scButton" type="color" value="${t.button||t.panel}"></label><label>Button hover<input id="scHover" type="color" value="${t.hover||t.panel}"></label>\n<label>Button active<input id="scActive" type="color" value="${t.active||t.panel}"></label><label>Button text<input id="scButtonText" type="color" value="${t.buttonText||t.text}"></label>\n<label>Outline<input id="scOutline" type="color" value="${t.outline||"#ffffff"}"></label><label>Outline width<input id="scOutlineWidth" type="range" min="0" max="3" step="0.5" value="${t.outlineWidth??1}"><span id="scOutlineWidthText">${t.outlineWidth??1}px</span></label>\n<label>Outline style<select id="scOutlineStyle"><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option><option value="double">Double</option></select></label><label>Panel outline<input id="scPanelOutline" type="color" value="${t.panelOutline||t.border}"></label>\n<label>Panel outline width<input id="scPanelOutlineWidth" type="range" min="0" max="3" step="0.5" value="${t.panelOutlineWidth??1}"><span id="scPanelOutlineWidthText">${t.panelOutlineWidth??1}px</span></label><div></div>\n<div class="schemeSection">Shape & depth</div>\n<label>Corner style<select id="scRound"><option value="default">Default</option><option value="square">Square</option><option value="pill">Pill</option></select></label><label>Panel shadows<select id="scShadows"><option value="high">High</option><option value="low">Low</option><option value="off">Off</option></select></label>\n<div class="schemePreview"><strong>Preview</strong><div class="schemePreviewButtons"><button type="button" id="scPreviewButton">Normal</button><button type="button" class="primary">Primary</button></div></div>\n</div>`;
+    const body=`<div class="schemeEditor">\n<label>Name<input id="schemeName" type="text" value="${esc(t.name)}"></label><label>Description<input id="schemeDesc" type="text" value="${esc(t.desc||"")}"></label>\n<div class="schemeSection">Core colors</div>\n<label>Workspace background<input id="scBg" type="color" value="${t.bg}"></label><label>Panel background<input id="scPanel" type="color" value="${t.panel}"></label>\n<label>Panel border<input id="scBorder" type="color" value="${t.border}"></label><label>Text<input id="scText" type="color" value="${t.text}"></label>\n<label>Muted text<input id="scMuted" type="color" value="${t.muted}"></label><label>Accent<input id="scAccent" type="color" value="${t.accent}"></label>\n<label>Accent text<input id="scAccentText" type="color" value="${t.accentText}"></label><label>Canvas<input id="scCanvas" type="color" value="${t.canvas}"></label>\n<div class="schemeSection">Button design</div>\n<label>Button fill<input id="scButton" type="color" value="${t.button||t.panel}"></label><label>Button hover<input id="scHover" type="color" value="${t.hover||t.panel}"></label>\n<label>Button active<input id="scActive" type="color" value="${t.active||t.panel}"></label><label>Button text<input id="scButtonText" type="color" value="${t.buttonText||t.text}"></label>\n<label>Outline<input id="scOutline" type="color" value="${t.outline||t.border||"#ffffff"}"></label><label>Outline width<input id="scOutlineWidth" type="range" min="0" max="3" step="0.5" value="${t.outlineWidth??1}"><span id="scOutlineWidthText">${t.outlineWidth??1}px</span></label>\n<label>Outline style<select id="scOutlineStyle"><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option><option value="double">Double</option></select></label><label>Panel outline<input id="scPanelOutline" type="color" value="${t.panelOutline||t.border}"></label>\n<label>Panel outline width<input id="scPanelOutlineWidth" type="range" min="0" max="3" step="0.5" value="${t.panelOutlineWidth??1}"><span id="scPanelOutlineWidthText">${t.panelOutlineWidth??1}px</span></label><div></div>\n<div class="schemeSection">Shape & depth</div>\n<label>Corner style<select id="scRound"><option value="default">Default</option><option value="square">Square</option><option value="pill">Pill</option></select></label><label>Panel shadows<select id="scShadows"><option value="high">High</option><option value="low">Low</option><option value="off">Off</option></select></label>\n<div class="schemePreview"><strong>Preview</strong><div class="schemePreviewButtons"><button type="button" id="scPreviewButton">Normal</button><button type="button" class="primary">Primary</button></div></div>\n</div>`;
     openModal(existing?"Edit Color Scheme":"Create Custom Color Scheme",body,"Save Scheme",(m,close)=>{
       const out={id:t.id,name:m.querySelector("#schemeName").value.trim()||"My Color Scheme",desc:m.querySelector("#schemeDesc").value.trim(),bg:m.querySelector("#scBg").value,panel:m.querySelector("#scPanel").value,border:m.querySelector("#scBorder").value,text:m.querySelector("#scText").value,muted:m.querySelector("#scMuted").value,accent:m.querySelector("#scAccent").value,accentText:m.querySelector("#scAccentText").value,canvas:m.querySelector("#scCanvas").value,button:m.querySelector("#scButton").value,hover:m.querySelector("#scHover").value,active:m.querySelector("#scActive").value,buttonText:m.querySelector("#scButtonText").value,outline:m.querySelector("#scOutline").value,outlineWidth:+m.querySelector("#scOutlineWidth").value||0,outlineStyle:m.querySelector("#scOutlineStyle").value,panelOutline:m.querySelector("#scPanelOutline").value,panelOutlineWidth:+m.querySelector("#scPanelOutlineWidth").value||0,roundness:m.querySelector("#scRound").value,shadows:m.querySelector("#scShadows").value};
       const list=customSchemes(),i=list.findIndex(x=>x.id===out.id);if(i>=0)list[i]=out;else list.push(out);storeCustomSchemes(list);cssTheme(out);close();openColorSchemeModal();
@@ -2851,13 +2933,14 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     const customs=customSchemes();
     const customHtml=customs.length?customs.map(t=>`<div style="display:grid;grid-template-columns:1fr auto auto;gap:5px;align-items:stretch"><div>${schemeCard(t,true)}</div><button type="button" class="small" data-edit-scheme="${esc(t.id)}">Edit</button><button type="button" class="small" data-delete-scheme="${esc(t.id)}">Delete</button></div>`).join(""):"<div class=\"presetNote\">No custom schemes yet. Create one with the button below.</div>";
     const hs=getHomeSettings();
-    const body=`<div class="widgetSectionTitle">Built-in color schemes</div><div class="schemeGrid">${built}</div><div class="widgetSectionTitle" style="margin-top:12px">Your custom schemes</div>${customHtml}<div class="schemeActions"><button type="button" id="createColorSchemeButton">Create Custom Scheme</button><button type="button" id="resetColorSchemeButton">Reset Theme</button></div><div class="widgetSectionTitle" style="margin-top:12px">Home screen customization</div><div class="settingGrid" style="margin-top:6px"><label>Project card size<select id="schemeCardSize"><option value="small">Compact</option><option value="medium">Comfortable</option></select></label><label>Home background<select id="schemeHomeBg"><option value="plain">Plain</option><option value="dots">Dots</option><option value="lines">Lines</option></select></label></div><label class="checkRow" style="margin-top:7px"><input id="schemeShowStats" type="checkbox"> Show dashboard statistics</label>`;
+    const body=`<div class="widgetSectionTitle">Studio layout</div><div class="studioCustomRow"><button type="button" class="small primary" id="studioLayoutToggleBtn">Studio Layout</button><label class="checkRow"><input id="studioUseMatte" type="checkbox"> Use Studio Matte Grey colors</label></div><div class="presetNote">Docks every panel into a fixed, locked arrangement like Adobe Animate and Toon Boom Harmony. Your other color schemes and saved layouts are left untouched.</div><div class="widgetSectionTitle" style="margin-top:12px">Built-in color schemes</div><div class="schemeGrid">${built}</div><div class="widgetSectionTitle" style="margin-top:12px">Your custom schemes</div>${customHtml}<div class="schemeActions"><button type="button" id="createColorSchemeButton">Create Custom Scheme</button><button type="button" id="resetColorSchemeButton">Reset Theme</button></div><div class="widgetSectionTitle" style="margin-top:12px">Home screen customization</div><div class="settingGrid" style="margin-top:6px"><label>Project card size<select id="schemeCardSize"><option value="small">Compact</option><option value="medium">Comfortable</option></select></label><label>Home background<select id="schemeHomeBg"><option value="plain">Plain</option><option value="dots">Dots</option><option value="lines">Lines</option></select></label></div><label class="checkRow" style="margin-top:7px"><input id="schemeShowStats" type="checkbox"> Show dashboard statistics</label>`;
     openModal("Color Scheme Studio",body,"Done",(m,close)=>close());const schemeModal=document.querySelector("#modalRoot .modal");if(schemeModal){schemeModal.style.width="760px";schemeModal.style.maxWidth="94vw";schemeModal.style.maxHeight="88vh";schemeModal.style.overflow="auto"}
     document.querySelectorAll("[data-color-scheme]").forEach(b=>b.onclick=()=>{const id=b.dataset.colorScheme;const t=allSchemes().find(x=>(x.id||x.name)===id);if(t){cssTheme(t);closeModalRoot();openColorSchemeModal()}});
     document.getElementById("createColorSchemeButton")?.addEventListener("click",()=>{closeModalRoot();openSchemeEditor()});
     document.querySelectorAll("[data-edit-scheme]").forEach(b=>b.onclick=()=>{const t=customSchemes().find(x=>x.id===b.dataset.editScheme);if(t){closeModalRoot();openSchemeEditor(t)}});
     document.querySelectorAll("[data-delete-scheme]").forEach(b=>b.onclick=()=>{const list=customSchemes().filter(x=>x.id!==b.dataset.deleteScheme);storeCustomSchemes(list);closeModalRoot();openColorSchemeModal()});
     document.getElementById("resetColorSchemeButton")?.addEventListener("click",()=>{cssTheme(schemes.find(scheme=>scheme.id==="animation-pro")||schemes[0]);closeModalRoot();openColorSchemeModal()});
+    window.__bbaStudio?.wireControls(document.getElementById("studioLayoutToggleBtn"),document.getElementById("studioUseMatte"));
     const cs=document.getElementById("schemeCardSize"),hb=document.getElementById("schemeHomeBg"),ss=document.getElementById("schemeShowStats"),homeSettings=getHomeSettings();
     if(cs)cs.value=homeSettings.cardSize||"medium";if(hb)hb.value=homeSettings.homeBackground||"plain";if(ss)ss.checked=homeSettings.showStats!==false;
     const applyHome=()=>{saveHomeSettings({cardSize:cs?.value||"medium",homeBackground:hb?.value||"plain",showStats:ss?.checked!==false});applyHomeAppearance();renderHome()};
@@ -2885,7 +2968,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     panelWidth?.addEventListener("input",()=>{document.documentElement.style.setProperty("--panel-outline-width",panelWidth.value+"px");if(panelWt)panelWt.textContent=panelWidth.value+"px";const s=currentTheme()||{};s.panelOutlineWidth=+panelWidth.value;localStorage.setItem(THEME_KEY,JSON.stringify(s))});
   }
   window.__openColorSchemeStudio=openColorSchemeModal;
-  window.__colorSchemes=schemes;
+  window.__colorSchemes=schemes;window.__applyColorScheme=cssTheme;window.__currentColorScheme=currentTheme;
   window.__customColorSchemes=customSchemes;
   // The home Customize button becomes the full visual customization hub.
   window.__customizeColorHub=openColorSchemeModal;
@@ -3680,8 +3763,8 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     panelZ=Math.max(panelZ,max)+1;
   }
 
-  const baseRenderAll=renderAll;
-  renderAll=function(){ensureFrameMeta();baseRenderAll();if(document.getElementById("timelinePanel"))refreshTimeline();};
+  registerRenderStep(ensureFrameMeta,"pre");
+  registerRenderStep(()=>{if(document.getElementById("timelinePanel"))refreshTimeline()});
 
   // Wait until the existing app's initialization has completed.
   setTimeout(()=>{focusEveryWidget();wireTimeline();refreshTimeline()},0);
@@ -4738,13 +4821,15 @@ wirePlaybackWidget();
       if(px>0)enqueue(index-1);if(px<W-1)enqueue(index+1);if(py>0)enqueue(index-W);if(py<H-1)enqueue(index+W);
     }
     if(!matched)return;
-    sourceCtx.putImageData(output,0,0);
-    const src=source.toDataURL("image/png"),image=new Image(),targetObjects=currentObjects();
-    const obj={id:nextObjectId++,type:"image",src,width:W,height:H,x:W/2,y:H/2,rotation:0,scaleX:1,scaleY:1,opacity:penOpacity,points:[{x:-W/2,y:-H/2},{x:W/2,y:H/2}],color:"#fff",lineCap:"round",lineJoin:"round",composite:"source-over",dash:[]};
-    pushHistory();targetObjects.push(obj);selected.clear();selected.add(obj.id);
+    let bx0=W,by0=H,bx1=-1,by1=-1;for(let i=0;i<pixelCount;i++){if(filled[i*4+3]){const px=i%W,py=(i/W)|0;if(px<bx0)bx0=px;if(px>bx1)bx1=px;if(py<by0)by0=py;if(py>by1)by1=py}}
+    const bw=bx1-bx0+1,bh=by1-by0+1,crop=document.createElement("canvas");crop.width=bw;crop.height=bh;
+    crop.getContext("2d").putImageData(output,-bx0,-by0,bx0,by0,bw,bh);
+    const src=crop.toDataURL("image/png"),image=new Image(),targetObjects=currentObjects();
+    const obj={id:nextObjectId++,type:"image",bucketFill:true,src,width:bw,height:bh,x:bx0+bw/2,y:by0+bh/2,rotation:0,scaleX:1,scaleY:1,opacity:penOpacity,points:[{x:-bw/2,y:-bh/2},{x:bw/2,y:bh/2}],color:"#fff",lineCap:"round",lineJoin:"round",composite:"source-over",dash:[]};
+    pushHistory();targetObjects.push(obj);
     image.onload=()=>{IMAGE_CACHE.set(src,image);renderAll()};
     image.onerror=()=>{console.error("Unable to load generated bucket fill.");const index=targetObjects.indexOf(obj);if(index>=0)targetObjects.splice(index,1);selected.clear();renderAll()};
-    image.src=src;setTool("transform");selected.add(obj.id);renderAll();
+    image.src=src;renderAll();
   }
   canvas.addEventListener("pointerdown",event=>{
     if(tool!=="bucket")return;
@@ -4753,7 +4838,7 @@ wirePlaybackWidget();
 
   function openFileMenu(){
     const selectedRange=[...selectedTimelineFrames].sort((a,b)=>a-b),defaultStart=selectedRange.length?selectedRange[0]+1:1,defaultEnd=selectedRange.length?selectedRange[selectedRange.length-1]+1:frames.length;
-    const body='<div class="fileMenuActions"><button type="button" class="small" id="fileSaveProject">Save Project</button><button type="button" class="small" id="fileSaveProjectFile">Save Project File</button><button type="button" class="small" id="fileImportProject">Import JSON</button><button type="button" class="small" id="fileOpenProjectFile">Open Project File</button><button type="button" class="small" id="fileVersionHistory">Version History</button></div><div class="exportFormats"><label class="propertyLine"><span>Format</span><select id="exportFormat"><option value="png">PNG — Current Frame</option><option value="jpeg">JPEG — Current Frame</option><option value="svg">SVG — Current Frame</option><option value="sprite">PNG — Sprite Sheet</option><option value="sequence">PNG — Frame Sequence (ZIP)</option><option value="gif">GIF — Animation (offline)</option><option value="webm">WebM — Animation (real time)</option><option value="json">JSON — Project Data</option></select></label><div class="propertyLine"><span>Frame range</span><input id="exportRangeStart" type="number" min="1" max="'+frames.length+'" value="'+defaultStart+'" aria-label="Export first frame"><span>to</span><input id="exportRangeEnd" type="number" min="1" max="'+frames.length+'" value="'+defaultEnd+'" aria-label="Export last frame"></div><label class="propertyLine"><span>Scale</span><select id="exportScale"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option></select></label><label class="checkRow"><input id="exportTransparent" type="checkbox"> Transparent background</label><button class="primary" id="fileExportNow" type="button">Export</button><div class="exportStatus" id="exportStatus"></div><div class="exportHint">Frame range applies to sprite sheets, ZIP image sequences, GIF, and WebM; WebM captures in real time. GIF uses a compact 3-3-2 color palette.</div></div>';
+    const body='<div class="fileMenuActions"><button type="button" class="small" id="fileSaveProject">Save Project</button><button type="button" class="small" id="fileSaveProjectFile">Save Project File</button><button type="button" class="small" id="fileImportProject">Import JSON</button><button type="button" class="small" id="fileOpenProjectFile">Open Project File</button><button type="button" class="small" id="fileVersionHistory">Version History</button></div><div class="exportFormats"><label class="propertyLine"><span>Format</span><select id="exportFormat"><option value="png">PNG — Current Frame</option><option value="jpeg">JPEG — Current Frame</option><option value="svg">SVG — Current Frame</option><option value="sprite">PNG — Sprite Sheet</option><option value="sequence">PNG — Frame Sequence (ZIP)</option><option value="gif">GIF — Animation (offline)</option><option value="webm">WebM — Animation (real time)</option><option value="json">JSON — Project Data</option></select></label><div class="propertyLine"><span>Frame range</span><input id="exportRangeStart" type="number" min="1" max="'+frames.length+'" value="'+defaultStart+'" aria-label="Export first frame"><span>to</span><input id="exportRangeEnd" type="number" min="1" max="'+frames.length+'" value="'+defaultEnd+'" aria-label="Export last frame"></div><label class="propertyLine"><span>Scale</span><select id="exportScale"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option></select></label><label class="checkRow"><input id="exportTransparent" type="checkbox"> Transparent background</label><label class="checkRow" title="Smoother gradients in GIFs, slightly larger file"><input id="exportDither" type="checkbox"> Dither GIF (smoother gradients)</label><button class="primary" id="fileExportNow" type="button">Export</button><div class="exportStatus" id="exportStatus"></div><div class="exportHint">Frame range applies to sprite sheets, ZIP image sequences, GIF, and WebM; WebM captures in real time. GIF uses a compact 3-3-2 color palette.</div></div>';
     const modal=openModal("File",body,"Close",(m,close)=>close());
     modal.querySelector("#fileSaveProject").onclick=()=>{try{saveCurrent();modal.querySelector("#exportStatus").textContent="Project saved."+(window.__recoveryWarning||"")}catch(error){console.error("Project save failed.",error);modal.querySelector("#exportStatus").textContent="Save failed: "+(error?.message||"Storage error")}};
     modal.querySelector("#fileSaveProjectFile").onclick=async()=>{
@@ -4783,8 +4868,7 @@ wirePlaybackWidget();
     modal.querySelectorAll("[data-edit-action]").forEach(button=>button.addEventListener("click",()=>{const action=window.animationEditorActions[button.dataset.editAction];closeModalRoot();action?.()}));
   });
 
-  const previousRenderAll=renderAll;
-  renderAll=function(){previousRenderAll();refreshObjects()};
+  registerRenderStep(refreshObjects);
 })();
 
 /* Rig visualization, interactive camera framing, and recovery access */
@@ -5115,8 +5199,7 @@ wirePlaybackWidget();
     }
   });
 
-  const previousRenderAll=renderAll;
-  renderAll=function(){previousRenderAll();syncRigParentChoices();updateRecoveryButton()};
+  registerRenderStep(()=>{syncRigParentChoices();updateRecoveryButton()});
   setTimeout(()=>{syncRigParentChoices();updateRecoveryButton()},0);
 })();
 
@@ -5267,8 +5350,7 @@ wirePlaybackWidget();
   viewport.addEventListener("pointerup",finishScrub);viewport.addEventListener("pointercancel",finishScrub);viewport.addEventListener("lostpointercapture",finishScrub);
   window.addEventListener("resize",renderWaveform);
   if(typeof ResizeObserver!=="undefined")new ResizeObserver(renderWaveform).observe(framesEl);
-  const baseRenderAll=renderAll;
-  renderAll=function(){baseRenderAll();renderWaveform()};
+  registerRenderStep(renderWaveform);
   window.__refreshAudioWaveform=decodeWaveform;
   if(projectAudio)decodeWaveform();else renderWaveform();
 })();
@@ -5606,8 +5688,8 @@ ids("frame.tween","Tween to Next Key","Frame","tweenToNextBtn",{menu:"Frame",ord
 ids("frame.easing","Edit Easing Curve…","Frame","editEasingCurveBtn",{menu:"Frame",order:15});
 ids("frame.motionPath","Edit Motion Path…","Frame","editMotionPathBtn",{menu:"Frame",order:16,advanced:true});
 ids("frame.bakeSpring","Bake Spring Physics","Frame","bakePhysicsBtn",{menu:"Frame",order:17,advanced:true,keywords:"physics bounce"});
-ids("frame.copyKeys","Copy Keys","Frame","copyFrameBtn",{menu:"Frame",order:18});
-ids("frame.pasteKeys","Paste Keys","Frame","pasteFrameBtn",{menu:"Frame",order:19});
+ids("frame.copyKeys","Copy Poses","Frame","copyFrameBtn",{menu:"Frame",order:18});
+ids("frame.pasteKeys","Paste Poses","Frame","pasteFrameBtn",{menu:"Frame",order:19});
 ids("frame.dupRange","Duplicate Range","Frame","dupRangeBtn",{menu:"Frame",order:20});
 ids("frame.delRange","Delete Range","Frame","delRangeBtn",{menu:"Frame",order:21});
 ids("frame.revRange","Reverse Range","Frame","revRangeBtn",{menu:"Frame",order:22});
@@ -5667,9 +5749,11 @@ function registerPanels(){
   });
 }
 registerPanels();BBA.registerPanels=registerPanels;
-ids("window.workspace","Workspace Layouts…","Window","workspaceBtn",{menu:"Window",order:1});
-ids("window.presets","Workspace Presets…","Window","workspacePresetsBtn",{menu:"Window",order:2,when:exists("workspacePresetsBtn")});
-ids("window.widgetLibrary","Widget Library…","Window","widgetLibraryBtn",{menu:"Window",order:3});
+ids("window.workspace","Layouts…","Window","workspaceBtn",{menu:"Window",order:1});
+R("window.studioLayout","Studio Layout (Locked)","Window",()=>window.__bbaStudio?.toggle(),{menu:"Window",order:1.5,checked:()=>!!window.__bbaStudio?.active(),when:()=>!!window.__bbaStudio,keywords:"lock dock layout animate harmony toon boom studio panels"});
+ids("window.presets","Presets & Modes…","Window","workspacePresetsBtn",{menu:"Window",order:2,when:exists("workspacePresetsBtn")});
+ids("window.widgetLibrary","Panels…","Window","widgetLibraryBtn",{menu:"Window",order:3});
+R("window.saveWorkspace","Save Workspace…","Window",()=>openSaveWidgetPresetModal(),{menu:"Window",order:3.5,keywords:"save layout preset widget panels"});
 R("window.colorSchemes","Color Schemes…","Window",()=>window.__openColorSchemeStudio?.(),{menu:"Window",order:4,when:()=>!!window.__openColorSchemeStudio,keywords:"theme appearance"});
 ids("window.resetAppearance","Reset Appearance","Window","resetAppearanceButton",{menu:"Window",order:5,when:exists("resetAppearanceButton")});
 
@@ -5743,7 +5827,7 @@ function buildItems(menu){
 function itemButton(c){
   const b=document.createElement("button");b.type="button";b.className="bbaDropItem";b.setAttribute("role","menuitem");
   const en=C.isEnabled(c);if(!en)b.classList.add("disabled");
-  const l=document.createElement("span");l.textContent=c.label;
+  const l=document.createElement("span");l.textContent=(typeof c.checked==="function"&&c.checked()?"✓ ":"")+c.label;
   const k=document.createElement("kbd");k.textContent=C.prettyChord(C.shortcutOf(c));
   b.append(l,k);
   b.addEventListener("click",()=>{if(!en)return;closeAll();C.run(c.id)});
@@ -6330,7 +6414,7 @@ console.info("BBA menu bar ready");
   .bbaTlHeader{display:grid;grid-template-columns:190px minmax(0,1fr);min-height:34px;border-bottom:1px solid var(--border);background:var(--panel)}
   .bbaTlCorner{padding:8px;border-right:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
   .bbaTlScrollX{overflow:auto;min-width:0}
-  .bbaTlRuler{position:relative;height:34px;min-width:100%;display:flex}
+  .bbaTlRuler{position:relative;height:34px;min-width:100%;display:flex;touch-action:none;user-select:none}
   .bbaTlRulerCell{flex:0 0 var(--bba-tl-cell,52px);width:var(--bba-tl-cell,52px);border-right:1px solid var(--border);font-size:9px;text-align:center;padding-top:4px;color:var(--muted);position:relative}
   .bbaTlRulerCell strong{display:block;color:var(--text);font-size:9px}
   .bbaTlRulerCell.cameraKey::after{content:"CAM";position:absolute;bottom:1px;left:50%;transform:translateX(-50%);font-size:7px;color:var(--accent)}
@@ -6373,7 +6457,7 @@ console.info("BBA menu bar ready");
   const visibleObjects=()=>typeof allVisibleObjects==="function"?allVisibleObjects():[];
   const objectById=id=>visibleObjects().find(o=>String(o.id)===String(id));
 
-  const Pro={version:VERSION,dirty:false,lastSavedAt:0,brush:{enabled:true},camera:{enabled:true,keys:{},safeMargin:.08,guides:true,defaultEase:"ease-in-out"},effects:{version:1,quality:"balanced",selectedId:null},rig:{version:2,rigs:[],activeRigId:null},masks:{version:2},timeline:{mode:"pro",zoom:100,followPlayhead:true,rowHeight:48,cellWidth:52},recovery:{version:2,seq:0,lastCapture:0},_initialized:false};
+  const Pro={version:VERSION,dirty:false,lastSavedAt:0,brush:{enabled:true},camera:{enabled:true,keys:{},safeMargin:.08,guides:false,defaultEase:"ease-in-out"},effects:{version:1,quality:"balanced",selectedId:null},rig:{version:2,rigs:[],activeRigId:null},masks:{version:2},timeline:{mode:"pro",zoom:100,followPlayhead:true,rowHeight:48,cellWidth:52},recovery:{version:2,seq:0,lastCapture:0},_initialized:false};
   window.BBAProfessional=Pro;
 
   function readLS(key,fallback){try{const v=JSON.parse(localStorage.getItem(key)||"null");return v==null?fallback:v}catch{return fallback}}
@@ -6502,7 +6586,7 @@ console.info("BBA menu bar ready");
   }
 
   function brushPanel(){
-    const p=addPanel("bbaBrushStudioPanel","Professional Brush Engine",760,10,300,470),b=p.querySelector(".bbaProBody");if(p.dataset.built)return;
+    const p=addPanel("bbaBrushStudioPanel","Brush Engine",760,10,300,470),b=p.querySelector(".bbaProBody");if(p.dataset.built)return;
     b.innerHTML=`<div class="bbaProToolbar"><select id="bbaBrushSelect" style="flex:1;padding:5px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:5px"></select><button id="bbaBrushSave" class="small">Save</button><button id="bbaBrushReset" class="small">Reset</button></div>
     <div class="bbaProGrid"><label class="bbaProField"><span>Size</span><input id="bbaBrushSize2" type="number" min="0.25" max="200" step="0.25"></label><label class="bbaProField"><span>Opacity</span><input id="bbaBrushOpacity2" type="number" min="0" max="100" step="1"></label>
     <label class="bbaProField"><span>Smoothing</span><input id="bbaBrushSmooth2" type="number" min="0" max="100"></label><label class="bbaProField"><span>Streamline</span><input id="bbaBrushStream2" type="number" min="0" max="100"></label>
@@ -6525,11 +6609,11 @@ console.info("BBA menu bar ready");
   }
 
   function cameraPanel(){
-    const p=addPanel("bbaCameraPanel","Professional Camera",520,10,270,370),b=p.querySelector(".bbaProBody");if(p.dataset.built)return;
+    const p=addPanel("bbaCameraPanel","Camera",520,10,270,370),b=p.querySelector(".bbaProBody");if(p.dataset.built)return;
     b.innerHTML=`<div class="bbaProToolbar"><button id="bbaCamKey" class="small primary">Key Camera</button><button id="bbaCamClear" class="small">Clear Key</button><button id="bbaCamReset" class="small">Reset</button></div>
     <div class="bbaProGrid"><label class="bbaProField"><span>Position X</span><input id="bbaCamX" type="number" step=".1"></label><label class="bbaProField"><span>Position Y</span><input id="bbaCamY" type="number" step=".1"></label><label class="bbaProField"><span>Zoom</span><input id="bbaCamZoom" type="number" min=".1" max="16" step=".01"></label><label class="bbaProField"><span>Rotation</span><input id="bbaCamRot" type="number" step=".1"></label></div>
     <div class="bbaProGrid"><label class="bbaProField"><span>Key easing</span><select id="bbaCamEase"><option>linear</option><option>ease-in</option><option>ease-out</option><option selected>ease-in-out</option><option>ease-out-in</option><option>step</option></select></label><label class="bbaProField"><span>Shake amount</span><input id="bbaCamShake" type="number" min="0" max="100" step="1"></label><label class="bbaProField"><span>Shake frequency</span><input id="bbaCamFreq" type="number" min=".1" max="30" step=".1"></label><label class="bbaProField"><span>Safe margin</span><input id="bbaCamSafe" type="number" min="0" max="40" step="1"></label></div>
-    <label class="bbaProCheck"><input id="bbaCamGuides" type="checkbox" checked> Show camera guide and safe area</label><label class="bbaProCheck"><input id="bbaCamLiveFollow" type="checkbox"> Follow selected object</label><div id="bbaCamReadout" class="bbaProBadge">Camera track ready</div><div class="bbaProHint">Keys are stored per frame and interpolated with editable easing. The older camera key system remains compatible.</div>`;
+    <label class="bbaProCheck"><input id="bbaCamGuides" type="checkbox"> Show camera guide and safe area</label><label class="bbaProCheck"><input id="bbaCamLiveFollow" type="checkbox"> Follow selected object</label><div id="bbaCamReadout" class="bbaProBadge">Camera track ready</div><div class="bbaProHint">Keys are stored per frame and interpolated with editable easing. The older camera key system remains compatible.</div>`;
     const currentKey=()=>{const f=activeFrame();return f?Pro.camera.keys[f.id]||null:null};
     const sync=()=>{const state=currentKey()||cameraForFrame(currentFrame);for(const [id,val] of [["bbaCamX",state.x],["bbaCamY",state.y],["bbaCamZoom",state.zoom],["bbaCamRot",state.rotation]])if($(id)&&document.activeElement!==$(id))$(id).value=num(val,0);const k=currentKey()||{};$("bbaCamEase").value=k.ease||Pro.camera.defaultEase;$("bbaCamShake").value=num(k.shake,0);$("bbaCamFreq").value=num(k.frequency,4);$("bbaCamReadout").textContent=k?`Keyed on frame ${currentFrame+1}`:"Using interpolated/legacy camera"};
     const capture=()=>({x:clamp(num($("bbaCamX").value,W/2),-W*8,W*8),y:clamp(num($("bbaCamY").value,H/2),-H*8,H*8),zoom:clamp(num($("bbaCamZoom").value,1),.05,16),rotation:num($("bbaCamRot").value,0),ease:$("bbaCamEase").value,shake:clamp(num($("bbaCamShake").value,0),0,100),frequency:clamp(num($("bbaCamFreq").value,4),.1,30)});
@@ -6545,7 +6629,7 @@ console.info("BBA menu bar ready");
   const effectDefs=[
     ["Blur","blur",0,40],["Glow","glow",0,40],["Drop Shadow","shadow",0,40],["Brightness","brightness",-100,100],["Contrast","contrast",-100,100],["Saturation","saturation",-100,100],["Hue","hue",-180,180],["Grayscale","grayscale",0,100],["Sepia","sepia",0,100],["Invert","invert",0,100],["Opacity","opacity",0,100],["Pixelate","pixelate",1,24],["Sharpen","sharpen",0,3]
   ];
-  function ensureLayerEffects(){for(const l of layers||[]){if(!Array.isArray(l.effects)){l.effects=[];if(l.effect&&l.effect!=="none")l.effects.push(normalizeEffect({type:l.effect,amount:num(l.effectAmount,5)}))}l.effects=l.effects.map((x,i)=>normalizeEffect(Object.assign({},x,{order:i})))}}
+  function ensureLayerEffects(){for(const l of layers||[]){if(!Array.isArray(l.effects)){l.effects=[];if(l.effect&&l.effect!=="none"){l.effects.push(normalizeEffect({type:l.effect,amount:num(l.effectAmount,5)}));l.effect="none"}}l.effects=l.effects.map((x,i)=>normalizeEffect(Object.assign({},x,{order:i})))}}
   function effectFilter(e){const a=num(e.amount,0),alpha=clamp(num(e.opacity,1),0,1);switch(e.type){case"blur":return`blur(${Math.max(0,a/2)}px)`;case"brightness":return`brightness(${100+a}%)`;case"contrast":return`contrast(${100+a}%)`;case"saturation":return`saturate(${100+a}%)`;case"hue":return`hue-rotate(${a}deg)`;case"grayscale":return`grayscale(${clamp(a,0,100)}%)`;case"sepia":return`sepia(${clamp(a,0,100)}%)`;case"invert":return`invert(${clamp(a,0,100)}%)`;case"shadow":return`drop-shadow(${Math.max(1,a*.18)}px ${Math.max(1,a*.22)}px ${Math.max(1,a*.75)}px rgba(0,0,0,.55))`;case"glow":return`drop-shadow(0 0 ${Math.max(1,a/2)}px rgba(255,220,150,.8))`;default:return""}}
   function applyEffectStack(ctx,canvas,effects){const active=(effects||[]).filter(e=>e&&e.enabled!==false);const filters=active.map(effectFilter).filter(Boolean);ctx.filter=filters.join(" ")||"none";const opacity=active.reduce((v,e)=>v*clamp(num(e.opacity,1),0,1),1);return{opacity,active}}
   function pixelateCanvas(src,amount){const factor=clamp(Math.round(num(amount,4)),1,32);if(factor<=1)return src;const w=Math.max(1,Math.floor(src.width/factor)),h=Math.max(1,Math.floor(src.height/factor)),small=document.createElement("canvas");small.width=w;small.height=h;const s=small.getContext("2d");s.imageSmoothingEnabled=false;s.drawImage(src,0,0,w,h);const out=document.createElement("canvas");out.width=src.width;out.height=src.height;const o=out.getContext("2d");o.imageSmoothingEnabled=false;o.drawImage(small,0,0,out.width,out.height);return out}
@@ -6562,7 +6646,7 @@ console.info("BBA menu bar ready");
   if(baseDrawCompositedLayers){ensureLayerEffects();drawCompositedLayers=function(context,frame,frameIndex,includeGuideLayers=false){const anyPro=(layers||[]).some(l=>Array.isArray(l.effects)&&l.effects.some(e=>e&&e.enabled!==false))||(layers||[]).some(l=>Array.isArray(l.masks)&&l.masks.length);if(!anyPro)return baseDrawCompositedLayers.apply(this,arguments);const visible=(layers||[]).filter(l=>l.visible!==false&&(includeGuideLayers||!l.guide));const base=context.getTransform();for(let i=0;i<visible.length;i++){const layer=visible[i],underLayer=visible[i-1],objects=objectsForRender(frameIndex,layer);const view=cameraForFrame(frameIndex),depth=clamp(num(layer.depth,50),0,100),factor=.5+depth/100,dx=-view.x*(factor-1),dy=-view.y*(factor-1);const m={a:base.a,b:base.b,c:base.c,d:base.d,e:base.e+base.a*dx+base.c*dy,f:base.f+base.b*dx+base.d*dy};renderLayerWithEffects(context,layer,frameIndex,m,objects,!includeGuideLayers,underLayer)}}}
 
   function effectsPanel(){
-    const p=addPanel("bbaEffectsPanel","Professional Effects",930,390,300,360),b=p.querySelector(".bbaProBody");if(p.dataset.built)return;ensureLayerEffects();
+    const p=addPanel("bbaEffectsPanel","Effects",930,390,300,360),b=p.querySelector(".bbaProBody");if(p.dataset.built)return;ensureLayerEffects();
     b.innerHTML=`<div class="bbaProToolbar"><button id="bbaFxAdd" class="small primary">Add Effect</button><button id="bbaFxDuplicate" class="small">Duplicate</button><button id="bbaFxClear" class="small">Clear</button><select id="bbaFxQuality" style="flex:1;padding:5px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:5px"><option value="draft">Draft</option><option value="balanced" selected>Balanced</option><option value="full">Full</option></select></div><div id="bbaFxList" class="bbaProList"></div><div id="bbaFxEditor"></div><div class="bbaProHint">Effects are non-destructive layer stacks. Existing single-effect layers are migrated automatically.</div>`;
     const list=$("bbaFxList"),editor=$("bbaFxEditor");
     function render(){ensureLayerEffects();const l=activeLayer();list.innerHTML="";if(!l){list.innerHTML='<div class="bbaProHint">Select a layer to edit its effect stack.</div>';return}if(!l.effects.length){list.innerHTML='<div class="bbaProHint">No effects on this layer.</div>'}for(const fx of l.effects){const row=document.createElement("div");row.className="bbaProListRow"+(fx.id===Pro.effects.selectedId?" active":"");const main=document.createElement("div");main.className="bbaProListMain";const s=document.createElement("strong");s.textContent=effectDefs.find(x=>x[1]===fx.type)?.[0]||fx.type;const d=document.createElement("span");d.textContent=fx.enabled===false?"Disabled":`Amount ${num(fx.amount,0)}`;main.append(s,d);const actions=document.createElement("div");actions.style.display="flex";actions.style.gap="4px";const en=document.createElement("button");en.className="small";en.textContent=fx.enabled===false?"Off":"On";en.onclick=e=>{e.stopPropagation();pushHistory();fx.enabled=fx.enabled===false;renderAll();render()};const del=document.createElement("button");del.className="small";del.textContent="Remove";del.onclick=e=>{e.stopPropagation();pushHistory();l.effects=l.effects.filter(x=>x.id!==fx.id);if(Pro.effects.selectedId===fx.id)Pro.effects.selectedId=l.effects[0]?.id||null;renderAll();render()};actions.append(en,del);row.append(main,actions);row.onclick=()=>{Pro.effects.selectedId=fx.id;render()};list.append(row)}
@@ -6588,7 +6672,7 @@ console.info("BBA menu bar ready");
     const list=$("bbaRigBoneList");if(!rig){list.innerHTML='<div class="bbaProHint">Create a rig from selected objects.</div>'}else for(const bone of rig.bones){const o=objectById(bone.objectId),row=document.createElement("div");row.className="bbaProListRow";const main=document.createElement("div");main.className="bbaProListMain";const s=document.createElement("strong");s.textContent=bone.name||`Bone ${bone.id}`;const d=document.createElement("span");const par=rig.bones.find(x=>x.id===bone.parentBoneId);d.textContent=`${par?"Parent: "+par.name:"Root"} · ${o?"Object "+o.id:"Missing object"}`;main.append(s,d);const edit=document.createElement("button");edit.className="small";edit.textContent="Pose";edit.onclick=()=>{if(o){selected.clear();selected.add(o.id);setTool("rig");renderAll()}};row.append(main,edit);list.append(row)}
     $("bbaRigCreate").onclick=()=>{buildRig();renderAll()};$("bbaRigKey").onclick=()=>{const r=activeRig();if(!r)return;pushHistory();r.poseKeys[frames[currentFrame].id]=captureRigPose(r);writeLS(LS.rig);renderAll();renderRigPanel()};$("bbaRigMirrorX").onclick=()=>{const r=activeRig();if(!r)return;pushHistory();mirrorPose(r,currentFrame,"x");renderAll()};$("bbaRigMirrorY").onclick=()=>{const r=activeRig();if(!r)return;pushHistory();mirrorPose(r,currentFrame,"y");renderAll()};
   }
-  function rigPanel(){const p=addPanel("bbaRigPanel","Professional Rigging",10,350,270,330);if(p.dataset.built)return;p.dataset.built="1";ensureRigData();renderRigPanel()}
+  function rigPanel(){const p=addPanel("bbaRigPanel","Rigging",10,350,270,330);if(p.dataset.built)return;p.dataset.built="1";ensureRigData();renderRigPanel()}
 
   function ensureMasks(){ensureLayerEffects();for(const l of layers||[])if(!Array.isArray(l.masks))l.masks=[];}
   function masksPanel(){
@@ -6608,9 +6692,19 @@ console.info("BBA menu bar ready");
     function build(){host.innerHTML='';const viewport=document.createElement("div");viewport.className="bbaTlViewport";const header=document.createElement("div");header.className="bbaTlHeader";const corner=document.createElement("div");corner.className="bbaTlCorner";corner.textContent="Tracks";header.appendChild(corner);const hs=document.createElement("div");hs.className="bbaTlScrollX";const ruler=document.createElement("div");ruler.className="bbaTlRuler";const cell=Math.max(34,Math.round(52*(Pro.timeline.zoom/100)));host.style.setProperty("--bba-tl-cell",cell+"px");for(let i=0;i<frames.length;i++){const c=document.createElement("div");c.className="bbaTlRulerCell"+(cameraKeyFor(i)?" cameraKey":"");c.innerHTML=`<strong>${i+1}</strong><span>${Math.max(1,num(frames[i].duration,1))}×</span>`;c.title="Click to go to this frame · Shift-click to select a range";c.onclick=ev=>{if(ev.shiftKey&&typeof selectedTimelineFrames!=="undefined"){const a=typeof timelineAnchorFrame==="number"?timelineAnchorFrame:currentFrame,lo=Math.min(a,i),hi=Math.max(a,i);selectedTimelineFrames=new Set();for(let k=lo;k<=hi;k++)selectedTimelineFrames.add(k);const s1=$("timelineLoopStartInput"),e1=$("timelineLoopEndInput");if(s1)s1.value=lo+1;if(e1)e1.value=hi+1}else if(typeof selectedTimelineFrames!=="undefined"){selectedTimelineFrames=new Set([i]);timelineAnchorFrame=i}currentFrame=i;selected.clear();renderAll();build()};ruler.append(c)}hs.appendChild(ruler);header.appendChild(hs);viewport.appendChild(header);
       const body=document.createElement("div");body.className="bbaTlBody";const names=document.createElement("div");names.className="bbaTlNames";const tracks=document.createElement("div");tracks.className="bbaTlTracks";const rows=document.createElement("div");rows.className="bbaTlRows";
       const trackItems=[...(layers||[]).map(l=>({type:"layer",layer:l})),{type:"camera",layer:null}];for(const item of trackItems){const name=document.createElement("div");name.className="bbaTlNameRow";if(item.type==="camera"){name.innerHTML='<div><strong>Camera</strong><small>Keyframes and motion</small></div>'}else{name.innerHTML='<div><strong></strong><small>Layer track</small></div>';name.querySelector("strong").textContent=item.layer.name||`Layer ${item.layer.id}`}names.append(name);if(item.type==="camera"){const row=document.createElement("div");row.className="bbaTlRow";for(let i=0;i<frames.length;i++){const c=document.createElement("div");c.className="bbaTlCell";if(cameraKeyFor(i)){const e=document.createElement("div");e.className="bbaTlExposure key";e.textContent="Key";c.append(e)}row.append(c)}rows.append(row)}else{const row=document.createElement("div");row.className="bbaTlRow";for(let i=0;i<frames.length;i++){const c=document.createElement("div");c.className="bbaTlCell"+(i===currentFrame?" activeFrame":"")+(item.layer.id===currentLayerId?" currentLayer":"");const arr=frames[i].layers?.[item.layer.id]||[];const e=document.createElement("div");e.className="bbaTlExposure"+(arr.length?"":" empty")+(frames[i].keyframes?.length?" key":"");e.title=`Frame ${i+1} · ${arr.length} objects · Hold ${Math.max(1,num(frames[i].duration,1))}×`;e.innerHTML=`<span>${arr.length?arr.length+" object"+(arr.length===1?"":"s"):"Empty"}</span>`;e.onclick=()=>{currentLayerId=item.layer.id;currentFrame=i;selected.clear();renderAll();build()};c.append(e);row.append(c)}rows.append(row)}}
-      names.scrollTop=tracks.scrollTop=0;tracks.appendChild(rows);const playhead=document.createElement("div");playhead.className="bbaTlPlayhead";const updateHead=()=>{playhead.style.left=(currentFrame*cell+cell/2)+"px"};updateHead();tracks.append(playhead);body.append(names,tracks);viewport.appendChild(body);const status=document.createElement("div");status.className="bbaTlStatus";status.textContent=`Frame ${currentFrame+1} / ${frames.length} · ${layers.length} layers · Hold ${Math.max(1,num(frames[currentFrame]?.duration,1))}×`;viewport.appendChild(status);host.append(viewport);names.addEventListener("scroll",()=>{tracks.scrollTop=names.scrollTop});tracks.addEventListener("scroll",()=>{names.scrollTop=tracks.scrollTop});}
+      names.scrollTop=tracks.scrollTop=0;tracks.appendChild(rows);const playhead=document.createElement("div");playhead.className="bbaTlPlayhead";const updateHead=()=>{playhead.style.left=(currentFrame*cell+cell/2)+"px"};updateHead();tracks.append(playhead);body.append(names,tracks);viewport.appendChild(body);const status=document.createElement("div");status.className="bbaTlStatus";status.textContent=`Frame ${currentFrame+1} / ${frames.length} · ${layers.length} layers · Hold ${Math.max(1,num(frames[currentFrame]?.duration,1))}×`;viewport.appendChild(status);host.append(viewport);names.addEventListener("scroll",()=>{tracks.scrollTop=names.scrollTop});tracks.addEventListener("scroll",()=>{names.scrollTop=tracks.scrollTop;hs.scrollLeft=tracks.scrollLeft});
+      hs.style.overflow="hidden";
+      const px=currentFrame*cell;if(px<tracks.scrollLeft||px>tracks.scrollLeft+tracks.clientWidth-cell)tracks.scrollLeft=Math.max(0,px-tracks.clientWidth/2);hs.scrollLeft=tracks.scrollLeft;
+      ruler.addEventListener("pointerdown",ev=>{if(ev.button===0)window.__bbaScrub=true});
+      tracks.addEventListener("wheel",ev=>{
+        if(ev.ctrlKey||ev.metaKey){ev.preventDefault();Pro.timeline.zoom=clamp(Pro.timeline.zoom+(ev.deltaY<0?10:-10),60,240);$("bbaTimelineZoom").value=Pro.timeline.zoom;$("bbaTimelineZoomText").textContent=Pro.timeline.zoom+"%";writeLS(LS.timeline);build();return}
+        if(Math.abs(ev.deltaY)>Math.abs(ev.deltaX)&&tracks.scrollHeight<=tracks.clientHeight+2){ev.preventDefault();tracks.scrollLeft+=ev.deltaY}
+      },{passive:false});}
+    if(!window.__bbaScrubWired){window.__bbaScrubWired=true;
+      document.addEventListener("pointermove",ev=>{if(!window.__bbaScrub||playing)return;const ruler=host.querySelector(".bbaTlRuler");if(!ruler)return;const cell=parseFloat(host.style.getPropertyValue("--bba-tl-cell"))||52,r=ruler.getBoundingClientRect(),idx=clamp(Math.floor((ev.clientX-r.left)/cell),0,frames.length-1);if(idx!==currentFrame){currentFrame=idx;selected.clear();renderAll()}});
+      const endScrub=()=>{window.__bbaScrub=false};document.addEventListener("pointerup",endScrub);document.addEventListener("pointercancel",endScrub)}
     function cameraKeyFor(i){return Pro.camera.keys[frames[i]?.id]||cameraKeys[frames[i]?.id]}
-    $("bbaTimelineProToggle").onclick=()=>{Pro.timeline.mode="pro";writeLS(LS.timeline);host.classList.add("active");panel.classList.add("bbaProMode");$("bbaTimelineProToggle").classList.add("primary");$("bbaTimelineLegacyToggle").classList.remove("primary");build()};$("bbaTimelineLegacyToggle").onclick=()=>{Pro.timeline.mode="legacy";writeLS(LS.timeline);host.classList.remove("active");panel.classList.remove("bbaProMode");$("bbaTimelineLegacyToggle").classList.add("primary");$("bbaTimelineProToggle").classList.remove("primary")};$("bbaTimelineZoom").oninput=e=>{Pro.timeline.zoom=clamp(num(e.target.value,100),60,240);$("bbaTimelineZoomText").textContent=Pro.timeline.zoom+"%";writeLS(LS.timeline);if(host.classList.contains("active"))build()};$("bbaTimelineFit").onclick=()=>{Pro.timeline.zoom=100;$("bbaTimelineZoom").value=100;$("bbaTimelineZoomText").textContent="100%";if(host.classList.contains("active"))build()};$("bbaTimelineAddTrack").onclick=()=>{if(typeof addLayer==="function")addLayer();renderAll();build()};
+    $("bbaTimelineProToggle").onclick=()=>{Pro.timeline.mode="pro";writeLS(LS.timeline);host.classList.add("active");panel.classList.add("bbaProMode");$("bbaTimelineProToggle").classList.add("primary");$("bbaTimelineLegacyToggle").classList.remove("primary");build()};$("bbaTimelineLegacyToggle").onclick=()=>{Pro.timeline.mode="legacy";writeLS(LS.timeline);host.classList.remove("active");panel.classList.remove("bbaProMode");$("bbaTimelineLegacyToggle").classList.add("primary");$("bbaTimelineProToggle").classList.remove("primary")};$("bbaTimelineZoom").oninput=e=>{Pro.timeline.zoom=clamp(num(e.target.value,100),60,240);$("bbaTimelineZoomText").textContent=Pro.timeline.zoom+"%";writeLS(LS.timeline);if(host.classList.contains("active"))build()};$("bbaTimelineFit").onclick=()=>{const tr=host.querySelector(".bbaTlTracks"),avail=tr?tr.clientWidth:Math.max(200,host.clientWidth-150);Pro.timeline.zoom=clamp(Math.round(avail/Math.max(1,frames.length)/52*100),60,240);$("bbaTimelineZoom").value=Pro.timeline.zoom;$("bbaTimelineZoomText").textContent=Pro.timeline.zoom+"%";writeLS(LS.timeline);if(host.classList.contains("active"))build()};$("bbaTimelineAddTrack").onclick=()=>{if(typeof addLayer==="function")addLayer();renderAll();build()};
     if(Pro.timeline.mode!=="legacy"){$("bbaTimelineProToggle").click()}else $("bbaTimelineLegacyToggle").click();window.__bbaRenderProTimeline=build;const baseRenderTimelinePro=typeof renderTimeline==="function"?renderTimeline:null;if(baseRenderTimelinePro){renderTimeline=function(){const r=baseRenderTimelinePro.apply(this,arguments);if(Pro.timeline.mode!=="legacy")setTimeout(()=>window.__bbaRenderProTimeline?.(),0);return r}}
   }
 
@@ -6630,7 +6724,7 @@ console.info("BBA menu bar ready");
     const incoming=st&&typeof st==="object"?st:{};
     const clearAndAssign=(target,value)=>{for(const key of Object.keys(target))delete target[key];Object.assign(target,value||{})};
     clearAndAssign(Pro.brush,Object.assign({enabled:true,current:defaultBrush(),library:[]},incoming.brush||{}));if(typeof Pro.brush.enabled!=="boolean")Pro.brush.enabled=true;
-    clearAndAssign(Pro.camera,Object.assign({enabled:true,keys:{},safeMargin:.08,guides:true,defaultEase:"ease-in-out",followSelected:false},incoming.camera||{}));
+    clearAndAssign(Pro.camera,Object.assign({enabled:true,keys:{},safeMargin:.08,guides:false,defaultEase:"ease-in-out",followSelected:false},incoming.camera||{}));
     clearAndAssign(Pro.effects,Object.assign({version:1,quality:"balanced",selectedId:null},incoming.effects||{}));
     clearAndAssign(Pro.rig,Object.assign({version:2,rigs:[],activeRigId:null,overlay:true},incoming.rig||{}));
     clearAndAssign(Pro.masks,Object.assign({version:2},incoming.masks||{}));
@@ -6655,8 +6749,9 @@ console.info("BBA menu bar ready");
   if(baseProjectState){projectState=function(){const s=baseProjectState();const pro=serializePro();if(pro.recovery)pro.recovery.projectKey=projectId||pro.recovery.projectKey||"";s.bbaPro=pro;s.formatVersion=6;return s}}
   const baseInitProject=typeof initProject==="function"?initProject:null;
   if(baseInitProject){initProject=function(){baseInitProject.apply(this,arguments);Pro.rig.rigs=[];Pro.rig.activeRigId=null;Pro.camera.keys={};Pro.effects.selectedId=null;Pro.timeline.zoom=100;Pro.recovery.projectKey=projectId||uid2("unsaved_");writeLS("bba_pro_recovery_key_v2",Pro.recovery.projectKey);ensureLayerEffects();ensureMasks();ensureRigData();Pro.dirty=true}}
+  {const basePro=typeof snapshot==="function"?snapshot:null;if(basePro)snapshot=function(){const s=basePro.apply(this,arguments);try{s.bbaPro=deepCopy(serializePro())}catch{}return s}}
   const baseRestore=typeof restore==="function"?restore:null;
-  if(baseRestore){restore=function(s){baseRestore.apply(this,arguments);restorePro(s?.bbaPro||null);Pro.recovery.projectKey=projectId||uid2("restored_");writeLS("bba_pro_recovery_key_v2",Pro.recovery.projectKey);ensureLayerEffects();ensureMasks();ensureRigData();renderRigPanel();if(typeof window.__bbaRenderProTimeline==="function")window.__bbaRenderProTimeline()}}
+  if(baseRestore){restore=function(s){baseRestore.apply(this,arguments);if(s?.bbaPro||!s?.layers)restorePro(s?.bbaPro||null);Pro.recovery.projectKey=projectId||uid2("restored_");writeLS("bba_pro_recovery_key_v2",Pro.recovery.projectKey);ensureLayerEffects();ensureMasks();ensureRigData();renderRigPanel();if(typeof window.__bbaRenderProTimeline==="function")window.__bbaRenderProTimeline()}}
   const baseOpenProject=typeof openProject==="function"?openProject:null;
   if(baseOpenProject){openProject=function(id){baseOpenProject.apply(this,arguments);const p=loadProjects().find(x=>x.id===id);restorePro(p?.state?.bbaPro||null);Pro.recovery.projectKey=projectId||id||uid2("project_");writeLS("bba_pro_recovery_key_v2",Pro.recovery.projectKey);ensureLayerEffects();ensureMasks();ensureRigData();Pro.dirty=false;renderRigPanel();if(typeof window.__bbaRenderProTimeline==="function")window.__bbaRenderProTimeline()}}
   const baseSaveCurrent=typeof saveCurrent==="function"?saveCurrent:null;
@@ -6745,6 +6840,7 @@ console.info("BBA menu bar ready");
   const visible=()=>allPanels().filter(p=>!p.classList.contains("is-hidden")&&!p.classList.contains("tab-hidden")&&!p.classList.contains("collapsed"));
   const setRect=(p,x,y,w,h)=>{p.style.left=Math.max(0,Math.round(x))+"px";p.style.top=Math.max(0,Math.round(y))+"px";p.style.width=Math.max(170,Math.round(w))+"px";p.style.height=Math.max(90,Math.round(h))+"px"};
   function fitWidgetsTogether(){
+    if(window.__bbaStudio?.active()){window.__bbaStudio.relayout();return true}
     const root=$("workspace");if(!root)return false;const w=root.clientWidth,h=root.clientHeight;if(w<320||h<240)return false;
     const ps=visible(),canvas=$("canvasPanel"),timeline=$("timelinePanel"),gap=0;
     let th=timeline?Math.max(180,Math.min(320,timeline.offsetHeight||230)):0;if(timeline){th=Math.min(th,h-170);setRect(timeline,0,h-th,w,th)}
@@ -6808,11 +6904,10 @@ console.info("BBA menu bar ready");
   const oldwp=$("workspacePresetsBtn");if(oldwp){oldwp.textContent="Workspace Presets";oldwp.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();openPresets()},true)}
 
   /* Add the same control to the Window menu when the command registry is present. */
-  try{BBA.commands.register({id:"window.settings",label:"Window Settings…",category:"Window",run:openWindowSettings,menu:"Window",order:6,keywords:"fit widgets dock pack layout"})}catch{}
+  try{BBA.commands.register({id:"window.settings",label:"Window Settings…",category:"Window",run:openWindowSettings,menu:"Window",order:7,keywords:"fit widgets dock pack layout"})}catch{}
   autoFit=!!readSettings().autoFitWidgets;
 })();
 </script>
-</body>
 
 <style id="bba-navigation-v3">
 /* Navigation / learning-curve layer. Additive only: original panels stay in the DOM. */
@@ -6868,6 +6963,7 @@ console.info("BBA menu bar ready");
 .bbaNavTask{padding:9px;border:1px solid var(--border);border-radius:7px;background:var(--bg);text-align:left}
 .bbaNavTask strong{display:block;font-size:11px}
 .bbaNavTask span{display:block;font-size:9px;color:var(--muted);line-height:1.35;margin-top:3px}
+#workspaceBtn,#workspacePresetsTopBtn,#workspacePresetsBtn,#widgetLibraryBtn{display:none!important}
 .bbaNavHidden{display:none!important}
 :root[data-bba-nav-mode="beginner"] .bbaNavMoreTools{border-color:var(--border)}
 :root[data-bba-nav-mode="beginner"] #bbaAdvancedTransform{display:none!important}
@@ -7146,6 +7242,7 @@ console.info("BBA menu bar ready");
     return m;
   }
 
+  window.__bbaStartHere=()=>openStartHereGuide();
   function openStartHereGuide(){
     const body=document.createElement("div");
     body.innerHTML='<div class="bbaNavGuide"><strong>Start with the basics</strong><p>Animation Studio keeps advanced systems available, but you only need a few tools for everyday drawing and animation.</p></div><div class="bbaNavGuideSteps"><div class="bbaNavGuideStep"><div class="bbaNavGuideNum">1</div><div><strong>Draw</strong><span>Choose Brush from the Drawing panel, pick a color, and draw on the canvas.</span></div></div><div class="bbaNavGuideStep"><div class="bbaNavGuideNum">2</div><div><strong>Animate</strong><span>Use the Timeline to add frames and the Playback controls to preview them.</span></div></div><div class="bbaNavGuideStep"><div class="bbaNavGuideNum">3</div><div><strong>Improve your drawing</strong><span>Turn on Onion Skin when you need to compare nearby frames.</span></div></div><div class="bbaNavGuideStep"><div class="bbaNavGuideNum">4</div><div><strong>Find anything</strong><span>Press Ctrl+K, type what you are looking for, and choose the result. The program will open the right panel for you.</span></div></div><div class="bbaNavGuideStep"><div class="bbaNavGuideNum">5</div><div><strong>Grow into advanced tools</strong><span>Camera, effects, rigging, masks, and the professional brush engine are kept in the Advanced panel group.</span></div></div></div>';
@@ -7316,20 +7413,10 @@ console.info("BBA menu bar ready");
       const current=captureCurrentLayoutForBackup();
       if(current)localStorage.setItem(NAV_BACKUP_KEY,JSON.stringify(current));
     }catch(error){console.warn("[BBA Navigation] backup failed",error)}
-    let attempts=0;
-    const applyWhenReady=()=>{
-      const ws=$("workspace"),editor=$("editorView");
-      const visible=!!ws&&ws.clientWidth>0&&ws.clientHeight>0&&(!editor||getComputedStyle(editor).display!=="none");
-      if(visible||attempts>=80){
-        applyRecommendedLayout("animation");
-        applyMode("standard");
-        localStorage.setItem(NAV_MIGRATION_KEY,"1");
-        return;
-      }
-      attempts++;
-      setTimeout(applyWhenReady,250);
-    };
-    applyWhenReady();
+    /* No delayed layout swap: keep whatever layout is already on screen (the built-in default for new users). */
+    localStorage.setItem(NAV_MIGRATION_KEY,"1");
+    /* First run only: once the editor and Pro panels exist, hide the advanced panel group (Standard mode). */
+    let tries=0;const settle=()=>{const ready=$("bbaBrushStudioPanel")&&$("workspace")&&$("workspace").clientWidth>0;if(ready||tries++>40){try{for(const id of["bbaBrushStudioPanel","bbaCameraPanel","bbaEffectsPanel","bbaRigPanel","bbaMasksPanel"])$(id)?.classList.add("is-hidden");applyMode(currentMode(),false);if(typeof savePanelLayout==="function")savePanelLayout()}catch{}return}setTimeout(settle,150)};settle();
   }
 
   function boot(){
@@ -7512,4 +7599,393 @@ console.info("BBA menu bar ready");
 
 })();
 </script>
+<script id="bba-batch3-script">
+(function(){
+  "use strict";
+  /* ---- Precise hit-testing: strokes by distance, images by alpha, unfilled shapes by outline ---- */
+  const baseHit=pointInObject;
+  const alphaCache=new WeakMap();
+  function imageAlphaAt(o,u,v){
+    const img=IMAGE_CACHE.get(o.src);if(!img||!img.complete||!img.naturalWidth)return true;
+    let rec=alphaCache.get(img);
+    if(!rec){const c=document.createElement("canvas");c.width=img.naturalWidth;c.height=img.naturalHeight;const g=c.getContext("2d",{willReadFrequently:true});g.drawImage(img,0,0);rec={g,w:c.width,h:c.height};alphaCache.set(img,rec)}
+    const px=Math.max(0,Math.min(rec.w-1,Math.floor(u*rec.w))),py=Math.max(0,Math.min(rec.h-1,Math.floor(v*rec.h)));
+    try{return rec.g.getImageData(px,py,1,1).data[3]>16}catch{return true}
+  }
+  function segDist(px,py,a,b){const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy;let t=l?((px-a.x)*dx+(py-a.y)*dy)/l:0;t=Math.max(0,Math.min(1,t));return Math.hypot(px-(a.x+t*dx),py-(a.y+t*dy))}
+  pointInObject=function(x,y,o){
+    if(isEraserObject(o)||!baseHit(x,y,o))return false;
+    try{
+      const p=objectPivot(o),r=-(o.rotation||0)*Math.PI/180,c=Math.cos(r),s=Math.sin(r),dx=x-(o.x||0)-p.x,dy=y-(o.y||0)-p.y,sx=o.scaleX||1,sy=o.scaleY||1,lx=(dx*c-dy*s)/sx+p.x,ly=(dx*s+dy*c)/sy+p.y;
+      const tol=(Math.max(4,(o.width||1)/2+2))/Math.min(Math.abs(sx),Math.abs(sy)||1);
+      if((o.type==="stroke"||o.type==="line")&&o.points?.length){
+        if(o.points.length===1)return Math.hypot(lx-o.points[0].x,ly-o.points[0].y)<=tol;
+        for(let i=1;i<o.points.length;i++)if(segDist(lx,ly,o.points[i-1],o.points[i])<=tol)return true;
+        return false;
+      }
+      if(o.type==="image"&&o.src){const b=objectLocalBounds(o);if(!b||!b.width||!b.height)return true;return imageAlphaAt(o,(lx-b.minX)/b.width,(ly-b.minY)/b.height)}
+      if((o.type==="rectangle"||o.type==="ellipse")&&!o.isFilledShape){
+        const b=objectLocalBounds(o);if(!b)return true;
+        if(o.type==="rectangle"){const inner=lx>b.minX+tol&&lx<b.maxX-tol&&ly>b.minY+tol&&ly<b.maxY-tol;return!inner}
+        const cx=(b.minX+b.maxX)/2,cy=(b.minY+b.maxY)/2,rx=Math.max(1,b.width/2),ry=Math.max(1,b.height/2),n=Math.hypot((lx-cx)/rx,(ly-cy)/ry);return Math.abs(n-1)*Math.min(rx,ry)<=tol+2;
+      }
+    }catch{}
+    return true;
+  };
+
+  /* ---- Polygon / star controls ---- */
+  const fillRow=document.getElementById("shapeFill")?.closest("label");
+  if(fillRow&&!document.getElementById("polygonSidesInput")){
+    const row=document.createElement("div");row.className="propertyLine";
+    row.innerHTML='<span title="Number of sides for the Polygon tool and points for the Star tool">Polygon sides / Star points</span><span style="display:flex;gap:4px"><input id="polygonSidesInput" type="number" min="3" max="24" value="'+polygonSides+'" style="width:52px"><input id="starPointsInput" type="number" min="3" max="24" value="'+starPoints+'" style="width:52px"></span>';
+    fillRow.after(row);
+    row.querySelector("#polygonSidesInput").oninput=e=>{polygonSides=Math.max(3,Math.min(24,Number(e.target.value)||6))};
+    row.querySelector("#starPointsInput").oninput=e=>{starPoints=Math.max(3,Math.min(24,Number(e.target.value)||5))};
+  }
+
+  /* ---- Text: measured size + double-click to edit ---- */
+  const mc=document.createElement("canvas").getContext("2d");
+  function remeasure(o){
+    const key=o.text+"|"+o.fontFamily+"|"+o.fontSize+"|"+o.fontWeight;if(o._m===key)return;
+    mc.font=`${o.fontWeight||400} ${o.fontSize||48}px ${o.fontFamily||"Arial"}`;
+    const lines=String(o.text||"").split("\n"),w=Math.max(20,...lines.map(t=>mc.measureText(t).width)),h=(o.fontSize||48)*1.25*lines.length;
+    o.points=[{x:-w/2,y:-h/2},{x:w/2,y:h/2}];o._m=key;
+  }
+  registerRenderStep(()=>{try{const f=activeFrame();for(const l of layers)for(const o of (f.layers[l.id]||[]))if(o&&o.type==="text")remeasure(o)}catch{}},"pre");
+  canvas.addEventListener("dblclick",e=>{
+    const hit=topObjectAt(...Object.values(getCanvasPoint(e)));
+    if(!hit||hit.type!=="text")return;
+    if(!canEditObjects([hit]))return;
+    askText("Edit Text","Text:",hit.text,"Apply",v=>{pushHistory();hit.text=v;remeasure(hit);selected.clear();selected.add(hit.id);renderAll()});
+  });
+
+  /* ---- Brush-size cursor ---- */
+  const ring=document.createElement("div");
+  ring.style.cssText="position:fixed;pointer-events:none;border:1px solid rgba(0,0,0,.8);box-shadow:0 0 0 1px rgba(255,255,255,.8);border-radius:50%;display:none;z-index:99999;transform:translate(-50%,-50%)";
+  document.body.appendChild(ring);
+  const usesRing=()=>tool==="brush"||tool==="eraser";
+  function place(e){
+    if(!usesRing()||playing){ring.style.display="none";canvas.style.cursor="";return}
+    const scale=Math.max(.05,(zoom/100)*canvasFitScale),d=Math.max(4,brushSize*scale);
+    ring.style.width=ring.style.height=d+"px";ring.style.left=e.clientX+"px";ring.style.top=e.clientY+"px";ring.style.display="block";canvas.style.cursor="none";
+  }
+  canvas.addEventListener("pointermove",place);canvas.addEventListener("pointerenter",place);
+  canvas.addEventListener("pointerleave",()=>{ring.style.display="none"});
+  /* Show the Start Here guide once, the first time someone enters the editor */
+  const baseEnter=enterEditor;
+  enterEditor=function(){
+    const r=baseEnter.apply(this,arguments);
+    try{if(!localStorage.getItem("bba_start_here_seen")){localStorage.setItem("bba_start_here_seen","1");setTimeout(()=>window.__bbaStartHere?.(),700)}}catch{}
+    return r;
+  };
+  /* ---- Merge duplicated systems: one name per feature, legacy layer-effect controls folded into Effects ---- */
+  function mergeSystems(){
+    const names={bbaBrushStudioPanel:"Brush Engine",bbaCameraPanel:"Camera",bbaEffectsPanel:"Effects",bbaRigPanel:"Rigging",bbaMasksPanel:"Layer Masks"};
+    for(const[id,name]of Object.entries(names)){const t=document.querySelector("#"+id+" .panelTitle");if(t&&t.textContent!==name){t.textContent=name}}
+    for(const id of["layerEffect","layerEffectAmount"]){const row=document.getElementById(id)?.closest(".propertyLine");if(row&&!row.dataset.merged){row.dataset.merged="1";row.style.display="none"}}
+    const lt=document.querySelector("#brushesPanel .panelTitle");if(lt&&lt.textContent==="Pens & Brushes")lt.textContent="Pens (quick)";
+  }
+  mergeSystems();setTimeout(mergeSystems,600);setTimeout(mergeSystems,2500);
+  /* ---- Navigation: cursor-centred wheel zoom, Fit / 1:1, frame jump keys ---- */
+  function zoomAt(factor,cx,cy){
+    const vr=viewport.getBoundingClientRect(),c={x:vr.left+vr.width/2,y:vr.top+vr.height/2},s=(zoom/100)*canvasFitScale;
+    setZoom(zoom*factor);const s2=(zoom/100)*canvasFitScale,k=1-s2/s;
+    panX+=(cx-c.x)*k;panY+=(cy-c.y)*k;setCanvasViewportTransform();
+  }
+  const area=document.getElementById("canvasArea");
+  area?.addEventListener("wheel",e=>{
+    const mouseWheel=e.deltaMode!==0||(e.deltaX===0&&Number.isInteger(e.deltaY)&&Math.abs(e.deltaY)>=50);
+    if(e.ctrlKey||e.metaKey||(mouseWheel&&!e.shiftKey)){
+      e.preventDefault();e.stopImmediatePropagation();
+      zoomAt(Math.pow(1.0018,-Math.max(-200,Math.min(200,e.deltaY))*(e.ctrlKey?2.5:1)),e.clientX,e.clientY);
+    }else if(mouseWheel&&e.shiftKey){
+      e.preventDefault();e.stopImmediatePropagation();panX-=e.deltaY;setCanvasViewportTransform();
+    }
+  },{passive:false,capture:true});
+  const zr=document.getElementById("zoomReset");
+  if(zr&&!document.getElementById("zoomFit")){
+    const fit=document.createElement("button"),one=document.createElement("button");
+    fit.className=one.className="small";fit.id="zoomFit";fit.textContent="Fit";fit.title="Fit the whole canvas in view (F)";
+    one.id="zoomActual";one.textContent="1:1";one.title="Actual size, one canvas pixel per screen pixel (Ctrl+1)";
+    fit.onclick=()=>{panX=0;panY=0;updateCanvasFitScale();setZoom(100)};
+    one.onclick=()=>{panX=0;panY=0;setZoom(100/canvasFitScale)};
+    zr.before(fit,one);
+  }
+  document.addEventListener("keydown",e=>{
+    const t=e.target,typing=t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable);
+    if(typing||document.querySelector("#modalRoot .modal"))return;
+    if((e.ctrlKey||e.metaKey)&&e.key==="1"){e.preventDefault();panX=0;panY=0;setZoom(100/canvasFitScale);return}
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    const go=i=>{currentFrame=Math.max(0,Math.min(frames.length-1,i));selected.clear();renderAll()};
+    if(e.key===","){e.preventDefault();go(currentFrame-1)}
+    else if(e.key==="."){e.preventDefault();go(currentFrame+1)}
+    else if(e.key==="Home"){e.preventDefault();go(0)}
+    else if(e.key==="End"){e.preventDefault();go(frames.length-1)}
+    else if(e.key==="k"||e.key==="K"){e.preventDefault();document.getElementById(e.shiftKey?"prevKeyframeBtn":"nextKeyframeBtn")?.click()}
+  });
+  console.info("[BBA] Batch 3 loaded");
+})();
+</script>
+<script id="bba-studio-layout-script">
+/* Studio Layout: a fixed, locked, docked workspace modelled on Adobe Animate and Toon Boom Harmony.
+   Tools strip on the left, stage in the middle, tabbed docks on the right, timeline along the bottom. */
+(function(){
+  "use strict";
+  const KEY="bba_studio_layout_v1",PREV_LAYOUT="bba_studio_prev_layout_v1",PREV_THEME="bba_studio_prev_theme_v1",MATTE_KEY="bba_studio_matte_v1";
+  const root=document.documentElement,$=id=>document.getElementById(id);
+  const ls={get:k=>{try{return localStorage.getItem(k)}catch{return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch{}},del:k=>{try{localStorage.removeItem(k)}catch{}}};
+  const TOOLS_W=46;
+  const DOCKS=[
+    {name:"properties",weight:.5,ids:["propertiesPanel","brushesPanel","colorPanel","symmetryPanel","appearancePanel"],active:"propertiesPanel"},
+    {name:"library",weight:.5,ids:["layersPanel","objectsPanel","playbackPanel","onionPanel","navigatorPanel"],active:"layersPanel"}
+  ];
+  const FIXED=new Set(["canvasPanel","toolsPanel","timelinePanel"]);
+  let applied=false,applying=false,relayoutTimer=0;
+
+  /* ---------- styles ---------- */
+  const css=document.createElement("style");css.id="bba-studio-layout-style";css.textContent=`
+  .toolGlyph{display:inline-flex;width:18px;height:18px;flex:0 0 18px;align-items:center;justify-content:center}
+  .toolGlyph svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  #toolsPanel .toolChoice,#toolsPanel #quickUndo,#toolsPanel #quickRedo,#toolsPanel #quickDelete,#toolsPanel #quickDeselect{display:flex;align-items:center;gap:7px;text-align:left}
+  @container (max-width:110px){
+    #toolsPanel .toolLabel,#toolsPanel .hint,#toolsPanel .widgetSectionTitle{display:none}
+    #toolsPanel .widgetButtonGrid{grid-template-columns:minmax(0,1fr);gap:3px}
+    #toolsPanel .toolChoice,#toolsPanel #quickUndo,#toolsPanel #quickRedo,#toolsPanel #quickDelete,#toolsPanel #quickDeselect{justify-content:center;padding:0;height:32px;min-height:0}
+  }
+  :root[data-bba-studio="1"] .panel{border-radius:0;box-shadow:none!important;min-width:0}
+  :root[data-bba-studio="1"] .panel .panelClose,:root[data-bba-studio="1"] .panel .panelResizeHandle{display:none!important}
+  :root[data-bba-studio="1"] .panelHeader{cursor:default}
+  :root[data-bba-studio="1"] .panel:not(#canvasPanel) .panelBody{zoom:var(--studio-scale,.95)!important}
+  :root[data-bba-studio="1"] #toolsPanel .panelHeader{display:none}
+  :root[data-bba-studio="1"] #toolsPanel .panelBody{height:100%;padding:6px 5px;zoom:1!important;overflow-x:hidden}
+  :root[data-bba-studio="1"] #toolsPanel .widgetButtonGrid+.widgetButtonGrid{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+  :root[data-bba-studio="1"] #timelinePanel{min-width:0}
+  :root[data-bba-studio="1"] .panelTab{padding:0 7px;letter-spacing:0;font-size:10px}
+  :root[data-bba-studio="1"] #toolsPanel .bbaNavMoreTools{padding:2px;font-size:8px;line-height:1.1;min-height:0;height:auto}
+  .studioCustomRow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:4px 0 6px}
+  `;
+  document.head.appendChild(css);
+
+  /* ---------- tool glyphs (so the tools column can shrink to icons) ---------- */
+  const G={
+    brush:'<path d="M18.5 3.5l2 2L10 16l-3 1 1-3z"/><path d="M6.5 18C6 20 4.5 20.5 3 20.5"/>',
+    line:'<path d="M5 19L19 5"/>',
+    rectangle:'<rect x="5" y="6.5" width="14" height="11"/>',
+    ellipse:'<ellipse cx="12" cy="12" rx="8" ry="6"/>',
+    polygon:'<path d="M12 4l7 5-3 9H8L5 9z"/>',
+    star:'<path d="M12 3.5l2.6 5.5 6 .8-4.4 4.1 1.1 6L12 17l-5.3 2.9 1.1-6L3.4 9.8l6-.8z"/>',
+    lasso:'<path d="M12 5c4.4 0 8 1.6 8 4.5S16.400 15 12 15 4 12.400 4 9.500 7.600 5 12 5z"/><path d="M12 15c0 2.200-1 3.500-3 4.500"/>',
+    transform:'<path d="M6 3.500l12 7-5.500 1.500L10 18z"/>',
+    node:'<path d="M4.500 17.500C8 7 16 7 19.500 17.500"/><rect x="2.500" y="16" width="4" height="4"/><rect x="17.500" y="16" width="4" height="4"/>',
+    eyedropper:'<path d="M15 4.500l4.500 4.500-3 1-8.500 8.500-3.500 1 1-3.500 8.500-8.500z"/>',
+    bucket:'<path d="M5 12.500l7-8 7 7-7 7z"/><path d="M20 15.500c1.200 2 1.200 3.500 0 3.500s-1.200-1.500 0-3.500z"/>',
+    camera:'<rect x="3" y="7" width="12.500" height="10"/><path d="M15.500 11l5.500-3v8l-5.500-3"/>',
+    rig:'<circle cx="7" cy="17" r="2.200"/><circle cx="17" cy="7" r="2.200"/><path d="M8.600 15.400l6.800-6.800"/>',
+    "rig-ik":'<circle cx="6" cy="18" r="2"/><circle cx="12" cy="8" r="2"/><circle cx="19" cy="14" r="2"/><path d="M7 16l4-6M13.800 9.200L18 12.300"/>',
+    undo:'<path d="M10 6.500L5 11.500l5 5"/><path d="M5 11.500h9a5 5 0 0 1 0 10"/>',
+    redo:'<path d="M14 6.500l5 5-5 5"/><path d="M19 11.500h-9a5 5 0 0 0 0 10"/>',
+    delete:'<path d="M5 7h14M9 7V4.500h6V7M7 7l1 13h8l1-13"/>',
+    deselect:'<rect x="5" y="5" width="14" height="14" stroke-dasharray="3 2.500"/>'
+  };
+  function addGlyphs(){
+    const panel=$("toolsPanel");if(!panel)return;
+    const targets=[...panel.querySelectorAll(".toolChoice[data-tool]")].map(b=>[b,b.dataset.tool]).concat([["quickUndo","undo"],["quickRedo","redo"],["quickDelete","delete"],["quickDeselect","deselect"]].map(([id,g])=>[$(id),g]));
+    for(const [b,g] of targets){
+      if(!b||b.querySelector(".toolGlyph")||!G[g])continue;
+      const label=b.textContent.trim();b.title=label;b.setAttribute("aria-label",label);
+      const gl=document.createElement("span");gl.className="toolGlyph";gl.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+G[g]+'</svg>';
+      const tx=document.createElement("span");tx.className="toolLabel";tx.textContent=label;
+      b.textContent="";b.append(gl,tx);
+    }
+  }
+
+  /* Short tab names so five tabs fit the dock width. */
+  const SHORT={propertiesPanel:"Properties",brushesPanel:"Pens",colorPanel:"Color",symmetryPanel:"Symmetry",appearancePanel:"Theme",layersPanel:"Layers",objectsPanel:"Objects",playbackPanel:"Playback",onionPanel:"Onion",navigatorPanel:"Navigator",guidesPanel:"Guides",createPanel:"Create",projectPanel:"Project"};
+  function shortenTabs(){
+    if(!locked())return;
+    document.querySelectorAll(".panelTab[data-tab-panel]").forEach(t=>{const n=SHORT[t.dataset.tabPanel];if(n&&t.textContent!==n){t.title=t.title||t.textContent;t.textContent=n}});
+  }
+  /* ---------- helpers ---------- */
+  const allIds=()=>(typeof workspacePanelIds!=="undefined"?workspacePanelIds:[]).filter(id=>$(id));
+  const isHidden=id=>{const p=$(id);return !p||p.classList.contains("is-hidden")};
+  const wsSize=()=>{const ws=$("workspace");return{w:ws?.clientWidth||0,h:ws?.clientHeight||0}};
+  const locked=()=>root.dataset.bbaStudio==="1";
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  function place(id,l,t,w,h,z){
+    const p=$(id);if(!p)return;
+    p.classList.remove("collapsed");const body=p.querySelector(".panelBody");if(body&&body.style.display==="none")body.style.display="";
+    p.style.left=Math.round(l)+"px";p.style.top=Math.round(t)+"px";p.style.width=Math.max(0,Math.round(w))+"px";p.style.height=Math.max(0,Math.round(h))+"px";p.style.zIndex=String(z);
+  }
+  /* The docks that currently exist: fixed membership plus any other panel the person has opened since (they join the library dock). */
+  function dockPlan(){
+    const docks=DOCKS.map(d=>({...d,ids:d.ids.filter(id=>$(id)&&!isHidden(id))}));
+    const known=new Set(DOCKS.flatMap(d=>d.ids));
+    for(const id of allIds())if(!FIXED.has(id)&&!known.has(id)&&!isHidden(id))docks[1].ids.push(id);
+    return docks.filter(d=>d.ids.length);
+  }
+  function ensureGroups(plan){
+    const tabs=window.__bbaTabs;if(!tabs)return;
+    const want=plan.filter(d=>d.ids.length>1);
+    const have=tabs.groups();
+    const sig=a=>a.map(g=>g.ids.slice().sort().join("|")).sort().join("||");
+    if(sig(want)===sig(have))return;
+    tabs.restore(want.map(d=>{const old=have.find(g=>g.ids.some(id=>d.ids.includes(id)));return{ids:d.ids,active:old&&d.ids.includes(old.active)?old.active:(d.ids.includes(d.active)?d.active:d.ids[0])}}));
+  }
+
+  /* ---------- layout ---------- */
+  function layout(){
+    const {w,h}=wsSize();if(w<400||h<300)return false;
+    applying=true;
+    try{
+      root.style.setProperty("--studio-scale",String(typeof widgetContentBaseScale==="number"?widgetContentBaseScale:.95));
+      const plan=dockPlan();ensureGroups(plan);
+      const tl=$("timelinePanel"),tlOn=tl&&!isHidden("timelinePanel");
+      const tlH=tlOn?clamp(Math.round(h*.32),220,320):0,mainH=h-tlH;
+      const toolsOn=$("toolsPanel")&&!isHidden("toolsPanel"),toolsW=toolsOn?TOOLS_W:0;
+      const rightW=plan.length?clamp(Math.round(w*.21),270,340):0;
+      const stageW=w-toolsW-rightW;
+      if(toolsOn)place("toolsPanel",0,0,toolsW,mainH,31);
+      place("canvasPanel",toolsW,0,stageW,mainH,35);
+      const totalWeight=plan.reduce((s,d)=>s+d.weight,0)||1;let y=0;
+      plan.forEach((d,i)=>{
+        const hh=i===plan.length-1?mainH-y:Math.round(mainH*d.weight/totalWeight);
+        d.ids.forEach(id=>place(id,toolsW+stageW,y,rightW,hh,id===(plan[i].active)?38:37));
+        y+=hh;
+      });
+      if(tlOn)place("timelinePanel",0,mainH,w,tlH,40);
+      shortenTabs();try{updateCanvasFitScale()}catch{}
+    }finally{
+      applying=false;
+      try{obs.takeRecords()}catch{}
+    }
+    return true;
+  }
+  function scheduleRelayout(){clearTimeout(relayoutTimer);relayoutTimer=setTimeout(()=>{if(locked()&&applied)layout()},30)}
+
+  /* ---------- enter / leave ---------- */
+  function savePrevLayout(){
+    if(ls.get(PREV_LAYOUT))return;
+    try{ls.set(PREV_LAYOUT,JSON.stringify(capturePanelLayout()))}catch{}
+  }
+  function enterLayout(){
+    if(applied)return;
+    const {w,h}=wsSize();if(w<400||h<300)return;           /* editor not on screen yet: the ResizeObserver will retry */
+    applying=true;
+    try{
+      const tabs=window.__bbaTabs;tabs?.ungroup();
+      const members=new Set(DOCKS.flatMap(d=>d.ids));
+      for(const id of allIds()){
+        const p=$(id);if(!p)continue;
+        p.classList.remove("collapsed");
+        if(FIXED.has(id)||members.has(id))p.classList.remove("is-hidden");else p.classList.add("is-hidden");
+      }
+      /* Pro panels that may not exist yet stay out until opened. */
+      applied=true;
+    }finally{applying=false;try{obs.takeRecords()}catch{}}
+    layout();
+    setTimeout(layout,250);setTimeout(layout,900);
+    try{updateAllPanelContentScales?.()}catch{}
+  }
+  function leaveLayout(){
+    applied=false;
+    const prevRaw=ls.get(PREV_LAYOUT);ls.del(PREV_LAYOUT);
+    applying=true;
+    try{
+      window.__bbaTabs?.ungroup();
+      let prev=null;try{prev=prevRaw?JSON.parse(prevRaw):null}catch{}
+      if(prev){
+        for(const id of allIds()){if(prev[id])restorePanelState($(id),prev[id])}
+        if(Array.isArray(prev.__tabGroups))window.__bbaTabs?.restore(prev.__tabGroups);
+      }else if(typeof resetWorkspaceLayout==="function")resetWorkspaceLayout();
+      for(const id of allIds()){const p=$(id);if(p){p.style.minWidth="";}}
+      try{savePanelLayout()}catch{}
+      try{updateAllPanelContentScales()}catch{}
+    }finally{applying=false;try{obs.takeRecords()}catch{}}
+    try{updateCanvasFitScale()}catch{}
+  }
+
+  /* ---------- matte grey colours (a normal scheme in the list; never replaces the others) ---------- */
+  const wantMatte=()=>ls.get(MATTE_KEY)!=="0";
+  function applyMatte(){
+    if(!window.__applyColorScheme||!window.__colorSchemes)return;
+    const t=window.__colorSchemes.find(x=>x.id==="studio-matte");if(!t)return;
+    const cur=window.__currentColorScheme?.();
+    if(cur&&cur.id==="studio-matte")return;
+    if(!ls.get(PREV_THEME)&&cur)ls.set(PREV_THEME,JSON.stringify(cur));
+    window.__applyColorScheme(t);
+  }
+  function restoreTheme(){
+    const raw=ls.get(PREV_THEME);if(!raw)return;ls.del(PREV_THEME);
+    const cur=window.__currentColorScheme?.();
+    if(!cur||cur.id!=="studio-matte")return;               /* the person already picked something else: leave it */
+    try{window.__applyColorScheme(JSON.parse(raw))}catch{}
+  }
+
+  /* ---------- public switch ---------- */
+  function sync(){
+    $("studioLayoutToggleBtn")&&($("studioLayoutToggleBtn").textContent=locked()?"Turn Off Studio Layout":"Turn On Studio Layout");
+    const a=$("studioLayoutAppearanceBtn");if(a)a.textContent=locked()?"Studio Layout: On (click to unlock)":"Studio Layout";
+    const m=$("studioUseMatte");if(m)m.checked=wantMatte();
+  }
+  function enable(){
+    savePrevLayout();
+    ls.set(KEY,"1");root.dataset.bbaStudio="1";
+    if(wantMatte())applyMatte();
+    enterLayout();sync();
+  }
+  function disable(){
+    ls.del(KEY);delete root.dataset.bbaStudio;
+    if(applied)leaveLayout();else ls.del(PREV_LAYOUT);
+    restoreTheme();sync();
+  }
+  const api={
+    active:()=>locked(),
+    enable,disable,toggle:()=>locked()?disable():enable(),
+    relayout:()=>layout(),
+    wireControls(btn,matte){
+      sync();
+      btn?.addEventListener("click",()=>{api.toggle();sync()});
+      matte?.addEventListener("change",()=>{ls.set(MATTE_KEY,matte.checked?"1":"0");if(locked()){if(matte.checked)applyMatte();else restoreTheme()}});
+    }
+  };
+  window.__bbaStudio=api;
+
+  /* ---------- the lock: no dragging, resizing, detaching or collapsing while Studio Layout is on ---------- */
+  const stop=e=>{e.stopPropagation();e.stopImmediatePropagation()};
+  for(const type of ["pointerdown","mousedown","touchstart"]){
+    window.addEventListener(type,e=>{
+      if(!locked())return;const t=e.target;if(!t||!t.closest)return;
+      if(t.closest(".panelResizeHandle")){e.preventDefault();stop(e);return}
+      const tab=t.closest(".panelTab");
+      if(tab){                                                    /* tabs still switch, but can't be dragged out */
+        if(type==="pointerdown"&&tab.dataset.tabPanel)try{window.__bbaTabs?.focus(tab.dataset.tabPanel)}catch{}
+        e.preventDefault();stop(e);return;
+      }
+      const header=t.closest(".panelHeader");
+      if(header&&!t.closest("button,input,select,textarea,label,a"))stop(e);
+    },true);
+  }
+  window.addEventListener("dblclick",e=>{if(locked()&&e.target?.closest?.(".panelHeader"))stop(e)},true);
+
+  /* If anything else moves, shows or regroups a panel, snap back to the studio arrangement. */
+  const obs=new MutationObserver(()=>{if(applying||!locked()||!applied)return;scheduleRelayout()});
+  function observeAll(){for(const id of allIds()){const p=$(id);if(p&&!p.__studioObs){p.__studioObs=1;obs.observe(p,{attributes:true,attributeFilter:["style","class"]})}}}
+  window.addEventListener("resize",()=>{if(locked()&&applied)scheduleRelayout()});
+  new MutationObserver(()=>shortenTabs()).observe(document.body,{childList:true,subtree:true});
+
+  /* ---------- boot ---------- */
+  function boot(){
+    addGlyphs();observeAll();
+    if(ls.get(KEY)==="1"){root.dataset.bbaStudio="1";if(wantMatte())applyMatte()}
+    const ws=$("workspace");
+    if(ws&&window.ResizeObserver)new ResizeObserver(()=>{observeAll();if(!locked())return;if(!applied)enterLayout();else scheduleRelayout()}).observe(ws);
+    $("studioLayoutAppearanceBtn")?.addEventListener("click",()=>api.toggle());
+    sync();
+    setTimeout(()=>{observeAll();if(locked()&&!applied)enterLayout()},900);
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
+  console.info("[BBA] Studio layout loaded");
+})();
+</script>
+</body>
 </html>
