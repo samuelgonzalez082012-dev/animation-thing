@@ -2859,7 +2859,7 @@ document.getElementById("editorWidgetContentScale")?.addEventListener("input",e=
     {id:"dark",name:"Classic Dark",desc:"The original dark workspace",bg:"#17181a",panel:"#212226",border:"#34363a",text:"#eceded",muted:"#8a8d93",accent:"#7c8bff",accentText:"#111111",canvas:"#ffffff",button:"#212226",hover:"#2a2d32",active:"#33363d",outline:"#ffffff"},
     {id:"paper",name:"Paper",desc:"Warm paper with ink controls",bg:"#efece5",panel:"#fbfaf6",border:"#d1cbbf",text:"#25231f",muted:"#706b61",accent:"#8a5a34",accentText:"#ffffff",canvas:"#ffffff",button:"#f7f4ed",hover:"#ece7dd",active:"#dfd7c9",outline:"#ffffff"},
     {id:"graphite",name:"Graphite",desc:"Neutral charcoal studio",bg:"#242629",panel:"#2d3034",border:"#4c5055",text:"#f0f1f2",muted:"#a7abb0",accent:"#9aa0a6",accentText:"#101214",canvas:"#ffffff",button:"#35393e",hover:"#40454b",active:"#4b5158",outline:"#ffffff"},
-    {id:"studio-matte",name:"Studio Matte Grey",desc:"Flat matte greys for Studio Layout (Animate / Harmony style)",bg:"#585858",panel:"#3a3a3a",border:"#262626",text:"#d9d9d9",muted:"#9b9b9b",accent:"#27a8d8",accentText:"#06222e",canvas:"#ffffff",button:"#474747",hover:"#555555",active:"#626262",outline:"#2a2a2a",outlineWidth:1,buttonText:"#e0e0e0",panelOutline:"#262626",panelOutlineWidth:1,roundness:"square",shadows:"off"},
+    {id:"studio-matte",name:"Studio Matte Grey",desc:"Flat matte greys with a blue accent and warm highlights (Studio Layout)",bg:"#4d4d4d",panel:"#383838",border:"#242424",text:"#d8d8d8",muted:"#929292",accent:"#4a8fd4",accentText:"#ffffff",canvas:"#ffffff",button:"#4b4b4b",hover:"#5a5a5a",active:"#2f6fae",outline:"#2a2a2a",outlineWidth:1,buttonText:"#e2e2e2",panelOutline:"#242424",panelOutlineWidth:1,roundness:"square",shadows:"off"},
     {id:"slate",name:"Slate Blue",desc:"Cool professional blue-gray",bg:"#202833",panel:"#293341",border:"#465463",text:"#eef3f7",muted:"#a6b1bc",accent:"#6ea8fe",accentText:"#07111f",canvas:"#ffffff",button:"#313c49",hover:"#3b4857",active:"#465567",outline:"#ffffff"},
     {id:"ocean",name:"Ocean",desc:"Deep blue with aqua accents",bg:"#0e2430",panel:"#12313f",border:"#2b5667",text:"#e9fbff",muted:"#9cc5d0",accent:"#4fd1c5",accentText:"#08201d",canvas:"#ffffff",button:"#173d4d",hover:"#1d4b5d",active:"#25586b",outline:"#ffffff"},
     {id:"forest",name:"Forest",desc:"Evergreen and moss palette",bg:"#18251d",panel:"#213128",border:"#3e5948",text:"#edf6ef",muted:"#a9c0ad",accent:"#73c991",accentText:"#0a1a10",canvas:"#ffffff",button:"#293b30",hover:"#32483a",active:"#3b5543",outline:"#ffffff"},
@@ -7734,10 +7734,12 @@ console.info("BBA menu bar ready");
   const KEY="bba_studio_layout_v1",PREV_LAYOUT="bba_studio_prev_layout_v1",PREV_THEME="bba_studio_prev_theme_v1",MATTE_KEY="bba_studio_matte_v1";
   const root=document.documentElement,$=id=>document.getElementById(id);
   const ls={get:k=>{try{return localStorage.getItem(k)}catch{return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch{}},del:k=>{try{localStorage.removeItem(k)}catch{}}};
-  const TOOLS_W=46;
+  const TOOLS_W=84;
+  /* Every panel in the app gets a home. Wide screens use two right-hand columns (properties | scene + animation); narrow screens merge them into one. */
   const DOCKS=[
-    {name:"properties",weight:.5,ids:["propertiesPanel","brushesPanel","colorPanel","symmetryPanel","appearancePanel"],active:"propertiesPanel"},
-    {name:"library",weight:.5,ids:["layersPanel","objectsPanel","playbackPanel","onionPanel","navigatorPanel"],active:"layersPanel"}
+    {name:"properties",weight:.55,ids:["propertiesPanel","brushesPanel","colorPanel","bbaBrushStudioPanel","symmetryPanel","createPanel","appearancePanel"],active:"propertiesPanel"},
+    {name:"scene",weight:.5,ids:["layersPanel","objectsPanel","navigatorPanel","projectPanel","guidesPanel"],active:"layersPanel"},
+    {name:"anim",weight:.5,ids:["playbackPanel","onionPanel","bbaCameraPanel","bbaEffectsPanel","bbaRigPanel","bbaMasksPanel"],active:"playbackPanel"}
   ];
   const FIXED=new Set(["canvasPanel","toolsPanel","timelinePanel"]);
   let applied=false,applying=false,relayoutTimer=0;
@@ -7749,7 +7751,7 @@ console.info("BBA menu bar ready");
   #toolsPanel .toolChoice,#toolsPanel #quickUndo,#toolsPanel #quickRedo,#toolsPanel #quickDelete,#toolsPanel #quickDeselect{display:flex;align-items:center;gap:7px;text-align:left}
   @container (max-width:110px){
     #toolsPanel .toolLabel,#toolsPanel .hint,#toolsPanel .widgetSectionTitle{display:none}
-    #toolsPanel .widgetButtonGrid{grid-template-columns:minmax(0,1fr);gap:3px}
+    #toolsPanel .widgetButtonGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}
     #toolsPanel .toolChoice,#toolsPanel #quickUndo,#toolsPanel #quickRedo,#toolsPanel #quickDelete,#toolsPanel #quickDeselect{justify-content:center;padding:0;height:32px;min-height:0}
   }
   :root[data-bba-studio="1"] .panel{border-radius:0;box-shadow:none!important;min-width:0}
@@ -7759,6 +7761,28 @@ console.info("BBA menu bar ready");
   :root[data-bba-studio="1"] #toolsPanel .panelHeader{display:none}
   :root[data-bba-studio="1"] #toolsPanel .panelBody{height:100%;padding:6px 5px;zoom:1!important;overflow-x:hidden}
   :root[data-bba-studio="1"] #toolsPanel .widgetButtonGrid+.widgetButtonGrid{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+  .studioPenSection{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+  .studioPenGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}
+  .studioPen{height:26px;min-height:0;padding:0;display:flex;align-items:center;justify-content:center;color:var(--text)}
+  .studioPen svg{width:30px;height:17px;display:block;overflow:visible}
+  .studioPen.active{box-shadow:inset 0 0 0 1px var(--accent);background:var(--button-active)}
+  .studioTabIcon{display:inline-flex;width:12px;height:12px;margin-right:4px;flex:0 0 12px}
+  .studioTabIcon svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  /* Docks: header grows so many tabs can wrap onto a second line, body fills the rest. */
+  :root[data-bba-studio="1"] .panel.studioDock{display:grid;grid-template-rows:auto minmax(0,1fr)}
+  :root[data-bba-studio="1"] .studioDock .panelHeader{height:auto;min-height:32px;padding:3px 6px 0;align-items:flex-end}
+  :root[data-bba-studio="1"] .studioDock .panelTabs{height:auto;flex-wrap:wrap;overflow:visible;gap:2px 2px}
+  :root[data-bba-studio="1"] .studioDock .panelTab{height:24px;margin-bottom:0;max-width:none;padding:0 7px}
+  :root[data-bba-studio="1"] .studioDock .panelBody{height:auto;min-height:0}
+  /* Tonal tiers so the matte greys have depth: darker headers and fields, blue for active, warm orange for the current item. */
+  :root[data-bba-studio="1"]{--studio-warm:#e8a23a}
+  :root[data-bba-studio="1"] .panelHeader{background:color-mix(in srgb,var(--panel) 72%,#000)!important}
+  :root[data-bba-studio="1"] .panel:not(#canvasPanel) .panelBody{background:var(--panel)}
+  :root[data-bba-studio="1"] input[type=text],:root[data-bba-studio="1"] input[type=number],:root[data-bba-studio="1"] select,:root[data-bba-studio="1"] textarea{background:color-mix(in srgb,var(--panel) 60%,#000)!important;border-color:var(--border)}
+  :root[data-bba-studio="1"] input[type=range],:root[data-bba-studio="1"] input[type=checkbox]{accent-color:var(--accent)}
+  :root[data-bba-studio="1"] .panelTab.active{color:var(--studio-warm);box-shadow:inset 0 2px 0 var(--accent)}
+  :root[data-bba-studio="1"] .objectList button.selected,:root[data-bba-studio="1"] .layerRow.active{color:var(--studio-warm)}
+  :root[data-bba-studio="1"] .widgetSectionTitle{color:color-mix(in srgb,var(--text) 62%,var(--panel))}
   :root[data-bba-studio="1"] #timelinePanel{min-width:0}
   :root[data-bba-studio="1"] .panelTab{padding:0 7px;letter-spacing:0;font-size:10px}
   :root[data-bba-studio="1"] #toolsPanel .bbaNavMoreTools{padding:2px;font-size:8px;line-height:1.1;min-height:0;height:auto}
@@ -7799,12 +7823,33 @@ console.info("BBA menu bar ready");
     }
   }
 
-  /* Short tab names so five tabs fit the dock width. */
-  const SHORT={propertiesPanel:"Properties",brushesPanel:"Pens",colorPanel:"Color",symmetryPanel:"Symmetry",appearancePanel:"Theme",layersPanel:"Layers",objectsPanel:"Objects",playbackPanel:"Playback",onionPanel:"Onion",navigatorPanel:"Navigator",guidesPanel:"Guides",createPanel:"Create",projectPanel:"Project"};
+  /* Short tab names with a small icon, so many tabs fit a dock and are recognisable at a glance. */
+  const SHORT={propertiesPanel:"Properties",brushesPanel:"Pens",colorPanel:"Color",bbaBrushStudioPanel:"Brush Engine",symmetryPanel:"Symmetry",createPanel:"Create",appearancePanel:"Theme",layersPanel:"Layers",objectsPanel:"Objects",navigatorPanel:"Navigator",projectPanel:"Project",guidesPanel:"Guides",playbackPanel:"Playback",onionPanel:"Onion",bbaCameraPanel:"Camera",bbaEffectsPanel:"Effects",bbaRigPanel:"Rig",bbaMasksPanel:"Masks"};
+  const TI={propertiesPanel:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10M4 12h6M14 12h6"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/><circle cx="12" cy="12" r="2"/>',brushesPanel:'<path d="M18.500 3.500l2 2L10 16l-3 1 1-3z"/>',colorPanel:'<circle cx="12" cy="12" r="8"/><path d="M12 4v8l6 4"/>',bbaBrushStudioPanel:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.500 5.500l2 2M16.500 16.500l2 2M18.500 5.500l-2 2M7.500 16.500l-2 2"/>',symmetryPanel:'<path d="M12 3v18" stroke-dasharray="2 2"/><path d="M9 7L4 12l5 5zM15 7l5 5-5 5z"/>',createPanel:'<rect x="4" y="4" width="8" height="8"/><circle cx="16" cy="16" r="4"/>',appearancePanel:'<path d="M12 4a8 8 0 1 0 0 16c1.500 0 2-1 1.500-2s0-2 1.500-2h2A3 3 0 0 0 20 12 8 8 0 0 0 12 4z"/>',layersPanel:'<path d="M12 4l8 4-8 4-8-4zM4 12l8 4 8-4M4 16l8 4 8-4"/>',objectsPanel:'<path d="M12 3l8 4.500v9L12 21l-8-4.500v-9zM12 12l8-4.500M12 12v9M12 12L4 7.500"/>',navigatorPanel:'<circle cx="12" cy="12" r="8"/><path d="M15.500 8.500L13.500 13.500 8.500 15.500l2-5z"/>',projectPanel:'<path d="M3 7h6l2 2h10v10H3z"/>',guidesPanel:'<path d="M4 4h16v16H4zM9.300 4v16M14.700 4v16M4 9.300h16M4 14.700h16"/>',playbackPanel:'<path d="M7 5l12 7-12 7z"/>',onionPanel:'<rect x="4" y="7" width="12" height="12"/><path d="M8 3h12v12" opacity=".6"/>',bbaCameraPanel:'<rect x="3" y="7" width="12.500" height="10"/><path d="M15.500 11l5.500-3v8l-5.500-3"/>',bbaEffectsPanel:'<path d="M12 3l1.800 5.200L19 10l-5.200 1.800L12 17l-1.800-5.200L5 10l5.200-1.800zM18 16l.8 2.200L21 19l-2.200.8L18 22l-.8-2.200L15 19l2.200-.8z"/>',bbaRigPanel:'<circle cx="7" cy="17" r="2.200"/><circle cx="17" cy="7" r="2.200"/><path d="M8.600 15.400l6.800-6.800"/>',bbaMasksPanel:'<circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/>'};
   function shortenTabs(){
     if(!locked())return;
-    document.querySelectorAll(".panelTab[data-tab-panel]").forEach(t=>{const n=SHORT[t.dataset.tabPanel];if(n&&t.textContent!==n){t.title=t.title||t.textContent;t.textContent=n}});
+    document.querySelectorAll(".panelTab[data-tab-panel]").forEach(t=>{
+      const id=t.dataset.tabPanel,n=SHORT[id];if(!n||t.querySelector(".studioTabIcon"))return;
+      t.title=t.title||t.textContent;t.textContent="";
+      if(TI[id]){const i=document.createElement("span");i.className="studioTabIcon";i.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+TI[id]+'</svg>';t.appendChild(i)}
+      t.appendChild(document.createTextNode(n));
+    });
   }
+  /* Every pen as an icon in the tool strip (click to pick it up). */
+  function buildStripPens(){
+    const body=$("toolsPanel")?.querySelector(".panelBody");if(!body||typeof BRUSH_PRESETS==="undefined"||typeof brushPresetIconSvg!=="function")return;
+    body.querySelector(".studioPenSection")?.remove();
+    const sec=document.createElement("div");sec.className="studioPenSection";
+    const grid=document.createElement("div");grid.className="studioPenGrid";
+    let list=[];try{list=[...BRUSH_PRESETS,...loadCustomBrushPresets()]}catch{list=[...BRUSH_PRESETS]}
+    for(const pr of list){
+      const b=document.createElement("button");b.type="button";b.className="small studioPen";b.dataset.brushPreset=pr.name;b.title=pr.name+(pr.desc?" — "+pr.desc:"");b.setAttribute("aria-label",pr.name);
+      b.innerHTML=brushPresetIconSvg(pr);b.classList.toggle("active",typeof currentPen!=="undefined"&&currentPen===pr.name);
+      b.addEventListener("click",()=>applyBrushPreset(pr.name));grid.appendChild(b);
+    }
+    sec.appendChild(grid);body.appendChild(sec);
+  }
+  if(typeof renderBrushPresets==="function"){const baseRender=renderBrushPresets;renderBrushPresets=function(){const r=baseRender.apply(this,arguments);try{buildStripPens()}catch{}return r}}
   /* ---------- helpers ---------- */
   const allIds=()=>(typeof workspacePanelIds!=="undefined"?workspacePanelIds:[]).filter(id=>$(id));
   const isHidden=id=>{const p=$(id);return !p||p.classList.contains("is-hidden")};
@@ -7817,10 +7862,12 @@ console.info("BBA menu bar ready");
     p.style.left=Math.round(l)+"px";p.style.top=Math.round(t)+"px";p.style.width=Math.max(0,Math.round(w))+"px";p.style.height=Math.max(0,Math.round(h))+"px";p.style.zIndex=String(z);
   }
   /* The docks that currently exist: fixed membership plus any other panel the person has opened since (they join the library dock). */
-  function dockPlan(){
-    const docks=DOCKS.map(d=>({...d,ids:d.ids.filter(id=>$(id)&&!isHidden(id))}));
+  function dockPlan(wide){
+    let docks=DOCKS.map(d=>({...d,ids:d.ids.filter(id=>$(id)&&!isHidden(id))}));
     const known=new Set(DOCKS.flatMap(d=>d.ids));
-    for(const id of allIds())if(!FIXED.has(id)&&!known.has(id)&&!isHidden(id))docks[1].ids.push(id);
+    const extra=allIds().filter(id=>!FIXED.has(id)&&!known.has(id)&&!isHidden(id));
+    docks[2].ids.push(...extra);
+    if(!wide){docks[1]={...docks[1],weight:.45,ids:docks[1].ids.concat(docks[2].ids)};docks.splice(2,1)}
     return docks.filter(d=>d.ids.length);
   }
   function ensureGroups(plan){
@@ -7838,19 +7885,23 @@ console.info("BBA menu bar ready");
     applying=true;
     try{
       root.style.setProperty("--studio-scale",String(typeof widgetContentBaseScale==="number"?widgetContentBaseScale:.95));
-      const plan=dockPlan();ensureGroups(plan);
+      const wide=w>=1380,plan=dockPlan(wide);ensureGroups(plan);
       const tl=$("timelinePanel"),tlOn=tl&&!isHidden("timelinePanel");
-      const tlH=tlOn?clamp(Math.round(h*.32),220,320):0,mainH=h-tlH;
+      const tlH=tlOn?clamp(Math.round(h*.34),250,330):0,mainH=h-tlH;
       const toolsOn=$("toolsPanel")&&!isHidden("toolsPanel"),toolsW=toolsOn?TOOLS_W:0;
-      const rightW=plan.length?clamp(Math.round(w*.21),270,340):0;
-      const stageW=w-toolsW-rightW;
+      const cols=wide&&plan.length>=2?[[plan[0]],plan.slice(1)]:(plan.length?[plan]:[]);
+      const colW=cols.length?clamp(Math.round(w*(cols.length>1?.19:.22)),270,340):0;
+      const stageW=w-toolsW-colW*cols.length;
+      allIds().forEach(id=>$(id).classList.remove("studioDock"));
       if(toolsOn)place("toolsPanel",0,0,toolsW,mainH,31);
       place("canvasPanel",toolsW,0,stageW,mainH,35);
-      const totalWeight=plan.reduce((s,d)=>s+d.weight,0)||1;let y=0;
-      plan.forEach((d,i)=>{
-        const hh=i===plan.length-1?mainH-y:Math.round(mainH*d.weight/totalWeight);
-        d.ids.forEach(id=>place(id,toolsW+stageW,y,rightW,hh,id===(plan[i].active)?38:37));
-        y+=hh;
+      cols.forEach((col,ci)=>{
+        const totalWeight=col.reduce((sum,d)=>sum+d.weight,0)||1;let y=0;
+        col.forEach((d,i)=>{
+          const hh=i===col.length-1?mainH-y:Math.round(mainH*d.weight/totalWeight);
+          d.ids.forEach(id=>{place(id,toolsW+stageW+ci*colW,y,colW,hh,id===d.active?38:37);$(id).classList.add("studioDock")});
+          y+=hh;
+        });
       });
       if(tlOn)place("timelinePanel",0,mainH,w,tlH,40);
       shortenTabs();try{updateCanvasFitScale()}catch{}
@@ -7975,7 +8026,7 @@ console.info("BBA menu bar ready");
 
   /* ---------- boot ---------- */
   function boot(){
-    addGlyphs();observeAll();
+    addGlyphs();buildStripPens();observeAll();
     if(ls.get(KEY)==="1"){root.dataset.bbaStudio="1";if(wantMatte())applyMatte()}
     const ws=$("workspace");
     if(ws&&window.ResizeObserver)new ResizeObserver(()=>{observeAll();if(!locked())return;if(!applied)enterLayout();else scheduleRelayout()}).observe(ws);
