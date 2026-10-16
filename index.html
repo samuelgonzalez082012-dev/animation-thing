@@ -917,6 +917,39 @@ function stabilizeStrokePoints(points){
   smooth.push(out[out.length-1]);
   return smooth;
 }
+/* Incremental version of stabilizeStrokePoints for the live preview. The resample is a greedy left-to-right pass and the
+   smoothing only looks at neighbours, so earlier results never change: we keep them and only process new points.
+   Output is identical to stabilizeStrokePoints(a.points). */
+function stabilizeStrokePointsInc(a){
+  const points=a.points;
+  if(points.length<3)return points.slice();
+  const spacing=Math.max(.75,Number(strokeSpacing)||2);
+  const sm=Math.max(0,Math.min(.9,Math.max(Number(strokeSmoothing)||0,(Number(strokeStabilizer)||0)*.65)));
+  let st=a._stab;
+  if(!st||st.points!==points||st.spacing!==spacing||st.sm!==sm||st.n>points.length||st.first!==points[0]){
+    st=a._stab={points,spacing,sm,first:points[0],n:1,out:[{x:points[0].x,y:points[0].y}],last:points[0],smooth:[],smDone:0};
+  }
+  const out=st.out;let last=st.last;
+  for(let i=st.n;i<points.length;i++){
+    const p=points[i],dx=p.x-last.x,dy=p.y-last.y,d=Math.hypot(dx,dy);
+    if(d>=spacing){
+      const steps=Math.floor(d/spacing);
+      for(let k=1;k<steps;k++)out.push({x:last.x+dx*(k/steps),y:last.y+dy*(k/steps)});
+      out.push({x:p.x,y:p.y});
+      last=p;
+    }
+  }
+  st.n=points.length;st.last=last;
+  if(sm<=.01||out.length<3)return out.slice();
+  const smooth=st.smooth;
+  if(!smooth.length)smooth.push(out[0]);
+  for(let i=smooth.length;i<out.length-1;i++){
+    const p=out[i-1],b=out[i],c=out[i+1];
+    smooth.push({x:b.x*(1-sm)+(p.x+c.x)*sm/2,y:b.y*(1-sm)+(p.y+c.y)*sm/2});
+  }
+  const res=smooth.slice();res.push(out[out.length-1]);
+  return res;
+}
 function transformStrokePoints(points,mask,angle){
   const rad=angle*Math.PI/180,c=Math.cos(rad),s=Math.sin(rad),cx=W/2,cy=H/2;
   return points.map(p=>{let x=p.x,y=p.y;if(mask&1)x=W-x;if(mask&2)y=H-y;x-=cx;y-=cy;return{x:x*c-y*s+cx,y:x*s+y*c+cy}});
@@ -1208,7 +1241,7 @@ function previewObjectFromAction(){
   if(a.kind==="rectangle")return{points:[a.start,a.current],x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,type:"rectangle"};
   if(a.kind==="ellipse")return{points:[a.start,a.current],x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,type:"ellipse"};
   if(a.kind==="polygon"||a.kind==="star"){return makeStrokeObject(shapeVertices(a.kind,a.start,a.current),a.kind,false)}
-  if(a.kind==="draw")return{points:stabilizeStrokePoints(a.points),x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,type:"stroke"};
+  if(a.kind==="draw")return{points:stabilizeStrokePointsInc(a),x:0,y:0,rotation:0,scaleX:1,scaleY:1,color,width:brushSize,opacity:penOpacity,lineCap:penCap,lineJoin:penJoin,composite:penComposite,dash:deep(penDash),brushStyle:penStyle,type:"stroke"};
   return null;
 }
 let polygonSides=6,starPoints=5;
@@ -1240,7 +1273,23 @@ function finishLasso(points){
   }
   renderAll();
 }
-function renderPreview(){render();const preview=previewObjectFromAction();if(preview)drawObject(ctx,preview)}
+/* Live-stroke preview: the committed scene is rendered once per stroke and cached as a bitmap.
+   Each frame then only blits that bitmap and draws the in-progress stroke, once per animation frame. */
+let previewSceneCache=null,previewRaf=0;
+function clearPreviewCache(){previewSceneCache=null;if(previewRaf){cancelAnimationFrame(previewRaf);previewRaf=0}}
+function renderPreviewNow(){
+  previewRaf=0;
+  if(!pointerAction)return;
+  if(!previewSceneCache||previewSceneCache.width!==canvas.width||previewSceneCache.height!==canvas.height){
+    render();
+    const snap=document.createElement("canvas");snap.width=canvas.width;snap.height=canvas.height;
+    snap.getContext("2d").drawImage(canvas,0,0);previewSceneCache=snap;
+  }else{
+    const m=ctx.getTransform();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(previewSceneCache,0,0);ctx.setTransform(m);
+  }
+  const preview=previewObjectFromAction();if(preview)drawObject(ctx,preview);
+}
+function renderPreview(){if(!previewRaf)previewRaf=requestAnimationFrame(renderPreviewNow)}
 canvas.addEventListener("pointerdown",e=>{
   if(e.button===1||(e.button===0&&(e.altKey||panToolActive))){
     e.preventDefault();
@@ -1310,7 +1359,7 @@ function finishPointer(event){
     if(!last||Math.hypot(point.x-last.x,point.y-last.y)>.01)action.points.push(point);
     action.current=point;
   }
-  pointerAction=null;editVersion++;
+  pointerAction=null;editVersion++;clearPreviewCache();
   if(action.kind==="draw")addStroke(action.points,"stroke");
   else if(action.kind==="line")addStroke([action.start,action.current],"line");
   else if(action.kind==="rectangle")addStroke([action.start,action.current],"rectangle");
