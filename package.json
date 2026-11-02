@@ -7,10 +7,24 @@
   "version": "1.0.0",
   "author": "samue",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "make": "electron-forge make"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@electron-forge/cli": "^8.0.1",
+    "@electron-forge/maker-squirrel": "^8.0.1",
     "electron": "43.4.0"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "icon": "./assets/icon"
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel"
+        }
+      ]
+    }
   }
 }
